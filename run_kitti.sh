@@ -1,0 +1,11 @@
+./bin/run_sfm_key 00
+./bin/run_sfm_key 01
+./bin/run_sfm_key 02
+./bin/run_sfm_key 03
+./bin/run_sfm_key 04
+./bin/run_sfm_key 05
+./bin/run_sfm_key 06
+./bin/run_sfm_key 07
+./bin/run_sfm_key 08
+./bin/run_sfm_key 09
+./bin/run_sfm_key 10
