@@ -49,6 +49,9 @@ void PreProcess(const std::string dir_path, Map& map) {
       frame.points_normalized.emplace_back(eptn);
     }
     frame.track_ids_.assign(num_points, -1);
+    char buff[128];
+    std::sprintf(buff,"%06d.png",frame.id);
+    frame.name = buff;
   }
 
   map.frames_ = frames;
@@ -87,83 +90,36 @@ int main(int argc, char* argv[]) {
 
   // 2.Initialize Program
   TimerArray timer;
-  // ViewerThread viewer;
-  // viewer.start();
+  ViewerThread viewer;
+  viewer.start();
 
   Map map;
   BASolver ba_solver;
   Point3dProcessor p3d_processor(th_rpe_lba, th_angle_lba, th_rpe_gba, th_angle_lba);
   ErrorCorrector error_corrector(&ba_solver, &p3d_processor);
   error_corrector.only_correct_with_sim3_ = false;
-  error_corrector.error_detector.Init(image_dir, debug);
+  error_corrector.error_detector.Init(image_dir, true);
+  error_corrector.error_detector.viewerTh_ = &viewer;
+
 
   // 3.Read & PreProcess Data
   PreProcess(seq_path + "/open/nv50", map);
   std::vector<double> timestamp_vec;
   LoadTimeStamp(seq_path + "times.txt", timestamp_vec);
-  UpdateFrameTimeStamp(map.frames_, timestamp_vec);
-  // SaveMap(output_path + seq_name + "/", map);
+  UpdateFrameTimeStamp(map.frames_, timestamp_vec); 
 
   // 4.Initialize Map
   timer.tot.resume();
-  FramePair init_frame_pair = FindPair(map.frame_pairs_, init_id1, init_id2);
-  // FramePair init_frame_pair;
-  // FindInitFramePair(map, init_frame_pair);
+  FramePair init_frame_pair = FindPair(map.frame_pairs_, init_id1, init_id2); 
   InitializeMap(map, init_frame_pair);
   ba_solver.GBA(map);
   timer.tot.stop();
 
-  int num_image_reg = 2, num_image_reg_pre = 2;
-  for (int iter = 0; iter < map.frames_.size(); iter++) {
-    // viewer.update_map(map);
-
-    timer.tot.resume();
-    // 5.Register Frame
-    timer.reg.resume();
-    printf("-----------------------------------------------\n");
-    int frame_id = map.MaxPoint3dFrameId();
-    if (frame_id == -1) break;
-    if (!RegisterImage(frame_id, map)) break;
-    map.current_frame_id_ = frame_id;
-    printf("Iter %d %d %s\n", iter, frame_id, map.frames_[frame_id].name.c_str());
-    timer.reg.stop();
-
-    // 6.Check & Correct Frame Pose
-    error_corrector.CheckAndCorrectPose(map, frame_id, iter);
-
-    // 7.Expand & Optimize Map
-    TIMING(timer.tri, p3d_processor.TriangulateFramePoint(map, frame_id, th_angle_lba));
-    TIMING(timer.fil, p3d_processor.FilterPointsFrame(map, frame_id, th_rpe_lba, th_angle_lba));
-    TIMING(timer.merge, p3d_processor.MergeTracks(map, frame_id, th_rpe_lba));
-    if (p3d_processor.CheckFrameMeasurement(map, frame_id)) continue;
-    TIMING(timer.lba, ba_solver.LBA(frame_id, map));
-    TIMING(timer.fil, p3d_processor.FilterPointsFrame(map, frame_id, th_rpe_lba, th_angle_lba));
-
-    if (num_image_reg++ > 1.2 * num_image_reg_pre) {
-      TIMING(timer.che, p3d_processor.CheckTrackDepth(map));
-      p3d_processor.CheckFramesMeasurement(map, th_rpe_lba, th_angle_lba);
-      TIMING(timer.gba, ba_solver.KGBA(map, std::vector<int>(0), true));
-      TIMING(timer.fil, p3d_processor.FilterPoints3d(map, th_rpe_gba, th_angle_gba));
-      num_image_reg_pre = num_image_reg;
-    }
-
-    UpdateCovisiblity(map, frame_id);
-    timer.tot.stop();
-  }
-
-  ba_solver.GBA(map);
-
-  for (auto& timer_ptr : timer.timer_vec) {
-    timer_ptr->print();
-  }
-  // ba_solver.lba1.print();
-  // ba_solver.lba2.print();
-  // ba_solver.lba3.print();
-
-  // int iter = 0;
+  int iter = 0;
+  LoadSfMState(output_path + seq_name + "/end.bin",iter,map);
+  error_corrector.CheckAndCorrectPose(map, 290, iter);
   // WriteColMapDataBinary(output_path + seq_name + '/', map);
-  SaveSfMState(output_path + seq_name + "/end.bin", 0, map);
-  WriteTrajectory(map, output_path + seq_name + "_test.tum");
-  // viewer.stop();
+  viewer.stop();
+
   return 0;
 }

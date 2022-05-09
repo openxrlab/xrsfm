@@ -1,5 +1,7 @@
 import os
 
+
+
 seq_name_list = [
     "00",
     "01",
@@ -8,13 +10,11 @@ seq_name_list = [
     "04",
     "05",
     "06",
-    "07",
-    "08",
     "09",
     "10"
 ]
  
-config_path = "/home/yzc/Projects/TIP_ECSfM/ECIM/config_kitti.json"
+config_path = "/home/yzc/Projects/xrsfm/config_kitti.json"
 
 for seq_name in seq_name_list:
     print("Begin "+seq_name)
@@ -30,5 +30,5 @@ for seq_name in seq_name_list:
     str += "}"
     fo.write(str)
     fo.close()
-    os.system("/home/yzc/Projects/TIP_ECSfM/ECIM/bin/run_kitti")
+    os.system("/home/yzc/Projects/xrsfm/bin/run_kitti")
     print("End "+seq_name)

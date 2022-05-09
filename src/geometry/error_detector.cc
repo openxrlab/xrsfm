@@ -54,11 +54,12 @@ bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp, std:
         if (deg_r1_r2 > 1.0) {
           const double cos_1 = ray1.dot(t12);
           const double cos_2 = ray2.dot(t12);
-          if (cos_1 > 1e-5 && cos_2 > 1e-5) {
+          // std::cout<<cos_1<<" "<<cos_2<<std::endl;
+          if (abs(cos_1) > 1e-5 && abs(cos_2) > 1e-5) {
             const double t1 = acos(cos_1);
             const double t2 = acos(cos_2);
-            if ((1.0 / tan(t1) - 1.0 / tan(t2)) < 1e-5) good_relative_pose = false;
-            const double h = distance / (1.0 / tan(t1) - 1.0 / tan(t2));
+            if (abs(1.0 / tan(t1) - 1.0 / tan(t2)) < 1e-5) good_relative_pose = false;
+            const double h = distance / abs(1.0 / tan(t1) - 1.0 / tan(t2));
             if (h > 200 * sin(t1) || h > 200 * sin(t2)) good_relative_pose = false;
           }
         }
@@ -128,7 +129,9 @@ bool ErrorDetector::CheckAllRelativePose(Map &map, int frame_id, std::set<int> &
 
     const auto &frame1 = map.frames_[fp.id1];
     const auto &frame2 = map.frames_[fp.id2];
-    if (frame1.registered && frame2.registered && frame1.is_keyframe && frame2.is_keyframe) {
+    // std::cout<<fp.id1<< " "<<fp.id2<<" "<<num_covise<<" "<<fp.matches.size()<<std::endl;
+    if (frame1.registered && frame2.registered){// && frame1.is_keyframe && frame2.is_keyframe) {
+    // std::cout<<fp.id1<< " 1 "<<fp.id2<<" "<<num_covise<<" "<<fp.matches.size()<<std::endl; bad key frame selection
       ++num_all;
       std::vector<char> inlier_mask;
       if (IsGoodRelativePose(map, fp, inlier_mask)) {
@@ -136,8 +139,7 @@ bool ErrorDetector::CheckAllRelativePose(Map &map, int frame_id, std::set<int> &
       } else {
         int bad_neighbor_id = fp.id1 == frame_id ? fp.id2 : fp.id1;
         bad_matched_frame_ids.insert(bad_neighbor_id);
-        // std::cout << "DetectError: frame pair covisible number " << num_covise << std::endl;
-        if (debug_) IsGoodRelativePose_Debug(map, fp, inlier_mask);
+        // if (debug_) IsGoodRelativePose_Debug(map, fp, inlier_mask);
       }
     }
   }

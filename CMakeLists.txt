@@ -157,7 +157,7 @@ target_link_libraries(ecim
         stdc++fs 
         )
 
-add_executable(debug_kitti src/run_kitti_debug.cc)
+add_executable(debug_kitti src/debug_kitti.cc)
 target_link_libraries(debug_kitti ecim)
 
 add_executable(run_kitti src/run_kitti_simple.cc)

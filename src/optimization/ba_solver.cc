@@ -161,6 +161,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool u
       problem.SetParameterLowerBound(&s_vec[frame.id], 0, 0.2);
       // problem.SetParameterBlockConstant(&s_vec[frame.id]);
     }
+    problem.SetParameterBlockConstant(twc_vec[frame.id].q.coeffs().data());
   }
 
   problem.SetParameterLowerBound(&s_vec_loop[0], 0, 0.2);
@@ -175,7 +176,9 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool u
 
   ceres::Solver::Options solver_options = InitSolverOptions();
   solver_options.minimizer_progress_to_stdout = true;
-  solver_options.initial_trust_region_radius = 1e12;
+  solver_options.initial_trust_region_radius = 1e16;
+  // solver_options.linear_solver_type = ceres::ITERATIVE_SCHUR;
+  solver_options.trust_region_strategy_type = ceres::DOGLEG;
   ceres::Solver::Summary summary;
 
   ceres::Solve(solver_options, &problem, &summary);

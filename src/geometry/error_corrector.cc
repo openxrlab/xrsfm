@@ -179,6 +179,11 @@ bool ErrorCorrector::CheckAndCorrectPose(Map &map, int frame_id, int iter) {
     std::cout << "|" << id << std::endl;
   }
 
+  // error_detector.viewerTh_->update_map(map);
+  // cv::Mat img(10,10,CV_8U);
+  // cv::imshow("",img); 
+  // cv::waitKey();
+
   // PoseGraph
   const double dist = (frame.Tcw.center() - map.tmp_frame.center()).norm();
   const bool negtive_depth = CheckNegtiveDepth(map, map.tmp_frame, frame);
@@ -188,9 +193,14 @@ bool ErrorCorrector::CheckAndCorrectPose(Map &map, int frame_id, int iter) {
     UpdateByRefFrame(map);
     LoopInfo loop_info = GetLoopInfo(map, frame, map.tmp_frame);
     if (loop_info.cor_frame_ids_vec[0].size() == 0 || loop_info.cor_frame_ids_vec[1].size() == 0) return false;
-    if (only_correct_with_sim3_ && loop_info.scale_obs == -1) return false;
+    if (only_correct_with_sim3_ && loop_info.scale_obs == -1) return false; 
     ba_solver_->ScalePoseGraphUnorder(loop_info, map, true);
   }
+  
+  // error_detector.viewerTh_->update_map(map); 
+  // cv::imshow("",img); 
+  // cv::waitKey();
+
 
   MergeTrackLoop(map, frame, map.tmp_frame);
 
