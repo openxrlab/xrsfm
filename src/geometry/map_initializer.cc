@@ -9,8 +9,7 @@
 #include "geometry/triangluate_svd.h"
 
 bool CheckInitFramePair(const Map &map, FramePair &frame_pair) {
-  auto &frame1 = map.frames_[frame_pair.id1];
-  auto &frame2 = map.frames_[frame_pair.id2];
+  auto &frame1 = map.frames_[frame_pair.id1],&frame2 = map.frames_[frame_pair.id2];
  
   int inlier_num;
   std::vector<char> inlier_mask;
@@ -55,13 +54,9 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
   {
     std::vector<std::pair<int, int>> frame_info_vec;
     for (const auto &frame : map.frames_) { 
-      if(map.cameras_[frame.camera_id].distort_params[0]!=0)
-        frame_info_vec.emplace_back(frame.id, map.frameid2matched_frameids_[frame.id].size()); 
-      // if (frame.id < 2000)  // ECIM_SEQ_cluster will fail init without this condition
-      //  if (frame.id > 1100)  // Union_Square will fail init without this condition
-    }
-    // 1.have prior camera
-    // 2.num_correspondences
+      if(map.cameras_[frame.camera_id].distort_params[0]!=0)//TODO
+        frame_info_vec.emplace_back(frame.id, map.frameid2matched_frameids_[frame.id].size());  
+    } 
     std::sort(frame_info_vec.begin(), frame_info_vec.end(),
               [](const std::pair<int, int> &a, const std::pair<int, int> &b) { return a.second > b.second; });
     for (const auto &[frame_id, num_matched_frame] : frame_info_vec) {
@@ -102,10 +97,8 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
 }
 
 void InitializeMap(Map &map, FramePair &frame_pair) { 
-  const int id1 = frame_pair.id1;
-  const int id2 = frame_pair.id2;
-  auto &frame1 = map.frames_[id1];
-  auto &frame2 = map.frames_[id2];
+  const int id1 = frame_pair.id1,id2 = frame_pair.id2;
+  auto &frame1 = map.frames_[id1],&frame2 = map.frames_[id2];
   printf("Initialize id1: %d %s id2: %d %s\n", id1,  frame1.name.c_str(),id2,frame2.name.c_str());
 
   int inlier_num;
@@ -120,11 +113,11 @@ void InitializeMap(Map &map, FramePair &frame_pair) {
   const double th = 10.0 / map.cameras_[frame1.camera_id].fx();
   itslam::solve_essential(points1, points2, th, frame_pair.E, inlier_num, inlier_mask);
   printf("Init essential %d/%zu\n",inlier_num,points1.size());
-
-
+  
   inlier_mask.clear();
   std::vector<Eigen::Vector3d> point3ds;
   itslam::decompose_rt(frame_pair.E, points1, points2, frame_pair.R, frame_pair.t, point3ds, inlier_mask);
+
   frame1.Tcw = Pose(Eigen::Quaterniond::Identity(), Eigen::Vector3d::Zero());
   frame1.registered = frame1.is_keyframe = true;
   frame1.hierarchical_level = 0;
@@ -161,32 +154,4 @@ void InitializeMap(Map &map, FramePair &frame_pair) {
   map.frameid2covisible_frameids_[id1].emplace_back(id2);
   map.frameid2covisible_frameids_[id2].emplace_back(id1); 
   printf("Initialize Triangulated num: %d/%zu\n", tri_num, points1.size());
-  // fail in pure rotation: Initialize id1: 347 2143221381_ca84bf055c_o.jpg id2: 348 2143221883_c6849c9917_o.jpg
-}
-
-void InitializeWithGT(Map &map, FramePair &frame_pair, Pose pose1, Pose pose2) {
-  auto &frames = map.frames_;
-  int id1 = frame_pair.id1;
-  int id2 = frame_pair.id2;
-  auto &frame1 = frames[id1];
-  auto &frame2 = frames[id2];
-
-  std::vector<Eigen::Vector2d> points1, points2;
-  size_t num_matches = frame_pair.matches.size();
-  for (int i = 0; i < num_matches; ++i) {
-    if (!frame_pair.inlier_mask[i]) continue;
-    points1.push_back(frame1.points_normalized[frame_pair.matches[i].id1]);
-    points2.push_back(frame2.points_normalized[frame_pair.matches[i].id2]);
-  }
-  frame1.Tcw = pose1;
-  frame2.Tcw = pose2;
-  frame1.registered = true;
-  frame2.registered = true;
-  frame1.is_keyframe = true;
-  frame2.is_keyframe = true;
-
-  map.init_id1 = id1;
-  map.init_id2 = id2;
-  map.frameid2covisible_frameids_[id1].emplace_back(id2);
-  map.frameid2covisible_frameids_[id2].emplace_back(id1);
 }

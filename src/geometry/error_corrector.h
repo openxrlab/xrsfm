@@ -1,3 +1,6 @@
+#ifndef ERROR_CORRECTOR_H_
+#define ERROR_CORRECTOR_H_
+
 #include "geometry/track_processor.h"
 #include "base/map.h"
 #include "optimization/ba_solver.h"
@@ -27,6 +30,7 @@ class ErrorDetector {
 
 class ErrorCorrector {
  public:
+  ErrorCorrector(){};
   ErrorCorrector(BASolver *ba_ptr, Point3dProcessor *p3d_ptr) : ba_solver_(ba_ptr), p3d_processor_(p3d_ptr){};
   bool CheckAndCorrectPose(Map &map, int next_frame_id, int iter);
 
@@ -35,3 +39,5 @@ class ErrorCorrector {
   Point3dProcessor *p3d_processor_;
   ErrorDetector error_detector;
 };
+
+#endif

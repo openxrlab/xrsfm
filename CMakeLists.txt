@@ -134,6 +134,8 @@ add_library(ecim
 
         src/optimization/ba_solver.cc
 
+        src/mapper/incremental_mapper.cc
+
         src/utility/view.cc
         src/utility/viewer_handler.cc
         src/utility/viewer.cc

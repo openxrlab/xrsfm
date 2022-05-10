@@ -457,8 +457,7 @@ void Map::LogFrameReprojectError() {
 bool FindPair(const std::vector<FramePair> &frame_pairs, const int id1, const int id2, FramePair &frame_pair) {
   for (auto &t_frame_pair : frame_pairs) {
     if (t_frame_pair.id1 == id1 && t_frame_pair.id2 == id2) {
-      frame_pair = t_frame_pair;
-      //      printf("Find Pair: %d %d\n", id1, id2);
+      frame_pair = t_frame_pair; 
       return true;
     }
   }
@@ -518,7 +517,7 @@ bool UpdateCovisiblity(Map &map, int frame_id) {
   return true;
 }
 
-void UpdateKey(Map &map, std::vector<int> loop_matched_frame_id, const bool order_frames) {
+void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id, const bool order_frames) {
   // constexpr int th_obs = 3;
   // constexpr int num_min_obs = 150;
   // constexpr double th_min_ratio = 0.5;

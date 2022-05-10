@@ -1,7 +1,5 @@
 import os
 
-
-
 seq_name_list = [
     "00",
     "01",

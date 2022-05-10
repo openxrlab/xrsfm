@@ -189,7 +189,7 @@ bool ErrorCorrector::CheckAndCorrectPose(Map &map, int frame_id, int iter) {
   const bool negtive_depth = CheckNegtiveDepth(map, map.tmp_frame, frame);
   std::cout << "DIST:  " << dist << std::endl;
   if (dist > 1.5 || negtive_depth) {
-    UpdateKey(map, matched_frame_ids, true);
+    KeyFrameSelection(map, matched_frame_ids, true);
     UpdateByRefFrame(map);
     LoopInfo loop_info = GetLoopInfo(map, frame, map.tmp_frame);
     if (loop_info.cor_frame_ids_vec[0].size() == 0 || loop_info.cor_frame_ids_vec[1].size() == 0) return false;

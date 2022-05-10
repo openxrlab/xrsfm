@@ -77,6 +77,7 @@ void AddLoopEdge(ceres::Problem &problem, Map &map, const LoopInfo &loop_info, s
 }
 
 void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool use_key) {
+  // assign the best frame for each map points
   for (auto &track : map.tracks_) {
     if (track.outlier) continue;
     int best_frame_id = -1;
@@ -133,7 +134,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool u
     weight_o = 1 - abs(loop_info.scale_obs - 1) / max_th;
     printf("weight scale: %lf\n", weight_o);
   } else {
-    weight_o = 0.0;  // for kitti00 the latest should
+    weight_o = 0.0;
   }
 
   ceres::Problem problem;
@@ -159,15 +160,11 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool u
     problem.SetParameterization(twc_vec[frame.id].q.coeffs().data(), new QuatParam);
     if (frame.id != loop_info.frame_id) {
       problem.SetParameterLowerBound(&s_vec[frame.id], 0, 0.2);
-      // problem.SetParameterBlockConstant(&s_vec[frame.id]);
     }
-    problem.SetParameterBlockConstant(twc_vec[frame.id].q.coeffs().data());
+    // problem.SetParameterBlockConstant(twc_vec[frame.id].q.coeffs().data());//may bug
   }
-
   problem.SetParameterLowerBound(&s_vec_loop[0], 0, 0.2);
   problem.SetParameterLowerBound(&s_vec_loop[1], 0, 0.2);
-  // problem.SetParameterBlockConstant(&s_vec_loop[0]);
-  // problem.SetParameterBlockConstant(&s_vec_loop[1]);
 
   problem.SetParameterBlockConstant(&s_vec[map.init_id1]);
   problem.SetParameterBlockConstant(&s_vec[map.init_id2]);
@@ -390,30 +387,29 @@ std::vector<int> CovisibilityNeibors(const int frame_id, Map &map, const size_t 
   return local_bundle_image_ids;
 }
 
-void BASolver::LBA(int frame_id, Map &map) {//TODO boost
-  lba1.resume();
+void BASolver::LBA(int frame_id, Map &map) {//TODO boost 
+  // find local frames
   std::vector<int> local_frame_ids1 = CovisibilityNeibors(frame_id, map);
   std::vector<int> local_frame_ids2 = FindLocalBundle(frame_id, map);
   std::set<int> local_frame_ids;
-
   for (auto &id : local_frame_ids1) {
     local_frame_ids.insert(id);
   }
   for (auto &id : local_frame_ids2) {
     local_frame_ids.insert(id);
-  }
-  lba1.resume();
+  } 
 
-  lba2.resume();
+  // set up problem
   ceres::Problem problem;
   printf("LBA: ");
   for (const int &id : local_frame_ids) {
-    printf(" %d", id);
-    auto &frame = map.frames_[id];
-    SetUpLBA(problem, map, frame, frame_id);
+    printf(" %d", id); 
+    SetUpLBA(problem, map, map.frames_[id], frame_id);
   }
   printf("\n");
 
+  // fix poses
+  //TOOD here bug
   int fix_num = 0;
   if (local_frame_ids.count(map.init_id1) != 0) {
     problem.SetParameterBlockConstant(map.frames_[map.init_id1].Tcw.t.data());
@@ -436,34 +432,33 @@ void BASolver::LBA(int frame_id, Map &map) {//TODO boost
     }
   }
 
-  for (const int &id : local_frame_ids) {
-    if (set_all_pose_const || (num_frames_set_const_ != -1 && id <= num_frames_set_const_)) {
-      auto &frame = map.frames_[id];
-      if (!frame.registered && !frame.is_keyframe) continue;
-      problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
-      problem.SetParameterBlockConstant(frame.Tcw.t.data());
-    }
-  }
-
-  lba2.stop();
-
-  lba3.resume();
+  // for (const int &id : local_frame_ids) {
+  //   if (set_all_pose_const || (num_frames_set_const_ != -1 && id <= num_frames_set_const_)) {
+  //     auto &frame = map.frames_[id];
+  //     if (!frame.registered && !frame.is_keyframe) continue;
+  //     problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
+  //     problem.SetParameterBlockConstant(frame.Tcw.t.data());
+  //   }
+  // }
+ 
   ceres::Solver::Options solver_options = InitSolverOptions();
   solver_options.max_num_iterations = 5;
   solver_options.function_tolerance = 1e-4;
   solver_options.parameter_tolerance = 1e-5;
   ceres::Solver::Summary summary;
   ceres::Solve(solver_options, &problem, &summary);
-  lba3.stop();
+
 }
 
 void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
+  // set up problem
   ceres::Problem problem;
   for (auto &frame : map.frames_) {
     if (!frame.registered) continue;
     SetUp(problem, map, frame);
   }
 
+  // fix poses
   if (!fix_all_frames) {
     problem.SetParameterBlockConstant(map.frames_[map.init_id1].Tcw.t.data());
     problem.SetParameterBlockConstant(map.frames_[map.init_id2].Tcw.t.data());
@@ -476,32 +471,23 @@ void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
   }
 
   ceres::Solver::Options solver_options = InitSolverOptions();
-
   solver_options.minimizer_progress_to_stdout = true;
-  // solver_options.max_num_iterations = 20;
-  solver_options.function_tolerance = 1e-4;
-  solver_options.parameter_tolerance = 1e-5;
-  // if (accurate) {
-  //   solver_options.function_tolerance = 1e-5;
-  //   solver_options.parameter_tolerance = 1e-6;
-  // } else {
-  //   solver_options.max_num_iterations = 50;
-  //   solver_options.function_tolerance = 1e-4;
-  //   solver_options.parameter_tolerance = 1e-5;
-  // }
-
+  if (accurate) {
+    solver_options.max_num_iterations = 50;
+    solver_options.function_tolerance = 1e-5;
+    solver_options.parameter_tolerance = 1e-6;
+  } else {
+    solver_options.max_num_iterations = 20;
+    solver_options.function_tolerance = 1e-4;
+    solver_options.parameter_tolerance = 1e-5;
+  }
   ceres::Solver::Summary summary;
-
   ceres::Solve(solver_options, &problem, &summary);
   std::cout << summary.BriefReport() << "\n";
 }
 
 void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bool order_frames) {
-  Timer timer("Time update %.6lfs\n");
-  timer.start();
-  UpdateKey(map, fix_key_frame_ids, order_frames);
-  timer.stop();
-  timer.print();
+  KeyFrameSelection(map, fix_key_frame_ids, order_frames); 
 
   int num_rf = 0, num_kf = 0, num_mea = 0;
   ceres::Problem problem;
@@ -516,37 +502,36 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bo
   problem.SetParameterBlockConstant(map.frames_[map.init_id1].Tcw.t.data());
   problem.SetParameterBlockConstant(map.frames_[map.init_id2].Tcw.t.data());
 
-  if (set_all_pose_const) {
-    for (auto &frame : map.frames_) {
-      if (!frame.registered) continue;
-      if (!frame.is_keyframe) continue;
-      problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
-      problem.SetParameterBlockConstant(frame.Tcw.t.data());
-    }
-  }
+  // if (set_all_pose_const) {
+  //   for (auto &frame : map.frames_) {
+  //     if (!frame.registered) continue;
+  //     if (!frame.is_keyframe) continue;
+  //     problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
+  //     problem.SetParameterBlockConstant(frame.Tcw.t.data());
+  //   }
+  // }
 
-  if (num_frames_set_const_ != -1) {
-    for (auto &frame : map.frames_) {
-      if (frame.id <= num_frames_set_const_) {
-        if (!frame.registered) continue;
-        if (!frame.is_keyframe) continue;
-        problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
-        problem.SetParameterBlockConstant(frame.Tcw.t.data());
-      }
-    }
-  }
+  // if (num_frames_set_const_ != -1) {  
+  //   for (auto &frame : map.frames_) {
+  //     if (frame.id <= num_frames_set_const_) {
+  //       if (!frame.registered) continue;
+  //       if (!frame.is_keyframe) continue;
+  //       problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
+  //       problem.SetParameterBlockConstant(frame.Tcw.t.data());
+  //     }
+  //   }
+  // }
 
   ceres::Solver::Options solver_options = InitSolverOptions();
-
   solver_options.minimizer_progress_to_stdout = true;
   solver_options.initial_trust_region_radius = 1e6;
-  solver_options.max_num_iterations = 100;
+  solver_options.max_num_iterations = 50;
   solver_options.function_tolerance = 1e-4;
   solver_options.parameter_tolerance = 1e-5;
-
   ceres::Solver::Summary summary;
   ceres::Solve(solver_options, &problem, &summary);
   printf("kf: %d/%d\n", num_kf, num_rf);
   std::cout << summary.BriefReport() << "\n";
+
   UpdateByRefFrame(map);
 }
