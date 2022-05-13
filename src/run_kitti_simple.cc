@@ -95,6 +95,8 @@ int main(int argc, char* argv[]) {
   IncrementalMapper imapper;
   imapper.options.init_id1 = init_id1;
   imapper.options.init_id2 = init_id2;
+  imapper.options.correct_pose = true;
+  imapper.options.stop_when_register_fail = true;
   imapper.Reconstruct(map);
   std::cout << "Reconstruction Done!" << std::endl;
    

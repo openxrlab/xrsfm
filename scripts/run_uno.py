@@ -2,10 +2,9 @@ import os
 
 seq_name_list = ['Alamo', 'Ellis_Island', 'Gendarmenmarkt', 'Madrid_Metropolis', 'Montreal_Notre_Dame', 'NYC_Library', 'Piazza_del_Popolo',
  'Piccadilly', 'Roman_Forum', 'Tower_of_London', 'Trafalgar', 'Piazza_del_Popolo', 'Union_Square', 'Vienna_Cathedral', 'Yorkminster']
- 
-seq_name_list = ['Union_Square']
+  
 
-config_path = "/home/yzc/Projects/TIP_ECSfM/ECIM/config_uno.json"
+config_path = "/home/yzc/Projects/xrsfm/config_uno.json"
 
 for seq_name in seq_name_list:
     print("Begin "+seq_name)
@@ -21,6 +20,5 @@ for seq_name in seq_name_list:
     fo.write(str)
     fo.close() 
     os.system("mkdir "+output_path)
-    os.system("/home/yzc/Projects/TIP_ECSfM/ECIM/bin/run_uno > /data/ECIM/SfM/ECIM_1DSFM/"+seq_name+"/open/log_our.txt")
-    # os.system("/home/yzc/Projects/TIP_ECSfM/ECIM/bin/run_uno")
+    os.system("/home/yzc/Projects/xrsfm/bin/run_uno > /data/ECIM/SfM/ECIM_1DSFM/"+seq_name+"/open/log_our1.txt")
     print("End "+seq_name)

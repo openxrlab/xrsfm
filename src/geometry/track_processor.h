@@ -19,14 +19,16 @@ class Point3dProcessor {
 
   void ReTriangulate(Map &map);
   void UpdateTrackInfo(Map &map);
+
   void CheckTrackDepth(const Map &map);
-  void MergeTracks(Map &map, const int frame_id, double max_re);
   bool CheckFrameMeasurement(Map &map, int frame_id);
   void CheckFramesMeasurement(Map &map, double th_rpe_lba, double th_angle_lba);
+
+  void MergeTracks(Map &map, const int frame_id, double max_re);
   void ContinueFrameTracks(const int frame_id, const std::vector<std::pair<int, int>> &cor_2d_3d_ids, Map &map);
 
   int TriangulateFramePoint(Map &map, const int frame_id, const double deg_th);
-  int TriangulateSinglePoint(Map &map, const int frame_id, const int p2d_id, double deg_th);
+  
   int FilterPoints3d(Map &map, double max_re, double deg);
   int FilterPointsFrame(Map &map, const int frame_id, const double max_re, const double deg);
 };

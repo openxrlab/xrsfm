@@ -1,7 +1,7 @@
 {
 	"data_path": "/data/ECIM/SfM/ECIM_1DSFM/",
-	"seq_name": "Trafalgar/",
-	"output_path": "/data/ECIM/SfM/ECIM_1DSFM/Trafalgar/open/ours/",
+	"seq_name": "Yorkminster/",
+	"output_path": "/data/ECIM/SfM/ECIM_1DSFM/Yorkminster/open/ours/",
 	"camera_size": 0.5,
 	"debug": 0
 }

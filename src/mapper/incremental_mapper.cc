@@ -24,13 +24,17 @@ void IncrementalMapper::Reconstruct(Map &map){
     timer.reg.resume();
     const int frame_id = map.MaxPoint3dFrameId();
     if (frame_id == -1) break;
-    if (!RegisterImage(frame_id, map)) break;
+    if (!RegisterImage(frame_id, map)){ 
+      if(options.stop_when_register_fail)break;
+      map.frames_[frame_id].registered_fail = true;
+      continue;
+    }
     map.current_frame_id_ = frame_id;
     timer.reg.stop();
     printf("Iter %d %d %s\n", iter, frame_id, map.frames_[frame_id].name.c_str());
 
     // 2) Check & Correct Frame Pose
-    error_corrector.CheckAndCorrectPose(map, frame_id, iter);
+   if(options.correct_pose)error_corrector.CheckAndCorrectPose(map, frame_id, iter);
 
     // 3) Map Point Estimation
     TIMING(timer.tri, p3d_processor.TriangulateFramePoint(map, frame_id, options.th_angle_lba));

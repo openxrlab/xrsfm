@@ -146,60 +146,72 @@ bool CreatePoint3d1(const std::vector<std::pair<int, int>> observations, Map &ma
   return false;
 }
 
-int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id, double deg_th) {
-  const double Angle_Th = DegToRad(deg_th);
-
-  int num_create = 0, num_extend = 0;
-  int num_zero_track = 0, num_one_track = 0, num_multi_track = 0;
-
-  Frame &frame = map.frames_[frame_id];
-  const auto &corrs_vector = map.corr_graph_.frame_node_vec_[frame_id].corrs_vector;
-  for (int p2d_id = 0; p2d_id < corrs_vector.size(); ++p2d_id) {
-    if (frame.track_ids_[p2d_id] != -1) continue;  // only triangulate un-trigulated points
-    std::set<int> track_ids;
-    std::vector<std::pair<int, int>> observations;
-    for (const auto &[t_frame_id, t_p2d_id] : corrs_vector[p2d_id]) {
-      if (!map.frames_[t_frame_id].registered) continue;
-      observations.emplace_back(t_frame_id, t_p2d_id);
-      const int trakc_id = map.frames_[t_frame_id].track_ids_[t_p2d_id];
-      if (trakc_id != -1) {
-        track_ids.insert(trakc_id);
-      }
-    }
-    observations.emplace_back(std::pair<int, int>(frame_id, p2d_id));
-
-    if (observations.size() < 2) continue;
-
-    const int num_track = track_ids.size();
-    if (num_track == 0) {
-      num_zero_track++;
-      if (CreatePoint3d1(observations, map)) num_create++;
-    } else if (num_track >= 1) {
-      bool log = false;
-      int best_track_id = -1;
-      double best_angle_error = 100;
-      double cos_theta = -1;
-      for (const auto &track_id : track_ids) {
+inline std::tuple<int,double> GetMaxAngle(const Map &map,const std::set<int> &observed_track_ids,const int frame_id,const int p2d_id){
+    int best_track_id = -1;
+    double best_angle_error = 100; 
+    const auto&frame = map.frames_.at(frame_id);
+    for (const auto &track_id : observed_track_ids) {
         const auto &track = map.tracks_[track_id];
         if (track.observations_.count(frame_id) != 0) continue;
         Eigen::Vector3d p3d = track.point3d_;
         Eigen::Vector3d ray1 = (frame.Tcw.q * p3d + frame.Tcw.t).normalized();
         Eigen::Vector3d ray2 = (frame.points_normalized[p2d_id].homogeneous()).normalized();
         const double angle_error = std::acos(ray1.dot(ray2));
-        if (angle_error < best_angle_error) {
-          cos_theta = ray1.dot(ray2);
+        if (angle_error < best_angle_error) { 
           best_track_id = track_id;
           best_angle_error = angle_error;
-        }
-        if (track.observations_.count(frame_id - 1) != 0) {
-          log = true;
-        }
+        } 
+    }
+    return std::tuple<int,double>(best_track_id,best_angle_error);
+}
+
+int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id, double deg_th) {
+  const double const_angle_th = DegToRad(deg_th);
+
+  int num_create = 0, num_extend = 0;
+  int num_zero_track = 0, num_one_track = 0, num_multi_track = 0;
+
+  Frame &frame = map.frames_[frame_id];
+  const auto &corrs_vector = map.corr_graph_.frame_node_vec_[frame_id].corrs_vector;
+  assert(frame.track_ids_.size()==corrs_vector.size());
+  for (int p2d_id = 0,num_p2d =  frame.track_ids_.size(); p2d_id < num_p2d; ++p2d_id) {
+    if (frame.track_ids_[p2d_id] != -1) continue;  // only triangulate un-trigulated points
+    std::set<int> observed_track_ids;
+    std::vector<std::pair<int, int>> observations;
+    for (const auto &[t_frame_id, t_p2d_id] : corrs_vector[p2d_id]) {
+      const auto& cor_frame = map.frames_[t_frame_id];
+      if (!cor_frame.registered) continue;
+      observations.emplace_back(t_frame_id, t_p2d_id);
+      const int trakc_id = cor_frame.track_ids_[t_p2d_id];
+      if (trakc_id != -1) {
+        observed_track_ids.insert(trakc_id);
       }
-      // if (log) {
-      //   std::cout << p2d_id << " " << frame.points[p2d_id].transpose() << std::endl;
-      //   std::cout << best_angle_error << " " << cos_theta << " " << Angle_Th << std::endl;
-      // }
-      if (best_angle_error < Angle_Th) {
+    }
+    observations.emplace_back(std::pair<int, int>(frame_id, p2d_id));
+
+    if (observations.size() < 2) continue;
+
+    const int num_track = observed_track_ids.size();
+    if (num_track == 0) {
+      num_zero_track++;
+      if (CreatePoint3d1(observations, map)) num_create++;
+    } else if (num_track >= 1) { 
+      auto [best_track_id,best_angle_error] = GetMaxAngle(map,observed_track_ids,frame_id,p2d_id);
+      // int best_track_id = -1;
+      // double best_angle_error = 100; 
+      // for (const auto &track_id : observed_track_ids) {
+      //   const auto &track = map.tracks_[track_id];
+      //   if (track.observations_.count(frame_id) != 0) continue;
+      //   Eigen::Vector3d p3d = track.point3d_;
+      //   Eigen::Vector3d ray1 = (frame.Tcw.q * p3d + frame.Tcw.t).normalized();
+      //   Eigen::Vector3d ray2 = (frame.points_normalized[p2d_id].homogeneous()).normalized();
+      //   const double angle_error = std::acos(ray1.dot(ray2));
+      //   if (angle_error < best_angle_error) { 
+      //     best_track_id = track_id;
+      //     best_angle_error = angle_error;
+      //   } 
+      // } 
+      if (best_angle_error < const_angle_th) {
         ContinueTrack(best_track_id, frame_id, p2d_id, map);
         num_extend++;
       }
@@ -209,83 +221,6 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id, double
       } else {
         num_multi_track++;
       }
-    }
-  }
-  printf("Tri %d %d/%d %d/%d %d\n", frame_id, num_create, num_zero_track, num_extend, num_one_track, num_multi_track);
-  return num_create + num_extend;
-}
-
-int Point3dProcessor::TriangulateSinglePoint(Map &map, const int frame_id, const int p2d_id, double deg_th) {
-  const double Angle_Th = DegToRad(deg_th);
-
-  int num_create = 0, num_extend = 0;
-  int num_zero_track = 0, num_one_track = 0, num_multi_track = 0;
-
-  Frame &frame = map.frames_[frame_id];
-  const auto &corrs_vector = map.corr_graph_.frame_node_vec_[frame_id].corrs_vector;
-  if (frame.track_ids_[p2d_id] != -1) {
-    std::cout << "return 0" << std::endl;
-    return 0;
-  }
-  std::set<int> track_ids;
-  std::vector<std::pair<int, int>> observations;
-  std::cout << corrs_vector[p2d_id].size() << std::endl;
-  for (const auto &[t_frame_id, t_p2d_id] : corrs_vector[p2d_id]) {
-    std::cout << "cor " << t_frame_id << " " << t_p2d_id << std::endl;
-    if (!map.frames_[t_frame_id].registered) continue;
-    observations.emplace_back(t_frame_id, t_p2d_id);
-    const int trakc_id = map.frames_[t_frame_id].track_ids_[t_p2d_id];
-    if (trakc_id != -1) {
-      std::cout << "track  " << trakc_id << std::endl;
-      track_ids.insert(trakc_id);
-    }
-  }
-  observations.emplace_back(std::pair<int, int>(frame_id, p2d_id));
-
-  std::cout << observations.size() << std::endl;
-  if (observations.size() <= 2) {
-    std::cout << "return observations.size() < 2 " << std::endl;
-    return 0;
-  }
-
-  const int num_track = track_ids.size();
-  if (num_track == 0) {
-    num_zero_track++;
-    if (CreatePoint3d1(observations, map)) num_create++;
-  } else if (num_track >= 1) {
-    bool log = false;
-    int best_track_id = -1;
-    double best_angle_error = 100;
-    double cos_theta = -1;
-    for (const auto &track_id : track_ids) {
-      const auto &track = map.tracks_[track_id];
-      if (track.observations_.count(frame_id) != 0) continue;
-      Eigen::Vector3d p3d = track.point3d_;
-      Eigen::Vector3d ray1 = (frame.Tcw.q * p3d + frame.Tcw.t).normalized();
-      Eigen::Vector3d ray2 = (frame.points_normalized[p2d_id].homogeneous()).normalized();
-      const double angle_error = std::acos(ray1.dot(ray2));
-      if (angle_error < best_angle_error) {
-        cos_theta = ray1.dot(ray2);
-        best_track_id = track_id;
-        best_angle_error = angle_error;
-      }
-      if (track.observations_.count(frame_id - 1) != 0) {
-        log = true;
-      }
-    }
-    if (log) {
-      std::cout << p2d_id << " " << frame.points[p2d_id].transpose() << std::endl;
-      std::cout << best_angle_error << " " << cos_theta << " " << Angle_Th << std::endl;
-    }
-    if (best_angle_error < Angle_Th) {
-      ContinueTrack(best_track_id, frame_id, p2d_id, map);
-      num_extend++;
-    }
-
-    if (num_track == 1) {
-      num_one_track++;
-    } else {
-      num_multi_track++;
     }
   }
   printf("Tri %d %d/%d %d/%d %d\n", frame_id, num_create, num_zero_track, num_extend, num_one_track, num_multi_track);

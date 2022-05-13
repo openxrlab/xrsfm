@@ -12,6 +12,8 @@
 #include "utility/timer.h" 
 
 struct IncrementalMapperOptions {
+    bool correct_pose = false;
+    bool stop_when_register_fail = false;
     int init_id1 = -1;
     int init_id2 = -1;
     double th_rpe_lba = 8;
