@@ -48,7 +48,6 @@ void Map::Init() {
     frameid2matched_frameids_[fp.id1].emplace_back(fp.id2);
     frameid2matched_frameids_[fp.id2].emplace_back(fp.id1);
   }
-
   corr_graph_.frame_node_vec_.resize(frames_.size());
   for (const auto &frame : frames_) {
     corr_graph_.frame_node_vec_[frame.id].num_observations = 0;
@@ -63,11 +62,12 @@ void Map::Init() {
     auto &image1 = corr_graph_.frame_node_vec_[id1];
     auto &image2 = corr_graph_.frame_node_vec_[id2];
     int num_inlier_matches = 0;
+    assert(matches.size()==frame_pair.inlier_mask.size());
     for (int i = 0; i < matches.size(); ++i) {
       if (!frame_pair.inlier_mask[i]) continue;
-      const auto &match = matches[i];
-      auto &corrs_vector1 = image1.corrs_vector[match.id1];
-      auto &corrs_vector2 = image2.corrs_vector[match.id2];
+      const auto &match = matches[i]; 
+      auto &corrs_vector1 = image1.corrs_vector.at(match.id1);
+      auto &corrs_vector2 = image2.corrs_vector.at(match.id2);
       corrs_vector1.emplace_back(id2, match.id2);
       corrs_vector2.emplace_back(id1, match.id1);
       num_inlier_matches++;

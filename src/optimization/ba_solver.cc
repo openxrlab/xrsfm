@@ -161,7 +161,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool u
     if (frame.id != loop_info.frame_id) {
       problem.SetParameterLowerBound(&s_vec[frame.id], 0, 0.2);
     }
-    // problem.SetParameterBlockConstant(twc_vec[frame.id].q.coeffs().data());//may bug
+    problem.SetParameterBlockConstant(twc_vec[frame.id].q.coeffs().data());//may bug
   }
   problem.SetParameterLowerBound(&s_vec_loop[0], 0, 0.2);
   problem.SetParameterLowerBound(&s_vec_loop[1], 0, 0.2);

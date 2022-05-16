@@ -169,6 +169,8 @@ target_link_libraries(run_kitti ecim)
 add_executable(run_uno src/run_uno_simple.cc)
 target_link_libraries(run_uno ecim)
 
+add_executable(run_euroc src/run_euroc.cc)
+target_link_libraries(run_euroc ecim)
 
 # add_executable(run_ouno src/run_uno.cc)
 # target_link_libraries(run_ouno ecim)

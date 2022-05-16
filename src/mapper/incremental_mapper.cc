@@ -5,6 +5,11 @@ IncrementalMapper::IncrementalMapper(){
 }
     
 void IncrementalMapper::Reconstruct(Map &map){
+  p3d_processor = Point3dProcessor(options.th_rpe_lba, options.th_angle_lba, options.th_rpe_gba, options.th_angle_lba);
+  error_corrector.ba_solver_ = &ba_solver;
+  error_corrector.p3d_processor_ = &p3d_processor;
+  error_corrector.only_correct_with_sim3_ = false;
+
   timer.tot.resume();
   // 1. Map Initialization
   FramePair init_frame_pair;
@@ -13,7 +18,9 @@ void IncrementalMapper::Reconstruct(Map &map){
   }else{
     init_frame_pair = FindPair(map.frame_pairs_, options.init_id1, options.init_id2); 
   }
+  std::cout<<"Found ok"<<std::endl;
   InitializeMap(map, init_frame_pair);
+  std::cout<<"Found ok"<<std::endl;
   ba_solver.GBA(map);
 
   // 2. Map Iterative Extension
@@ -51,6 +58,7 @@ void IncrementalMapper::Reconstruct(Map &map){
       TIMING(timer.che, p3d_processor.CheckTrackDepth(map));
       p3d_processor.CheckFramesMeasurement(map, options.th_rpe_lba, options.th_angle_lba);
       TIMING(timer.gba, ba_solver.KGBA(map, std::vector<int>(0), true));
+      // TIMING(timer.gba, ba_solver.GBA(map));
       TIMING(timer.fil, p3d_processor.FilterPoints3d(map, options.th_rpe_gba, options.th_angle_gba));
       num_image_reg_pre = num_image_reg;
     }
