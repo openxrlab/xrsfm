@@ -4,7 +4,7 @@
 
 #include "track_processor.h"
 
-#include "geometry/colmap/triangulation.h"
+#include "geometry/colmap/estimators/triangulation.h"
 #include "geometry/triangluate_svd.h"
 #include "base/camera.h"
 

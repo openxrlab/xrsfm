@@ -4,7 +4,7 @@
 
 #include "pnp.h"
 
-#include "colmap/absolute_pose.h"
+#include "colmap/estimators/absolute_pose.h"
 #include "colmap/optim/loransac.h"
 #include "umeyama.h"
 

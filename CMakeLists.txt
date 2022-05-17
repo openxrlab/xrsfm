@@ -112,7 +112,6 @@ add_library(ecim
         src/feature/orb_extractor.cc
         src/feature/feature_processing.cc
 
-
         src/geometry/map_initializer.cc
         src/geometry/error_detector.cc
         src/geometry/error_corrector.cc
@@ -122,10 +121,10 @@ add_library(ecim
         src/geometry/triangluate_svd.cc
         src/geometry/track_processor.cc
 
-        src/geometry/colmap/absolute_pose.cc
-        src/geometry/colmap/triangulation.cc
-        src/geometry/colmap/polynomial.cc
-        src/geometry/colmap/utils.cc
+        src/geometry/colmap/estimators/absolute_pose.cc
+        src/geometry/colmap/estimators/triangulation.cc
+        src/geometry/colmap/estimators/polynomial.cc
+        src/geometry/colmap/estimators/utils.cc
         src/geometry/colmap/base/triangulation.cc
         src/geometry/colmap/util/random.cc
         src/geometry/colmap/optim/combination_sampler.cc

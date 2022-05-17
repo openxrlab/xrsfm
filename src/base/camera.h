@@ -3,6 +3,8 @@
 
 #include <Eigen/Eigen>
 
+class Camera;
+
 template <typename T>
 inline void Distortion(const T *extra_params, const T u, const T v, T *du, T *dv) {
   const T k = extra_params[0];
