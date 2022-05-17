@@ -1,0 +1,5 @@
+{
+	"image_dir_path": "/data1/EuRoC/images/",
+	"retrival_path": "/data/ECIM/SfM/ECIM_Mat_old/Trafalgar/nv50_all.txt",
+	"output_path": "/data1/EuRoC/MH_01_easy/ours/"
+}

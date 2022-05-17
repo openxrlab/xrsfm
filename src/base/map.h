@@ -5,6 +5,17 @@
 
 #include "types.h"
 
+
+struct ImageSize {
+  int width, height;
+  ImageSize() {}
+  ImageSize(int w, int h) {
+    width = w;
+    height = h;
+  }
+};
+
+
 class Track {
  public:
   // Keyframes observing the point and associated index in keyframe

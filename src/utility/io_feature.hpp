@@ -161,3 +161,63 @@ inline void ReadCameraInfo(const std::string &file_name,
     cameras.emplace_back(cam);
   }   
 }
+
+inline void LoadImageSize(const std::string &file_name, std::vector<ImageSize> &image_size) {
+  std::ifstream file(file_name, std::ios::out | std::ios::binary);
+  if (!file.is_open()) {
+    std::cerr << "Error: can not open " << file_name << "\n";
+    return;
+  }
+  int num_frames = -1;
+  read_data(file, num_frames);
+  image_size.resize(num_frames);
+  for (auto &size : image_size) {
+    read_data(file, size.width);
+    read_data(file, size.height);
+  }
+}
+
+inline void LoadRetrievalRank(const std::string &file_path,
+                              const std::map<std::string, int> &name_map,
+                              std::map<int, std::vector<int>> &id2rank) {
+  std::ifstream infile(file_path.c_str());
+
+  std::string line;
+  std::set<std::string> missing_image_names;
+  while (getline(infile, line)) {
+    if (line == "") continue;
+    std::istringstream s1(line);
+    std::string image_name1, image_name2;
+    s1 >> image_name1 >> image_name2;
+    if (name_map.count(image_name1) == 0) {  //
+      // printf("Warning : missing %s in name map\n",image_name1.c_str());
+      missing_image_names.insert(image_name1);
+      continue;
+    }
+    if (name_map.count(image_name2) == 0) {
+      missing_image_names.insert(image_name2);
+      continue;
+    }
+    const int id1 = name_map[image_name1], id2 = name_map[image_name2];
+    id2rank[id1].emplace_back(id2);
+  }
+
+  for (const auto name : missing_image_names) {
+    printf("Warning : missing %s in name map\n", name.c_str());
+  }
+}
+
+inline void SaveImageSize(const std::string &file_name, const std::vector<ImageSize> &image_size) {
+  std::ofstream file(file_name, std::ios::out | std::ios::binary);
+  if (!file.is_open()) {
+    std::cerr << "Error: can not open " << file_name << "\n";
+    return;
+  }
+  int num_frames = image_size.size();
+  write_data(file, num_frames);
+  for (auto &size : image_size) {
+    write_data(file, size.width);
+    write_data(file, size.height);
+  }
+}
+

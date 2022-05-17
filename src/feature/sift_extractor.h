@@ -45,7 +45,8 @@ struct SiftExtractionOptions {
   int max_image_size = 3200;
 
   // Maximum number of features to detect, keeping larger-scale features.
-  int max_num_features = 4096;
+  int max_num_features = 4096;  //(Note)BCHO: controlled by construction function of SiftExrtraction
+                                //(dif 8192 in colmap)
 
   // First octave in the pyramid, i.e. -1 upsamples the image by one level.
   int first_octave = -1;
@@ -67,7 +68,7 @@ struct SiftExtractionOptions {
   bool estimate_affine_shape = false;
 
   // Maximum number of orientations per keypoint if not estimate_affine_shape.
-  int max_num_orientations = 1;
+  int max_num_orientations = 1;  // note here:2
 
   // Fix the orientation to 0 for upright features.
   bool upright = false;
@@ -106,7 +107,10 @@ class SiftExtractor {
  public:
   SiftExtractor(int nfeatures = 4096);
   ~SiftExtractor();
-  void operator()(cv::Mat image, std::vector<cv::KeyPoint> &keypoints, FeatureDescriptors &descriptors);
+  void ExtractFLOAT(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoints,
+                    FeatureDescriptors &descriptors);
+  void ExtractUINT8(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoints,
+                    UINT8Descriptors &descriptors);
   std::unique_ptr<SiftGPU> create_siftgpu();
   SiftExtractionOptions options;
   std::unique_ptr<SiftGPU> sift_gpu1;

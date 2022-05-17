@@ -18,6 +18,10 @@ config_path = "/home/yzc/Projects/xrsfm/config_kitti.json"
 
 for seq_name in seq_name_list:
     print("Begin "+seq_name)
+    init_id1 = 0
+    init_id2 = 10
+    # if seq_name == '01':
+
     fo = open(config_path, "w")
     str = "{\n"
     str += "\t\"data_path\": \"/data/ECIM/SfM/KITTI/\",\n"

@@ -110,7 +110,9 @@ add_library(ecim
 
         src/feature/sift_extractor.cc
         src/feature/orb_extractor.cc
+        src/feature/feature_extraction.cc
         src/feature/feature_processing.cc
+        src/feature/match_expansion.cc
 
         src/geometry/map_initializer.cc
         src/geometry/error_detector.cc
@@ -121,14 +123,15 @@ add_library(ecim
         src/geometry/triangluate_svd.cc
         src/geometry/track_processor.cc
 
+        src/geometry/colmap/base/triangulation.cc
         src/geometry/colmap/estimators/absolute_pose.cc
         src/geometry/colmap/estimators/triangulation.cc
         src/geometry/colmap/estimators/polynomial.cc
+        src/geometry/colmap/estimators/fundamental_matrix.cc
         src/geometry/colmap/estimators/utils.cc
-        src/geometry/colmap/base/triangulation.cc
         src/geometry/colmap/util/random.cc
-        src/geometry/colmap/optim/combination_sampler.cc
         src/geometry/colmap/optim/random_sampler.cc
+        src/geometry/colmap/optim/combination_sampler.cc
         src/geometry/colmap/optim/support_measurement.cc
 
         src/optimization/ba_solver.cc
@@ -145,6 +148,7 @@ target_include_directories(ecim
         PUBLIC
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/src
+        ${CMAKE_SOURCE_DIR}/src/geometry/colmap
         ${CMAKE_SOURCE_DIR}/3rdparty/SiftGPU
         ${EIGEN3_INCLUDE_DIRS}
         )
@@ -157,14 +161,13 @@ target_link_libraries(ecim
         ${Pangolin_LIBRARIES}
         stdc++fs 
         )
-
-add_executable(debug_kitti src/debug_kitti.cc)
-target_link_libraries(debug_kitti ecim)
+ 
 
 add_executable(run_kitti src/run_kitti_simple.cc)
 target_link_libraries(run_kitti ecim)
 
-
 add_executable(run_uno src/run_uno_simple.cc)
 target_link_libraries(run_uno ecim)
   
+add_executable(run_matching src/run_matching.cc)
+target_link_libraries(run_matching ecim)
