@@ -58,7 +58,7 @@ void AddTrack(const std::vector<std::pair<int, int>> &observations, const Eigen:
   }
 }
 
-void ContinueTrack(const int track_id, const int frame_id, const int p2d_id, Map &map) {
+void ContinueTrackUpdate(const int track_id, const int frame_id, const int p2d_id, Map &map) {
   auto &track = map.tracks_[track_id];
   track.observations_[frame_id] = p2d_id;
 
@@ -212,7 +212,7 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id, double
       //   } 
       // } 
       if (best_angle_error < const_angle_th) {
-        ContinueTrack(best_track_id, frame_id, p2d_id, map);
+        ContinueTrackUpdate(best_track_id, frame_id, p2d_id, map);
         num_extend++;
       }
 
@@ -380,6 +380,82 @@ void Point3dProcessor::ReTriangulate(Map &map) {
   printf("ReTriangulate %d/%d/%d\n", count0, count1, count2);
 }
 
+void Point3dProcessor::ContinueTrack(Map&map,int track_id,double max_re){
+    auto&track = map.tracks_[track_id];
+    const auto init_obs =  track.observations_;
+
+    std::set<std::pair<int, int>> visted_pair;
+    for (const auto &[frame_id, p2d_id] : init_obs) {
+      for (const auto &[c_frame_id, c_p2d_id] : map.corr_graph_.frame_node_vec_[frame_id].corrs_vector[p2d_id]) {
+        // search connect obs{frame,p2d}
+        if (track.observations_.count(c_frame_id) != 0) continue;
+        auto &c_frame = map.frames_[c_frame_id];
+        if (!c_frame.registered) continue;
+        const int track_id2 = c_frame.track_ids_[c_p2d_id];
+        std::pair<int, int> pair(c_frame_id, c_p2d_id);
+        if (track_id2 != -1 || visted_pair.count(pair) != 0) continue;
+        visted_pair.insert(pair);
+
+        // check rpe
+        const auto &c_camera = map.cameras_[c_frame.camera_id];
+        double re = Reprojection_Error(c_frame.Tcw, c_camera, c_frame.points[c_p2d_id], track.point3d_);
+        if (re > max_re) continue;
+        ContinueTrackUpdate(track_id, c_frame_id, c_p2d_id, map);
+      }
+    }
+}
+
+void Point3dProcessor::MergeTrack(Map&map,int track_id,double max_re){ 
+    auto&track = map.tracks_[track_id];
+    const auto init_obs =  track.observations_;
+    // merge track
+    std::set<int> visted_id;
+    for (const auto &[frame_id, p2d_id] : init_obs) {
+      for (const auto &[c_frame_id, c_p2d_id] : map.corr_graph_.frame_node_vec_[frame_id].corrs_vector[p2d_id]) {
+        // search connected track
+        if (track.observations_.count(c_frame_id) != 0) continue;
+        auto &frame = map.frames_[c_frame_id];
+        if (!frame.registered) continue;
+        const int track_id2 = frame.track_ids_[c_p2d_id];
+        if (track_id2 == -1 || visted_id.count(track_id2) > 0) continue;
+        visted_id.insert(track_id2);
+        auto &track2 = map.tracks_[track_id2];
+
+        // judge whether to merge
+        bool merge_success = true;
+        const double w1 = track.observations_.size(), w2 = track2.observations_.size();
+        const Eigen::Vector3d merged_p3d = (w1 * track.point3d_ + w2 * track2.point3d_) / (w1 + w2);
+        for (const Track *track_ptr : {&track, &track2}) {
+          for (const auto &[t_frame_id, t_p2d_id] : track_ptr->observations_) {
+            const auto &t_frame = map.frames_[t_frame_id];
+            const auto &t_camera = map.cameras_[t_frame.camera_id];
+            double re = Reprojection_Error(t_frame.Tcw, t_camera, t_frame.points[t_p2d_id], merged_p3d);
+            if (re > max_re) {
+              merge_success = false;
+              break;
+            }
+          }
+          if(!merge_success)break;
+        }
+
+        // merge two points
+        if (merge_success) { 
+          track.point3d_ = merged_p3d;
+          for (const auto &[t_frame_id, t_p2d_id] : track2.observations_) {
+            if (track.observations_.count(t_frame_id) == 0) {
+              track.observations_[t_frame_id] = t_p2d_id;
+              map.frames_[t_frame_id].track_ids_[t_p2d_id] = track_id;
+            } else {
+              map.frames_[t_frame_id].track_ids_[t_p2d_id] = -1;
+              map.DeleteNumCorHavePoint3D(t_frame_id, t_p2d_id);
+            }
+          }
+          track2.outlier = true;
+        }
+      }
+    } 
+}
+
 void Point3dProcessor::MergeTracks(Map &map, const int frame_id, double max_re) {
   int num_merged_track = 0, num_connected_track = 0;
   int num_continue_track = 0, num_connected_meas = 0;
@@ -450,7 +526,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id, double max_re) 
         double re = Reprojection_Error(t_frame.Tcw, t_camera, t_frame.points[c_p2d_id], track.point3d_);
         if (re < max_re) {
           num_continue_track++;
-          ContinueTrack(track_id, c_frame_id, c_p2d_id, map);
+          ContinueTrackUpdate(track_id, c_frame_id, c_p2d_id, map);
         }
       }
     }

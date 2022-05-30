@@ -65,7 +65,7 @@ inline void ReadFeatures(const std::string &file_name, std::vector<Frame> &frame
   assert(num_frames == frames.size());
   for (auto &frame : frames) {
     int num_points = -1;
-    read_data(file, num_points);
+    read_data(file, num_points); 
     frame.keypoints_.resize(num_points);
     frame.uint_descs_.resize(num_points, 128);
 

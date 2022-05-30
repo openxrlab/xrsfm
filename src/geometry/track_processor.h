@@ -24,7 +24,9 @@ class Point3dProcessor {
   bool CheckFrameMeasurement(Map &map, int frame_id);
   void CheckFramesMeasurement(Map &map, double th_rpe_lba, double th_angle_lba);
 
+  void MergeTrack(Map&map,int track_id,double max_re);
   void MergeTracks(Map &map, const int frame_id, double max_re);
+  void ContinueTrack(Map&map,int track_id,double max_re);
   void ContinueFrameTracks(const int frame_id, const std::vector<std::pair<int, int>> &cor_2d_3d_ids, Map &map);
 
   int TriangulateFramePoint(Map &map, const int frame_id, const double deg_th);

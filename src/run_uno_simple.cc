@@ -27,6 +27,7 @@ void PreProcess(const std::string dir_path, Map& map) {
   // ReadFramePairs(dir_path + "/open/nv25_fp.bin", frame_pairs);
   ReadFramePairs(dir_path + "/open/ours_fp.bin", frame_pairs);
   ReadCameraInfo(dir_path+"/open/camera_info.txt",name2cid,cameras);
+  
   assert(image_names.size()==frames.size());
   assert(cameras.size()==frames.size());
 

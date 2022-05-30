@@ -1,5 +1,5 @@
 {
-	"image_dir_path": "/data1/EuRoC/images/",
-	"retrival_path": "/data/ECIM/SfM/ECIM_Mat_old/Trafalgar/nv50_all.txt",
-	"output_path": "/data1/EuRoC/MH_01_easy/ours/"
+	"image_dir_path": "/data/2022-05-18T16-28-58/images/",
+	"retrival_path": "/data/2022-05-18T16-28-58/sfm/pairs-sfm.txt",
+	"output_path": "/data/2022-05-18T16-28-58/sfm/"
 }

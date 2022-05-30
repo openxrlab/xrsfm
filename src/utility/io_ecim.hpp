@@ -569,3 +569,5 @@ inline void ReadPoseColmapTXT(const std::string &file_name, std::map<int, Pose> 
 void WriteColMapDataBinary(const std::string &output_path, const Map &map);
 
 void ReadColMapDataBinary(const std::string &output_path, Map &map);
+
+void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames);

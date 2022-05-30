@@ -1,7 +1,7 @@
 {
-    "data_path": "/home/yzc/Data/",
-    "seq_name": "Garden/",
-    "output_path": "/home/yzc/Data/Garden/",
-    "camera_size": 0.01,
-    "debug": 0
+	"bin_path": "/data/2022-05-18T16-28-58/sfm/",
+	"images_path": "/data/2022-05-18T16-28-58/images/",
+	"output_path": "/data/2022-05-18T16-28-58/sfm/",
+	"init_id1": 0,
+	"init_id2": 10
 }

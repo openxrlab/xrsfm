@@ -4,7 +4,7 @@ project(ecim)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeHelper.cmake NO_POLICY_SCOPE)
 
-option(CUDA_ENABLED "Whether to enable CUDA, if available" OFF)
+option(CUDA_ENABLED "Whether to enable CUDA, if available" ON)
 set(CUDA_ARCHS "Auto" CACHE STRING "List of CUDA architectures for which to \
 generate code, e.g., Auto, All, Maxwell, Pascal, ...")
 
@@ -27,19 +27,19 @@ find_package(GLEW REQUIRED)
 
 find_package(Pangolin REQUIRED)
 
+if (CUDA_ENABLED)
+    find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
+endif ()
+
 ################################################################################
 # Compiler specific configuration
 ################################################################################
+
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++17 -msse4 -fopenmp -fpermissive -w -pthread")#for const
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++14 -msse4 -fopenmp -fpermissive -w -pthread")#for const
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -g")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -g -ggdb")
 set(CMAKE_BUILD_TYPE "release")
-
-
-# if (CMAKE_BUILD_TYPE MATCHES Debug)
-#     add_definitions(-D_DEBUG)
-# endif ()
 
 if (OPENGL_ENABLED)
     add_definitions("-DOPENGL_ENABLED")
@@ -47,7 +47,6 @@ if (OPENGL_ENABLED)
 else ()
     message(STATUS "Disabling OpenGL support")
 endif ()
-
 
 if (CUDA_FOUND)
     if (CUDA_ENABLED)
@@ -63,7 +62,7 @@ if (CUDA_FOUND)
         set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -D_FORCE_INLINES")
         # Do not show warnings if the architectures are deprecated.
         set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Wno-deprecated-gpu-targets")
-        set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --std=c++14")#need add
+        # set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --std=c++11")#need add
 
         message(STATUS "Enabling CUDA support (version: ${CUDA_VERSION_STRING},"
                 " archs: ${CUDA_ARCH_FLAGS_readable})")
@@ -77,7 +76,7 @@ else ()
         message(STATUS "Disabling CUDA support (found version "
                 "${CUDA_VERSION_STRING} but >= ${CUDA_MIN_VERSION} required)")
     else ()
-        message(STATUS "Disabling CUDA support")
+        message(STATUS "Disabling CUDA support!")
     endif ()
 endif ()
 
@@ -144,6 +143,7 @@ add_library(ecim
         src/utility/io_ecim.cc
         )
 
+
 target_include_directories(ecim
         PUBLIC
         ${CMAKE_SOURCE_DIR}
@@ -163,11 +163,18 @@ target_link_libraries(ecim
         )
  
 
+
+add_executable(run_matching src/run_matching.cc)
+target_link_libraries(run_matching ecim)
+
 add_executable(run_kitti src/run_kitti_simple.cc)
 target_link_libraries(run_kitti ecim)
 
 add_executable(run_uno src/run_uno_simple.cc)
 target_link_libraries(run_uno ecim)
   
-add_executable(run_matching src/run_matching.cc)
-target_link_libraries(run_matching ecim)
+add_executable(rec_seq src/rec_seq.cc)
+target_link_libraries(rec_seq ecim)
+
+add_executable(run_triangulation src/run_triangulation.cc)
+target_link_libraries(run_triangulation ecim)
