@@ -7,26 +7,33 @@
 #include "feature/feature_processing.h"
 #include "base/camera.h"
 #include "base/map.h"
-#include "utility/io_ecim.hpp"
-#include "utility/timer.h"
 #include "geometry/track_processor.h"
 #include "optimization/ba_solver.h"
+#include "utility/timer.h"
+#include "utility/io_ecim.hpp"
+#include "utility/viewer.h"
 
 void PreProcess(const std::string dir_path,const std::string images_path, Map& map) {
   std::vector<Frame> frames;
   std::vector<FramePair> frame_pairs; 
-  std::vector<std::string> image_names;
-  ReadFeatures(dir_path + "ftr.bin", frames, true); 
-  ReadFramePairs(dir_path + "fp.bin", frame_pairs); 
-  LoadImageNames(images_path, image_names);
 
+  std::map<int,Frame> frames_pt,frames_pose;
+  ReadImagesBinaryForTriangulation("/data/cowtransfer/matching/feat_superpoint_1024.bin",frames_pt);
+  ReadImagesBinary("/data/2022-05-18T16-28-58/refine/images.bin", frames_pose);
+  for(auto&[id,frame]:frames_pt){
+    frame.registered = true;
+    frame.Tcw = frames_pose[id].Tcw;
+    std::cout<<id<<" "<<frame.id<<std::endl;
+    frames.push_back(frame);
+  }
+  ReadFramePairBinaryForTriangulation("/data/cowtransfer/matching/match_nn_cross_07.bin",frame_pairs);
+  
   // set cameras & image name
   std::vector<Camera> cameras;
   Camera seq =  Camera(0, 1450,1450, 960, 720, 0.0); 
   cameras.emplace_back(seq);
   for (auto& frame : frames) {
     frame.camera_id = 0;
-    frame.name = image_names.at(frame.id);
   }
  
   // set points for reconstruction
@@ -47,25 +54,18 @@ void PreProcess(const std::string dir_path,const std::string images_path, Map& m
   map.frames_ = frames;
   map.cameras_ = cameras;
   map.frame_pairs_ = frame_pairs; 
-  map.RemoveRedundancyPoints();
+  // map.RemoveRedundancyPoints();
   map.Init();
 }
 
 int main(int argc, const char* argv[]) {
   std::string bin_path;
   std::string images_path;
-  std::string data_path;
+  std::string output_path = "/data/2022-05-18T16-28-58/retri/"; 
+
 
   Map map;
   PreProcess(bin_path ,images_path, map);
-  
-  std::map<int,Frame> frame_map;
-  ReadImagesBinary(data_path + "images.bin", frame_map);
-  
-  for(auto&[id,frame]:frame_map){
-    map.frames_[id].registered = true;
-    map.frames_[id].Tcw = frame.Tcw;
-  }
 
   BASolver ba_solver;
   Point3dProcessor p3d_processor;
@@ -88,7 +88,16 @@ int main(int argc, const char* argv[]) {
   }
 
   // GBA
-  ba_solver.GBA(map);
+  ba_solver.GBA(map,true,true);
 
+  WriteColMapDataBinary(output_path,map);
+
+  ViewerThread viewer;
+  viewer.start();
+  viewer.update_map(map);
+  sleep(1000);
+  viewer.stop();
+  
+  
   return 0;
 }

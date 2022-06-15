@@ -180,29 +180,29 @@ int main(int argc, const char* argv[]) {
   // 5.EC image matching 
   std::map<int, std::vector<int>> id2rank;
   LoadRetrievalRank(retrival_path, name2id, id2rank);
-  MatchingSeq(frames,fp_path,id2rank);
 
+  // MatchingSeq(frames,fp_path,id2rank);
   // // std::vector<std::pair<int, int>> id_pairs;
   // // ExtractNearestImagePairs(id2rank, 25, id_pairs);
   // // std::vector<FramePair> frame_pairs;
   // // FeatureMatching(frames, id_pairs, frame_pairs, true);
   // // SaveFramePairs(fp_path, frame_pairs);
 
-  // std::vector<std::pair<int, int>> id_pairs;
-  // ExtractNearestImagePairs(id2rank, 5, id_pairs);
-  // std::vector<FramePair> frame_pairs;
-  // GetInitFramePairs(fp_init_path, frames, id_pairs, frame_pairs);
+  std::vector<std::pair<int, int>> id_pairs;
+  ExtractNearestImagePairs(id2rank, 5, id_pairs);
+  std::vector<FramePair> frame_pairs;
+  GetInitFramePairs(fp_init_path, frames, id_pairs, frame_pairs);
 
-  // const int num_iteration = 5;
-  // const bool use_fundamental = true;
-  // const auto [init_id1, init_id2] = GetInitId(num_image, frame_pairs);
+  const int num_iteration = 5;
+  const bool use_fundamental = true;
+  const auto [init_id1, init_id2] = GetInitId(num_image, frame_pairs);
 
-  // Map map;
-  // map.frames_ = frames;
-  // map.frame_pairs_ = frame_pairs;
-  // ExpansionAndMatching(map, id2rank, num_iteration, image_size_vec, init_id1, init_id2,
-  //                      use_fundamental, id_pairs);
-  // SaveFramePairs(fp_path, map.frame_pairs_);
+  Map map;
+  map.frames_ = frames;
+  map.frame_pairs_ = frame_pairs;
+  ExpansionAndMatching(map, id2rank, num_iteration, image_size_vec, init_id1, init_id2,
+                       use_fundamental, id_pairs);
+  SaveFramePairs(fp_path, map.frame_pairs_);
 
   return 0;
 }

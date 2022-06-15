@@ -113,9 +113,9 @@ void FeatureExtract(const std::string &image_dir_path, std::vector<Frame> &frame
       exit(0);
     }
 #ifndef USE_ORB
-    std::cout << image_dir_path + frame.name << std::endl;
+    // std::cout << image_dir_path + frame.name << std::endl;
     sift.ExtractUINT8(image, frame.keypoints_, frame.uint_descs_);
-    std::cout << i << " " << frame.uint_descs_.rows() << std::endl;
+    // std::cout << i << " " << frame.uint_descs_.rows() << std::endl;
 #else
     orb(image, cv::Mat(), frame.keypoints_, frame.orb_descs_);
 #endif

@@ -118,11 +118,11 @@ void ReadName(std::ifstream &file, std::string &name) {
 void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames) {
   std::ifstream file(path, std::ios::binary);
   CHECK(file.is_open()) << path;
-  const uint64_t num_frame = read_data2<uint64_t>(file, num_frame);
+  const uint64_t num_frame = read_data2<uint64_t>(file );
 
   for (uint64_t i = 0; i < num_frame; ++i) {
     Frame frame;
-    frame.id = read_data2<uint32_t>(file, num_frame);
+    frame.id = read_data2<uint32_t>(file );
     Eigen::Vector4d q_vec;
     read_data(file, q_vec);
     frame.Tcw.q = Eigen::Quaterniond(q_vec[0], q_vec[1], q_vec[2], q_vec[3]);
@@ -174,4 +174,54 @@ void ReadColMapDataBinary(const std::string &output_path, Map &map) {
   ReadCamerasBinary(output_path + "cameras.bin", map.cameras_);
   ReadImagesBinary(output_path + "images.bin", map.frame_map_);
   ReadPoints3DBinary(output_path + "points3D.bin", map.track_map_);
+}
+
+void ReadImagesBinaryForTriangulation(const std::string &path, std::map<int, Frame> &frames) {
+  std::ifstream file(path, std::ios::binary);
+  CHECK(file.is_open()) << path;
+  const uint64_t num_frame = read_data2<uint64_t>(file );
+
+  for (uint64_t i = 0; i < num_frame; ++i) {
+    Frame frame;
+    frame.id = read_data2<uint32_t>(file ); 
+    ReadName(file, frame.name);
+    const int width = read_data2<uint64_t>(file);
+    const int height = read_data2<uint64_t>(file);
+
+    uint64_t num_p2d = read_data2<uint64_t>(file);
+    frame.keypoints_.resize(num_p2d); 
+    for (size_t i = 0; i < num_p2d; ++i) {
+      auto &pt = frame.keypoints_[i].pt;
+      pt.x =  read_data2<double>(file);
+      pt.y =  read_data2<double>(file);
+    }
+    for (size_t i = 0; i < num_p2d; ++i) { 
+      Eigen::Vector<float,256> desc;
+      read_data_vec(file,desc.data(),256); 
+    }
+    frames[frame.id] = frame;
+    // std::cout<<frame.id<<" "<<frame.name<<" "<<frame.points.size()<<std::endl;
+  }
+}
+
+void ReadFramePairBinaryForTriangulation(const std::string &path, std::vector<FramePair> &frame_pairs) {
+  std::ifstream file(path, std::ios::binary);
+  CHECK(file.is_open()) << path;
+  const uint64_t num_pair = read_data2<uint64_t>(file, num_pair);
+  frame_pairs.reserve(num_pair);
+  for (uint64_t i = 0; i < num_pair; ++i) {
+    FramePair fp;
+    fp.id1 = read_data2<uint32_t>(file ); 
+    fp.id2 = read_data2<uint32_t>(file );  
+    // std::cout<<fp.id1<<" "<<fp.id2<<std::endl;
+    uint64_t num_matches = read_data2<uint64_t>(file);
+    fp.matches.resize(num_matches);
+    fp.inlier_mask.resize(num_matches,true);
+    for (size_t i = 0; i < num_matches; ++i) {
+      auto&match = fp.matches[i];
+      read_data(file, match.id1); 
+      read_data(file, match.id2); 
+    } 
+    frame_pairs.push_back(fp);
+  }
 }

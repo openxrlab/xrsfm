@@ -571,3 +571,7 @@ void WriteColMapDataBinary(const std::string &output_path, const Map &map);
 void ReadColMapDataBinary(const std::string &output_path, Map &map);
 
 void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames);
+ 
+void ReadImagesBinaryForTriangulation(const std::string &path, std::map<int, Frame> &frames);
+
+void ReadFramePairBinaryForTriangulation(const std::string &path, std::vector<FramePair> &frame_pairs);

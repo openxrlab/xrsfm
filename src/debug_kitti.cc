@@ -1,13 +1,13 @@
 
 #include <fstream>
 
+#include "base/map.h"
 #include "3rdparty/json/json.hpp"
 #include "geometry/essential.h"
 #include "geometry/pnp.h"
 #include "geometry/track_processor.h"
 #include "base/camera.h"
 #include "geometry/error_corrector.h"
-#include "base/map.h"
 #include "geometry/map_initializer.h"
 #include "optimization/ba_solver.h"
 #include "utility/io_ecim.hpp"

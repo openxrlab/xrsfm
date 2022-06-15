@@ -48,7 +48,7 @@ void AddTrack(const std::vector<std::pair<int, int>> &observations, const Eigen:
       }
     }
   }
-  LOG_IF(WARNING, min_level2 == -1) << "Track level not init";
+  // LOG_IF(WARNING, min_level2 == -1) << "Track level not init";
   track.hierarchical_level = std::max(min_level2, 0);
 
   map.tracks_.emplace_back(track);
