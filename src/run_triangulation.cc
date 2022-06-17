@@ -13,20 +13,20 @@
 #include "utility/io_ecim.hpp"
 #include "utility/viewer.h"
 
-void PreProcess(const std::string dir_path,const std::string images_path, Map& map) {
+void PreProcess(const std::string pose_path,const std::string feature_path,const std::string frame_pair_path, Map& map) {
   std::vector<Frame> frames;
   std::vector<FramePair> frame_pairs; 
 
-  std::map<int,Frame> frames_pt,frames_pose;
-  ReadImagesBinaryForTriangulation("/data/cowtransfer/matching/feat_superpoint_1024.bin",frames_pt);
-  ReadImagesBinary("/data/2022-05-18T16-28-58/refine/images.bin", frames_pose);
+  std::map<int,Frame> frames_pose,frames_pt;
+  ReadImagesBinary(pose_path, frames_pose);
+  ReadImagesBinaryForTriangulation(feature_path,frames_pt);
   for(auto&[id,frame]:frames_pt){
     frame.registered = true;
     frame.Tcw = frames_pose[id].Tcw;
     std::cout<<id<<" "<<frame.id<<std::endl;
     frames.push_back(frame);
   }
-  ReadFramePairBinaryForTriangulation("/data/cowtransfer/matching/match_nn_cross_07.bin",frame_pairs);
+  ReadFramePairBinaryForTriangulation(frame_pair_path,frame_pairs);
   
   // set cameras & image name
   std::vector<Camera> cameras;
@@ -59,13 +59,15 @@ void PreProcess(const std::string dir_path,const std::string images_path, Map& m
 }
 
 int main(int argc, const char* argv[]) {
-  std::string bin_path;
-  std::string images_path;
-  std::string output_path = "/data/2022-05-18T16-28-58/retri/"; 
-
+  std::string config_path = "config_tri.json";
+  auto config_json = LoadJSON(config_path);
+  std::string pose_path = config_json["pose_path"];
+  std::string feature_path = config_json["feature_path"];
+  std::string frame_pair_path = config_json["frame_pair_path"];
+  std::string output_path = config_json["output_path"]; 
 
   Map map;
-  PreProcess(bin_path ,images_path, map);
+  PreProcess(pose_path,feature_path ,frame_pair_path, map);
 
   BASolver ba_solver;
   Point3dProcessor p3d_processor;

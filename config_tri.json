@@ -1,0 +1,6 @@
+{
+	"pose_path": "/data/2022-05-18T16-28-58/refine/images.bin",
+	"feature_path": "/data/cowtransfer/matching/feat_superpoint_1024.bin",
+	"frame_pair_path": "/data/cowtransfer/matching/match_nn_cross_07.bin",
+	"output_path": "/data/2022-05-18T16-28-58/retri/"
+}
