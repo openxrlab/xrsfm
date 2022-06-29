@@ -157,32 +157,6 @@ inline void ReadImage(const std::string &dir_path, const int step, std::vector<c
   file.close();
 }
 
-inline void ReadAssociate(const std::string &dir_path, const int step, std::vector<double> &time_vec,
-                          std::vector<cv::Mat> &images) {
-  std::string filename = dir_path + "associate.txt";
-  std::vector<std::string> image_names;
-  std::ifstream file(filename);
-  CHECK(file.is_open());
-  std::string line;
-  int count = 0;
-  while (std::getline(file, line)) {
-    if (line[0] == '#') continue;
-    std::stringstream ss(line);
-    double timestamp_rgb = 0;
-    std::string name_rgb;
-    double timestamp_dpt = 0;
-    std::string name_dpt;
-    if (!(ss >> timestamp_rgb >> name_rgb >> timestamp_dpt >> name_dpt)) break;
-    if (count++ % step == 0) {
-      time_vec.emplace_back(timestamp_rgb);
-      image_names.emplace_back(name_rgb);
-      cv::Mat image = cv::imread(dir_path + name_rgb);
-      images.emplace_back(image);
-    }
-  }
-  file.close();
-}
-
 inline void LoadImageKITTI(const std::string &dir_path, const int step, std::vector<cv::Mat> &images) {
   images.clear();
   char image_path[512];
@@ -466,7 +440,7 @@ inline void UpdateFrameTimeStamp(std::vector<Frame> &frames, std::vector<double>
   int step = int(1.0 * timestamp_Vec.size() / frames.size() + 0.1);
   printf("%d %zu %zu\n", step, timestamp_Vec.size(), frames.size());
   for (auto &f : frames) {
-    f.time = timestamp_Vec[step * f.id];
+    f.timestamp = timestamp_Vec[step * f.id];
   }
   return;
 }
@@ -542,7 +516,7 @@ inline void WriteTrajectory(const Map &map, const std::string &trajectory_path) 
     // if (!frame.is_keyframe) continue;
     Eigen::Vector3d twc = frame.twc();
     Eigen::Quaterniond qwc = frame.qwc();
-    trajectory_file << std::to_string(frame.time) << " " << twc[0] << " " << twc[1] << " " << twc[2] << " " << qwc.x()
+    trajectory_file << std::to_string(frame.timestamp) << " " << twc[0] << " " << twc[1] << " " << twc[2] << " " << qwc.x()
                     << " " << qwc.y() << " " << qwc.z() << " " << qwc.w() << "\n";
   }
   trajectory_file.close();

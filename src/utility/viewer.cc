@@ -99,6 +99,31 @@ void ViewerThread::update_map(const Map &map) {
   }
 }
 
+void ViewerThread::update_map_colmap(const Map &map) {
+  std::unique_lock lk(map_mutex);
+  cameras.clear();
+  colors_cam.clear();
+  points.clear();
+  colors_pt.clear();
+
+  for (const auto &[id,frame] : map.frame_map_) {
+    if (!frame.registered) continue;
+    cameras.emplace_back(frame.Tcw);
+    if (frame.flag_for_view) {
+      colors_cam.emplace_back(red);
+    } else if (frame.is_keyframe) {
+      colors_cam.emplace_back(green);
+    } else {
+      colors_cam.emplace_back(grey);
+    }
+  }
+
+  for (const auto &[id,track] : map.track_map_) {
+    if (!track.outlier)  //&& track.is_keypoint) {
+      points.emplace_back(track.point3d_);
+  }
+}
+
 void ViewerThread::update_cameras(const std::vector<Pose> &pose_vec) {
   cameras = pose_vec;
   colors_cam.assign(cameras.size(), red);

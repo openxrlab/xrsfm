@@ -139,6 +139,7 @@ void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames) {
       read_data(file, p2d);
       frame.track_ids_[i] = read_data2<uint64_t>(file);
     }
+    frame.registered = true;
     frames[frame.id] = frame;
   }
 }

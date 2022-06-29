@@ -87,10 +87,11 @@ class Camera {
 
 class Frame {
  public:
+
+  double timestamp = 0;
   std::string name;
   uint32_t id = -1;
   uint32_t camera_id = 0;
-  double time = 0;
 
   bool registered = false;
   bool registered_fail = false;

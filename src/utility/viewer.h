@@ -19,6 +19,7 @@ class ViewerThread {
 
   void update_map(const Map &map);
   void update_cameras(const std::vector<Pose> &pose_vec);
+  void update_map_colmap(const Map &map);
 
   double camera_size_ = 0.1;
   std::vector<Pose> cameras;

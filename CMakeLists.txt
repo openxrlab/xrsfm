@@ -91,7 +91,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 add_subdirectory(3rdparty/SiftGPU)
 
-set(COLMAP_CUDA_LIBNAME "colmap_cuda")
+
 if (CUDA_ENABLED)
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --use_fast_math")
 
@@ -178,3 +178,9 @@ target_link_libraries(rec_seq ecim)
 
 add_executable(run_triangulation src/run_triangulation.cc)
 target_link_libraries(run_triangulation ecim)
+
+add_executable(view_loc src/view_loc_result.cc)
+target_link_libraries(view_loc ecim)
+
+add_executable(test_loc src/test_loc.cc)
+target_link_libraries(test_loc ecim)
