@@ -112,14 +112,14 @@ int main(int argc, char* argv[]) {
   std::vector<Pose> view_vec = sfm_vec;
   for(auto&pose:slam_vec)view_vec.push_back(pose);
   
-  std::cout<<"scale:"<<srt.scale<<std::endl;
-  for(auto&[id,frame]:map.frame_map_){
-    frame.Tcw.t /=srt.scale;
-  }
-  for(auto&[id,track]:map.track_map_){
-    track.point3d_ /=srt.scale;
-  }
-  WriteColMapDataBinary2("/data1/rokid/results/test/",map);
+  // std::cout<<"scale:"<<srt.scale<<std::endl;
+  // for(auto&[id,frame]:map.frame_map_){
+  //   frame.Tcw.t /=srt.scale;
+  // }
+  // for(auto&[id,track]:map.track_map_){
+  //   track.point3d_ /=srt.scale;
+  // }
+  // WriteColMapDataBinary2("/data1/rokid/results/test/",map);
   
   ViewerThread viewer;
   viewer.camera_size_ = 0.5;
