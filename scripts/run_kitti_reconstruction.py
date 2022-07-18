@@ -28,16 +28,16 @@ for seq_name in seq_name_list:
     init_id2 = init_id1+10
 
     fo = open(config_path, "w")
-    str = "{\n"
-    str += "\t\"data_path\": \"/data/ECIM/SfM/KITTI/\",\n"
-    str += "\t\"seq_name\": \""+seq_name+"\",\n" 
-    str += "\t\"output_path\": \"/data/ECIM/SfM/KITTI/\",\n"
-    str += "\t\"camera_size\": 0.1,\n"
-    str += "\t\"init_id1\": "+init_id1+",\n"
-    str += "\t\"init_id2\": "+init_id2+",\n"
-    str += "\t\"debug\": 0\n"
-    str += "}"
-    fo.write(str)
+    str_config = "{\n"
+    str_config += "\t\"data_path\": \"/data/ECIM/SfM/KITTI/\",\n"
+    str_config += "\t\"seq_name\": \""+seq_name+"\",\n" 
+    str_config += "\t\"output_path\": \"/data/ECIM/SfM/KITTI/\",\n"
+    str_config += "\t\"camera_size\": 0.1,\n"
+    str_config += "\t\"init_id1\": "+str(init_id1)+",\n"
+    str_config += "\t\"init_id2\": "+str(init_id2)+",\n"
+    str_config += "\t\"debug\": 0\n"
+    str_config += "}"
+    fo.write(str_config)
     fo.close()
-    os.system("/home/yzc/Projects/xrsfm/bin/run_kitti")
+    os.system("/home/yzc/Projects/xrsfm/bin/rec_kitti > /data/ECIM/SfM/KITTI/log"+seq_name+".txt")
     print("End "+seq_name)

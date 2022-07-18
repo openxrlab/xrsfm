@@ -48,33 +48,45 @@ void Map::Init() {
     frameid2matched_frameids_[fp.id1].emplace_back(fp.id2);
     frameid2matched_frameids_[fp.id2].emplace_back(fp.id1);
   }
-  corr_graph_.frame_node_vec_.resize(frames_.size());
+  corr_graph_.frame_node_vec_.resize(frames_.size()+1);//TODO here a bug
   for (const auto &frame : frames_) {
     corr_graph_.frame_node_vec_[frame.id].num_observations = 0;
     corr_graph_.frame_node_vec_[frame.id].num_visible_point3d = 0;
     corr_graph_.frame_node_vec_[frame.id].num_correspondences = 0;
     corr_graph_.frame_node_vec_[frame.id].corrs_vector.assign(frame.points.size(), std::vector<std::pair<int, int>>(0)); 
-  } 
+  }  
   for (const auto &frame_pair : frame_pairs_) {
     const int id1 = frame_pair.id1;
-    const int id2 = frame_pair.id2;
+    const int id2 = frame_pair.id2; 
     const auto &matches = frame_pair.matches;
-    auto &image1 = corr_graph_.frame_node_vec_[id1];
-    auto &image2 = corr_graph_.frame_node_vec_[id2];
+    auto &image1 = corr_graph_.frame_node_vec_.at(id1);
+    auto &image2 = corr_graph_.frame_node_vec_.at(id2);
     int num_inlier_matches = 0;  
     assert(matches.size()==frame_pair.inlier_mask.size());
     for (int i = 0; i < matches.size(); ++i) {
       if (!frame_pair.inlier_mask[i]) continue;
-      const auto &match = matches[i];   
+      const auto &match = matches[i];
+      // if(image1.corrs_vector.size()<=match.id1||image2.corrs_vector.size()<=match.id2){
+      //   std::cout<<id1<<" "<<id2<<" "<<match.id1<<" "<<match.id2<<std::endl;
+      //   exit(0);
+      // }
       auto &corrs_vector1 = image1.corrs_vector.at(match.id1);
       auto &corrs_vector2 = image2.corrs_vector.at(match.id2);
       corrs_vector1.emplace_back(id2, match.id2);
       corrs_vector2.emplace_back(id1, match.id1);
+      // if(id1==1581&&match.id1==989){
+      //   std::cout<<frames_.at(1581).id<<std::endl;
+      //   std::cout<<frames_.at(1581).points.size()<<std::endl;
+      //   std::cout<<frames_.at(1581).track_ids_.size()<<std::endl;
+      //   std::cout<<corr_graph_.frame_node_vec_.at(1581).corrs_vector.size()<<std::endl;
+      //   exit(0);
+      // }
       num_inlier_matches++;
     }
     image1.num_correspondences += num_inlier_matches;
     image2.num_correspondences += num_inlier_matches;
   } 
+  std::cout<<"1\n";
 
   for (auto &frame : frames_) {
     frame.num_correspondences_have_point3D_.assign(frame.points.size(), 0);
@@ -82,8 +94,7 @@ void Map::Init() {
 }
 
 void Map::RemoveRedundancyPoints() {
-  Init();
-  std::cout<<"here\n";
+  Init(); 
   // remove unused frame points
   std::vector<std::vector<int>> id2nid_vec(frames_.size(), std::vector<int>(0));
   std::vector<std::vector<int>> nid2id_vec(frames_.size(), std::vector<int>(0));
@@ -761,15 +772,15 @@ void Map::LogReprojectError() {
       }
     }
   } 
-  printf("avg rpe %lf %lf\n", sre / count, sre_key / count_key);
+  printf("%d avg rpe %lf %lf\n",count, sre / count, sre_key / count_key);
   sre_key_ = sre_key / count_key;
 
-  int count_tra = 0, count_len = 0;
-  for (const auto &track : tracks_) {
-    if (track.outlier) continue;
-    count_tra++;
-    count_len += track.observations_.size();
-  }
-  avg_track_length_ = 1.0 * count_len / count_tra;
-  std::cout<<count_tra<<" "<<avg_track_length_<<std::endl;
+  // int count_tra = 0, count_len = 0;
+  // for (const auto &track : tracks_) {
+  //   if (track.outlier) continue;
+  //   count_tra++;
+  //   count_len += track.observations_.size();
+  // }
+  // avg_track_length_ = 1.0 * count_len / count_tra;
+  // std::cout<<count_tra<<" "<<avg_track_length_<<std::endl;
 }

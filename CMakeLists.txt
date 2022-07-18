@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.21)
 
 project(ecim)
 
@@ -26,6 +26,9 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
 find_package(Pangolin REQUIRED)
+
+# set(XRPrimer_DIR "/home/yzc/Projects/xrprimer/install/lib/cmake")
+# find_package(XRPrimer REQUIRED)
 
 if (CUDA_ENABLED)
     find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
@@ -141,6 +144,14 @@ add_library(ecim
         src/utility/viewer_handler.cc
         src/utility/viewer.cc
         src/utility/io_ecim.cc
+
+
+        src/optimization/mgba/optim/local_parameterization.cc
+        src/optimization/mgba/optim/lm_minimizer.cc
+        src/optimization/mgba/optim/linear_solver_weight.cc
+        # optim/linear_solver_refine.cc
+        src/optimization/mgba/run_ba.cc
+        src/optimization/mgba/run_ba_ceres.cc
         )
 
 
@@ -151,6 +162,7 @@ target_include_directories(ecim
         ${CMAKE_SOURCE_DIR}/src/geometry/colmap
         ${CMAKE_SOURCE_DIR}/3rdparty/SiftGPU
         ${EIGEN3_INCLUDE_DIRS}
+        /data1/Code/TVCG_CoLi/MGBA/3rdparty/ceres-solver/internal/
         )
 
 target_link_libraries(ecim
@@ -163,24 +175,30 @@ target_link_libraries(ecim
         )
  
 
+add_executable(rec_seq src/rec_seq.cc)
+target_link_libraries(rec_seq ecim)
+        
+add_executable(rec_1dsfm src/rec_1dsfm.cc)
+target_link_libraries(rec_1dsfm ecim)
+
+add_executable(rec_kitti src/rec_kitti.cc)
+target_link_libraries(rec_kitti ecim)
 
 add_executable(run_matching src/run_matching.cc)
 target_link_libraries(run_matching ecim)
 
-add_executable(run_kitti src/run_kitti_simple.cc)
-target_link_libraries(run_kitti ecim)
+# add_executable(run_kitti src/run_kitti_simple.cc)
+# target_link_libraries(run_kitti ecim)
 
-add_executable(run_uno src/run_uno_simple.cc)
-target_link_libraries(run_uno ecim)
+# add_executable(run_uno src/run_uno_simple.cc)
+# target_link_libraries(run_uno ecim)
   
-add_executable(rec_seq src/rec_seq.cc)
-target_link_libraries(rec_seq ecim)
+# add_executable(rec_seq src/rec_seq.cc)
+# target_link_libraries(rec_seq ecim)
 
 add_executable(run_triangulation src/run_triangulation.cc)
 target_link_libraries(run_triangulation ecim)
 
 add_executable(view_loc src/view_loc_result.cc)
 target_link_libraries(view_loc ecim)
-
-add_executable(test_loc src/test_loc.cc)
-target_link_libraries(test_loc ecim)
+ 

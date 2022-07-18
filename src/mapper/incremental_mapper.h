@@ -16,9 +16,9 @@ struct IncrementalMapperOptions {
     bool stop_when_register_fail = false;
     int init_id1 = -1;
     int init_id2 = -1;
-    double th_rpe_lba = 8;
+    double th_rpe_lba = 16;
     double th_angle_lba = 2.0;
-    double th_rpe_gba = 8;
+    double th_rpe_gba = 16;
     double th_angle_gba = 2.0;
 };
 

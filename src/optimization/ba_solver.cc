@@ -254,7 +254,8 @@ inline void BASolver::SetUp(ceres::Problem &problem, Map &map, Frame &frame) {
 }
 
 inline void BASolver::SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame, int frame_id) {
-  const double sigma = std::sqrt(5.99) / map.cameras_[frame.camera_id].fx();
+  // const double sigma = std::sqrt(5.99) / map.cameras_[frame.camera_id].fx();
+  const double sigma = 1000;
   int num_mea = 0;
   for (int i = 0; i < frame.track_ids_.size(); ++i) {
     if (frame.track_ids_[i] == -1) continue;
@@ -442,6 +443,7 @@ void BASolver::LBA(int frame_id, Map &map) {//TODO boost
   // }
  
   ceres::Solver::Options solver_options = InitSolverOptions();
+  solver_options.num_threads = 1;
   solver_options.max_num_iterations = 5;
   solver_options.function_tolerance = 1e-4;
   solver_options.parameter_tolerance = 1e-5;
@@ -488,8 +490,8 @@ void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
 
 void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bool order_frames) {
   KeyFrameSelection(map, fix_key_frame_ids, order_frames); 
-
   int num_rf = 0, num_kf = 0, num_mea = 0;
+
   ceres::Problem problem;
   for (auto &frame : map.frames_) {
     if (!frame.registered) continue;
@@ -530,8 +532,371 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bo
   solver_options.parameter_tolerance = 1e-5;
   ceres::Solver::Summary summary;
   ceres::Solve(solver_options, &problem, &summary);
-  printf("kf: %d/%d\n", num_kf, num_rf);
   std::cout << summary.BriefReport() << "\n";
 
+  printf("kf: %d/%d\n", num_kf, num_rf);
   UpdateByRefFrame(map);
+}
+
+#include "mgba/obs.h"
+#include "mgba/timer.h"
+
+// void AddFactor(mgba::BAGraph &ba_graph,
+//   std::map<int, int> &id_cam_order2ori,
+//   std::map<int, int> &id_cam_ori2order,
+//   std::map<int, uint64_t> &id_pt_order2ori, 
+//   std::map<uint64_t, int> &id_pt_ori2order,
+//   Frame &frame,
+//   Map &map
+// ){
+//     const int image_id = frame.id;
+//     const double focal = map.cameras_[frame.camera_id].fx();
+//     // pose
+//     mgba::vector<7> cam; 
+//     const mgba::vector3 ntwc_ = frame.Tcw.q.inverse() * frame.Tcw.t;
+//     cam<<frame.Tcw.q.coeffs(), ntwc_;
+//     ba_graph.cam_vec.emplace_back(cam);
+
+//     const int camera_id_reorder = count_camera;
+//     id_cam_order2ori[camera_id_reorder] = image_id;
+//     id_cam_ori2order[image_id] = camera_id_reorder;
+//     count_camera++;
+//     // 3d point & observation
+//     for (int i = 0;i<frame.track_ids_.size();++i) {
+//       const int p3d_id = frame.track_ids_[i];
+//       if (p3d_id == -1) continue;
+//       Track &track = map.tracks_[p3d_id];
+//       if(track.observations_.size() < 2)continue;
+//       assert(track.observations_.size() > 1);
+//       const mgba::vector2 mea = frame.points_normalized[i];
+//       if (id_pt_ori2order.count(p3d_id) == 0) {
+//         id_pt_order2ori[count_point] = p3d_id;
+//         id_pt_ori2order[p3d_id] = count_point;
+//         count_point++;
+//         const mgba::vector3 p3d = track.point3d_.cast<mgba::default_float>();
+//         ba_graph.point_vec.emplace_back(p3d);
+//       }
+
+//       const int point_id_reorder = id_pt_ori2order[p3d_id];
+//       ba_graph.obs_vec.emplace_back(camera_id_reorder, point_id_reorder,mea, focal);
+//     } 
+// }
+
+struct BAGraphCreater{
+  mgba::BAGraph ba_graph;    
+  std::map<int, int> id_cam_order2ori;
+  std::map<int, int> id_cam_ori2order;
+  std::map<int, uint64_t> id_pt_order2ori; 
+  std::map<uint64_t, int> id_pt_ori2order;
+  int count_point = 0, count_camera = 0;
+  int addcamera(int image_id,mgba::vector<7> cam){
+    ba_graph.cam_vec.emplace_back(cam);
+    const int camera_id_reorder = count_camera;
+    id_cam_order2ori[camera_id_reorder] = image_id;
+    id_cam_ori2order[image_id] = camera_id_reorder;
+    count_camera++;
+    return camera_id_reorder;
+  };
+  int addpoint(int p3d_id,mgba::vector3 p3d){
+     if (id_pt_ori2order.count(p3d_id) == 0) {
+        ba_graph.point_vec.emplace_back(p3d);
+        id_pt_order2ori[count_point] = p3d_id;
+        id_pt_ori2order[p3d_id] = count_point;
+        count_point++;
+      }
+      const int point_id_reorder = id_pt_ori2order[p3d_id];
+      return point_id_reorder;
+  }
+  void update(Map&map){
+    for(int i = 0;i<ba_graph.cam_vec.size();++i){
+      if(ba_graph.const_cam_flags[i])continue;
+      const int image_id = id_cam_order2ori[i];
+      auto& frame = map.frames_[image_id]; 
+      mgba::map<mgba::quaternion> qcw_(ba_graph.cam_vec[i].data());
+      mgba::map<mgba::vector3> ntwc_(ba_graph.cam_vec[i].data()+4);
+      mgba::vector3 tcw_ = qcw_ * ntwc_;
+      frame.Tcw.q = qcw_;
+      frame.Tcw.t  = tcw_;
+    }
+    for(int i = 0;i<ba_graph.point_vec.size();++i){
+      const int p3d_id = id_pt_order2ori[i];
+      map.tracks_[p3d_id].point3d_= ba_graph.point_vec[i];
+    }
+  }
+  void reorder_assign(){
+    std::sort(ba_graph.obs_vec.begin(), ba_graph.obs_vec.end(), [](const mgba::OBS &l, const mgba::OBS &r) {
+      if (l.camera_id < r.camera_id) {
+        return true;
+      } else if (l.camera_id == r.camera_id && l.point_id < r.point_id) {
+        return true;
+      }
+      return false;
+    }); 
+
+    ba_graph.const_cam_flags.assign(count_camera,false);
+    ba_graph.const_pt_flags.assign(count_point,false);
+  }
+  void set_cam_const(int id){
+    ba_graph.const_cam_flags[id_cam_ori2order[id]]=true;
+  }
+};
+
+mgba::vector<7> cvt_pose(Pose Tcw){
+  mgba::vector<7> cam; 
+  const mgba::vector3 ntwc_ = Tcw.q.inverse() * Tcw.t;
+  cam<< Tcw.q.coeffs(), ntwc_;
+  return cam;
+}
+
+void BASolver::KGBA1(Map &map, const std::vector<int> fix_key_frame_ids, const bool order_frames) {
+  KeyFrameSelection(map, fix_key_frame_ids, order_frames); 
+  int num_rf = 0, num_kf = 0, num_mea = 0;
+ 
+  BAGraphCreater ba_graph_creater; 
+  for(auto&frame:map.frames_){
+    if (!frame.registered) continue;
+    num_rf++;
+    if (!frame.is_keyframe) continue;
+    num_kf++;
+
+    const int image_id = frame.id;
+    const double focal = map.cameras_[frame.camera_id].fx(); 
+    const int camera_id_reorder = ba_graph_creater.addcamera(image_id,cvt_pose(frame.Tcw));
+
+    // 3d point & observation
+    for (int i = 0;i<frame.track_ids_.size();++i) {
+      const int p3d_id = frame.track_ids_[i];
+      if (p3d_id == -1) continue;
+      Track &track = map.tracks_[p3d_id];
+      if(track.observations_.size() < 2)continue;
+      assert(track.observations_.size() > 1);
+      const mgba::vector2 mea = frame.points_normalized[i];
+      const int point_id_reorder = ba_graph_creater.addpoint(p3d_id,track.point3d_);
+      ba_graph_creater.ba_graph.obs_vec.emplace_back(camera_id_reorder, point_id_reorder,mea, focal);
+    } 
+  }
+  
+  ba_graph_creater.reorder_assign();
+  ba_graph_creater.set_cam_const(map.init_id1);
+  ba_graph_creater.set_cam_const(map.init_id2);
+  
+  ba_graph_creater.ba_graph.max_iter = 10;
+  // mgba::RunCeres(ba_graph);
+  mgba::RunMGBA(ba_graph_creater.ba_graph); 
+
+  map.LogReprojectError();
+  ba_graph_creater.update(map);
+  map.LogReprojectError();
+
+  printf("kf: %d/%d\n", num_kf, num_rf);
+  UpdateByRefFrame(map);
+}
+
+void BASolver::GBA1(Map &map, bool accurate, bool fix_all_frames) {
+ int num_rf = 0, num_kf = 0, num_mea = 0;
+ 
+  mgba::BAGraph ba_graph;    
+  std::map<int, int> id_cam_order2ori;
+  std::map<int, int> id_cam_ori2order;
+  std::map<int, uint64_t> id_pt_order2ori; 
+  std::map<uint64_t, int> id_pt_ori2order;
+  int count_point = 0, count_camera = 0;
+  for(auto&frame:map.frames_){
+    if (!frame.registered) continue;
+    num_rf++; 
+
+    const int image_id = frame.id;
+    const double focal = map.cameras_[frame.camera_id].fx();
+    // pose
+    mgba::vector<7> cam; 
+    const mgba::vector3 ntwc_ = frame.Tcw.q.inverse() * frame.Tcw.t;
+    cam<<frame.Tcw.q.coeffs(), ntwc_;
+    ba_graph.cam_vec.emplace_back(cam);
+    
+    const int camera_id_reorder = count_camera;
+    id_cam_order2ori[camera_id_reorder] = image_id;
+    id_cam_ori2order[image_id] = camera_id_reorder;
+    count_camera++;
+    // 3d point & observation
+    for (int i = 0;i<frame.track_ids_.size();++i) {
+      const int p3d_id = frame.track_ids_[i];
+      if (p3d_id == -1) continue;
+      Track &track = map.tracks_[p3d_id];
+      if(track.observations_.size() < 2)continue;
+      assert(track.observations_.size() > 1);
+      const mgba::vector2 mea = frame.points_normalized[i];
+      if (id_pt_ori2order.count(p3d_id) == 0) {
+        id_pt_order2ori[count_point] = p3d_id;
+        id_pt_ori2order[p3d_id] = count_point;
+        count_point++;
+        const mgba::vector3 p3d = track.point3d_.cast<mgba::default_float>();
+        ba_graph.point_vec.emplace_back(p3d);
+      }
+
+      const int point_id_reorder = id_pt_ori2order[p3d_id];
+      ba_graph.obs_vec.emplace_back(camera_id_reorder, point_id_reorder,mea, focal);
+    } 
+  }
+  
+  std::sort(ba_graph.obs_vec.begin(), ba_graph.obs_vec.end(), [](const mgba::OBS &l, const mgba::OBS &r) {
+    if (l.camera_id < r.camera_id) {
+      return true;
+    } else if (l.camera_id == r.camera_id && l.point_id < r.point_id) {
+      return true;
+    }
+    return false;
+  }); 
+
+  ba_graph.const_cam_flags.assign(count_camera,false);
+  ba_graph.const_cam_flags[id_cam_ori2order[map.init_id1]]=true; 
+  ba_graph.const_cam_flags[id_cam_ori2order[map.init_id2]]=true;
+  ba_graph.const_pt_flags.assign(count_point,false);
+  
+  ba_graph.max_iter = 50;
+  mgba::RunMGBA(ba_graph);
+
+  for(int i = 0;i<ba_graph.cam_vec.size();++i){
+    if(ba_graph.const_cam_flags[i])continue;
+    const int image_id = id_cam_order2ori[i];
+    auto& frame = map.frames_[image_id]; 
+    mgba::map<mgba::quaternion> qcw_(ba_graph.cam_vec[i].data());
+    mgba::map<mgba::vector3> ntwc_(ba_graph.cam_vec[i].data()+4);
+    mgba::vector3 tcw_ = qcw_ * ntwc_;
+    frame.Tcw.q = qcw_;
+    frame.Tcw.t  = tcw_;
+  }
+  for(int i = 0;i<ba_graph.point_vec.size();++i){
+    if(ba_graph.const_pt_flags[i])continue;
+    const int p3d_id = id_pt_order2ori[i];
+    map.tracks_[p3d_id].point3d_= ba_graph.point_vec[i];
+  }
+}
+
+void BASolver::LBA1(int frame_id, Map &map) {//TODO boost 
+  // find local frames
+  std::vector<int> local_frame_ids1 = CovisibilityNeibors(frame_id, map);
+  std::vector<int> local_frame_ids2 = FindLocalBundle(frame_id, map);
+  std::set<int> local_frame_ids;
+  for (auto &id : local_frame_ids1) {
+    local_frame_ids.insert(id);
+  }
+  for (auto &id : local_frame_ids2) {
+    local_frame_ids.insert(id);
+  } 
+
+  int num_rf = 0, num_kf = 0, num_mea = 0;
+ 
+  mgba::BAGraph ba_graph;    
+  std::map<int, int> id_cam_order2ori;
+  std::map<int, int> id_cam_ori2order;
+  std::map<int, uint64_t> id_pt_order2ori; 
+  std::map<uint64_t, int> id_pt_ori2order;
+  int count_point = 0, count_camera = 0;
+
+  for(auto&id:local_frame_ids){
+    auto&frame = map.frames_[id];
+    if (!frame.registered) continue;
+    num_rf++; 
+
+    const int image_id = frame.id;
+    const double focal = map.cameras_[frame.camera_id].fx();
+    // pose
+    mgba::vector<7> cam; 
+    const mgba::vector3 ntwc_ = frame.Tcw.q.inverse() * frame.Tcw.t;
+    cam<<frame.Tcw.q.coeffs(), ntwc_;
+    ba_graph.cam_vec.emplace_back(cam);
+    
+    const int camera_id_reorder = count_camera;
+    id_cam_order2ori[camera_id_reorder] = image_id;
+    id_cam_ori2order[image_id] = camera_id_reorder;
+    count_camera++;
+    // 3d point & observation
+    for (int i = 0;i<frame.track_ids_.size();++i) {
+      const int p3d_id = frame.track_ids_[i];
+      if (p3d_id == -1) continue;
+      Track &track = map.tracks_[p3d_id];
+      if(track.observations_.size() < 2)continue;
+      assert(track.observations_.size() > 1);
+      const mgba::vector2 mea = frame.points_normalized[i];
+      if (id_pt_ori2order.count(p3d_id) == 0) {
+        id_pt_order2ori[count_point] = p3d_id;
+        id_pt_ori2order[p3d_id] = count_point;
+        count_point++;
+        const mgba::vector3 p3d = track.point3d_.cast<mgba::default_float>();
+        ba_graph.point_vec.emplace_back(p3d);
+      }
+
+      const int point_id_reorder = id_pt_ori2order[p3d_id];
+      ba_graph.obs_vec.emplace_back(camera_id_reorder, point_id_reorder,mea, focal);
+    } 
+  }
+  
+  std::sort(ba_graph.obs_vec.begin(), ba_graph.obs_vec.end(), [](const mgba::OBS &l, const mgba::OBS &r) {
+    if (l.camera_id < r.camera_id) {
+      return true;
+    } else if (l.camera_id == r.camera_id && l.point_id < r.point_id) {
+      return true;
+    }
+    return false;
+  }); 
+
+  ba_graph.const_cam_flags.assign(count_camera,false); 
+  ba_graph.const_pt_flags.assign(count_point,false);
+  int fix_num = 0;
+  if (local_frame_ids.count(map.init_id1) != 0) {
+    ba_graph.const_cam_flags[id_cam_ori2order[map.init_id1]]=true; 
+    fix_num++;
+  }
+  if (local_frame_ids.count(map.init_id2) != 0) {
+    ba_graph.const_cam_flags[id_cam_ori2order[map.init_id2]]=true; 
+    fix_num++;
+  }
+  if (fix_num == 0) {
+    if (local_frame_ids2.size() >= 2) {
+      ba_graph.const_cam_flags[id_cam_ori2order[local_frame_ids2[local_frame_ids2.size() - 1]]]=true; 
+      ba_graph.const_cam_flags[id_cam_ori2order[local_frame_ids2[local_frame_ids2.size() - 2]]]=true;  
+    } else if (local_frame_ids1.size() >= 2) {
+      ba_graph.const_cam_flags[id_cam_ori2order[local_frame_ids1[local_frame_ids2.size() - 1]]]=true; 
+      ba_graph.const_cam_flags[id_cam_ori2order[local_frame_ids1[local_frame_ids2.size() - 2]]]=true; 
+    } else {
+      printf("!!!LBA only one frame\n");
+      ba_graph.const_cam_flags[id_cam_ori2order[frame_id]]=true;  
+    }
+  }
+  
+  for(auto&frame_id:local_frame_ids){
+    auto&frame = map.frames_[frame_id];
+    if (!frame.registered) continue;
+    
+    for (int i = 0;i<frame.track_ids_.size();++i) {
+      const int p3d_id = frame.track_ids_[i];
+      if (p3d_id == -1) continue;
+      Track &track = map.tracks_[p3d_id];
+      if(track.observations_.size() < 2)continue;
+      assert(track.observations_.size() > 1);
+      if (track.angle_ > 5 || track.observations_.count(frame_id) == 0) {
+        ba_graph.const_pt_flags[id_pt_ori2order[p3d_id]]=true;
+      } 
+    } 
+  }
+
+
+  ba_graph.max_iter = 5;
+  mgba::RunMGBA(ba_graph);
+
+  for(int i = 0;i<ba_graph.cam_vec.size();++i){
+    if(ba_graph.const_cam_flags[i])continue;
+    const int image_id = id_cam_order2ori[i];
+    auto& frame = map.frames_[image_id]; 
+    mgba::map<mgba::quaternion> qcw_(ba_graph.cam_vec[i].data());
+    mgba::map<mgba::vector3> ntwc_(ba_graph.cam_vec[i].data()+4);
+    mgba::vector3 tcw_ = qcw_ * ntwc_;
+    frame.Tcw.q = qcw_;
+    frame.Tcw.t  = tcw_;
+  }
+  for(int i = 0;i<ba_graph.point_vec.size();++i){
+    if(ba_graph.const_pt_flags[i])continue;
+    const int p3d_id = id_pt_order2ori[i];
+    map.tracks_[p3d_id].point3d_= ba_graph.point_vec[i];
+  }
 }

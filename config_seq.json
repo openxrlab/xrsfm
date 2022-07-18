@@ -1,7 +1,7 @@
 {
-	"bin_path": "/data/2022-05-18T16-28-58/sfm/",
-	"images_path": "/data/2022-05-18T16-28-58/images/",
-	"output_path": "/data/2022-05-18T16-28-58/sfm/",
+	"bin_path": "/data/ECIM/SfM/Garden/results/",
+	"images_path": "/data/ECIM/SfM/Garden/images/",
+	"output_path": "/data/ECIM/SfM/Garden/results/",
 	"init_id1": 0,
-	"init_id2": 10
+	"init_id2": 5
 }

@@ -150,7 +150,7 @@ inline std::tuple<int,double> GetMaxAngle(const Map &map,const std::set<int> &ob
     int best_track_id = -1;
     double best_angle_error = 100; 
     const auto&frame = map.frames_.at(frame_id);
-    for (const auto &track_id : observed_track_ids) {
+    for (const auto &track_id : observed_track_ids) { 
         const auto &track = map.tracks_[track_id];
         if (track.observations_.count(frame_id) != 0) continue;
         Eigen::Vector3d p3d = track.point3d_;
@@ -173,30 +173,39 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id, double
 
   Frame &frame = map.frames_[frame_id];
   const auto &corrs_vector = map.corr_graph_.frame_node_vec_[frame_id].corrs_vector;
-  assert(frame.track_ids_.size()==corrs_vector.size());
+  assert(frame.track_ids_.size()==corrs_vector.size()); 
+
   for (int p2d_id = 0,num_p2d =  frame.track_ids_.size(); p2d_id < num_p2d; ++p2d_id) {
-    if (frame.track_ids_[p2d_id] != -1) continue;  // only triangulate un-trigulated points
+    if (frame.track_ids_.at(p2d_id) != -1) continue;  // only triangulate un-trigulated points   
+
     std::set<int> observed_track_ids;
     std::vector<std::pair<int, int>> observations;
-    for (const auto &[t_frame_id, t_p2d_id] : corrs_vector[p2d_id]) {
-      const auto& cor_frame = map.frames_[t_frame_id];
+    for (const auto &[t_frame_id, t_p2d_id] : corrs_vector.at(p2d_id)) { 
+      const auto& cor_frame = map.frames_.at(t_frame_id);
       if (!cor_frame.registered) continue;
+      if(cor_frame.track_ids_.size()<=t_p2d_id){
+        std::cout<<"bad"<<t_frame_id<<" "<<t_p2d_id<<std::endl;
+        exit(0);
+      }
       observations.emplace_back(t_frame_id, t_p2d_id);
-      const int trakc_id = cor_frame.track_ids_[t_p2d_id];
+      const int trakc_id = cor_frame.track_ids_.at(t_p2d_id);
       if (trakc_id != -1) {
         observed_track_ids.insert(trakc_id);
       }
     }
     observations.emplace_back(std::pair<int, int>(frame_id, p2d_id));
-
     if (observations.size() < 2) continue;
 
+
     const int num_track = observed_track_ids.size();
+    
+    // std::cout<<frame.id<<" 2 "<<p2d_id<<" "<<num_track<<std::endl;
+
     if (num_track == 0) {
       num_zero_track++;
       if (CreatePoint3d1(observations, map)) num_create++;
-    } else if (num_track >= 1) { 
-      auto [best_track_id,best_angle_error] = GetMaxAngle(map,observed_track_ids,frame_id,p2d_id);
+    } else if (num_track >= 1) {  
+      auto [best_track_id,best_angle_error] = GetMaxAngle(map,observed_track_ids,frame_id,p2d_id); 
       // int best_track_id = -1;
       // double best_angle_error = 100; 
       // for (const auto &track_id : observed_track_ids) {

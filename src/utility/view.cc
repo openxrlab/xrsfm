@@ -446,8 +446,7 @@ void Viewer::DrawGraph(const Map &map, bool stop) {
     if (!frame.registered) continue;
 
     double c = 1.0 * frame.hierarchical_level / max_level;
-    if (frame.hierarchical_level == -1) {
-      std::cout << "here\n";
+    if (frame.hierarchical_level == -1) { 
       c == 0.0;
     } 
     int count = 0;

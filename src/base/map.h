@@ -35,6 +35,12 @@ class Track {
 struct Pose {
   explicit Pose(Eigen::Quaterniond _q = Eigen::Quaterniond::Identity(), Eigen::Vector3d _t = Eigen::Vector3d::Zero())
       : q(_q), t(_t){};
+  Pose(Eigen::Matrix4d T){
+    Eigen::Matrix3d R = T.block<3,3>(0,0);
+    q = Eigen::Quaterniond(R);
+    q = q.normalized();
+    t = T.col(3).head<3>();
+  }
   Eigen::Quaterniond q;
   Eigen::Vector3d t;
 
@@ -52,7 +58,7 @@ struct Pose {
     p.q = q * p.q;
     return p;
   }
-
+   
   inline Pose scale(double s) { return Pose(q, s * t); }
   inline void log() { std::cout << q.coeffs().transpose() << " " << t.transpose() << std::endl; }
 };

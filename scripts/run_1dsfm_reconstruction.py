@@ -10,7 +10,7 @@ data_path = "/data/ECIM/SfM/ECIM_1DSFM/"
 
 for seq_name in seq_name_list:
     print("Begin "+seq_name)
-    output_path = data_path+seq_name+"/open/ours/"
+    output_path = data_path+seq_name+"/open/ours1/"
     fo = open(config_path, "w")
     str = "{\n"
     str += "\t\"data_path\": \""+data_path+"\",\n"
@@ -22,5 +22,5 @@ for seq_name in seq_name_list:
     fo.write(str)
     fo.close() 
     os.system("mkdir "+output_path)
-    os.system("/home/yzc/Projects/xrsfm/bin/run_uno > "+data_path+seq_name+"/open/log_our1.txt")
+    os.system("/home/yzc/Projects/xrsfm/bin/rec_1dsfm > "+data_path+seq_name+"/open/log_our3.txt")
     print("End "+seq_name)

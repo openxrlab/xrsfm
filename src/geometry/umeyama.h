@@ -5,7 +5,6 @@
 #ifndef WARG_UMYAMA_H
 #define WARG_UMYAMA_H
 
-#endif  // WARG_UMYAMA_H
 
 namespace benchmark {
 
@@ -82,3 +81,6 @@ inline SRT umeyama(std::vector<vector<3>> gt, std::vector<vector<3>> in, bool fi
   return srt;
 }
 }  // namespace benchmark
+
+
+#endif  // WARG_UMYAMA_H

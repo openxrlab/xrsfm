@@ -20,17 +20,31 @@ void PreProcess(const std::string pose_path,const std::string feature_path,const
   std::map<int,Frame> frames_pose,frames_pt;
   ReadImagesBinary(pose_path, frames_pose);
   ReadImagesBinaryForTriangulation(feature_path,frames_pt);
-  for(auto&[id,frame]:frames_pt){
-    frame.registered = true;
-    frame.Tcw = frames_pose[id].Tcw;
-    std::cout<<id<<" "<<frame.id<<std::endl;
-    frames.push_back(frame);
-  }
-  ReadFramePairBinaryForTriangulation(frame_pair_path,frame_pairs);
+  std::cout<<frames_pose.size()<<" "<<frames_pt.size()<<std::endl;
   
+  int max_id = -1;
+  for(auto&[id,frame]:frames_pt){
+    max_id = std::max(max_id,id);
+  }
+  frames.resize(max_id+1);
+  for(int id = 0;id<frames.size();++id){
+    auto&frame = frames[id];
+    if(frames_pose.count(id)==0){
+      frame.id = id;
+      frame.registered = false;
+    }else{
+      frame = frames_pt[id];
+      frame.Tcw = frames_pose[id].Tcw;
+      frame.registered = true;
+    }
+  }
+ 
+  ReadFramePairBinaryForTriangulation(frame_pair_path,frame_pairs);
+ 
   // set cameras & image name
   std::vector<Camera> cameras;
-  Camera seq =  Camera(0, 1450,1450, 960, 720, 0.0); 
+  Camera seq =  Camera(0, 1000,1000, 640, 360, 0.0); 
+  // Camera seq =  Camera(0, 1450,1450, 960, 720, 0.0); 
   cameras.emplace_back(seq);
   for (auto& frame : frames) {
     frame.camera_id = 0;
@@ -54,8 +68,8 @@ void PreProcess(const std::string pose_path,const std::string feature_path,const
   map.frames_ = frames;
   map.cameras_ = cameras;
   map.frame_pairs_ = frame_pairs; 
-  // map.RemoveRedundancyPoints();
-  map.Init();
+  // map.RemoveRedundancyPoints(); 
+  map.Init(); 
 }
 
 int main(int argc, const char* argv[]) {
@@ -68,6 +82,7 @@ int main(int argc, const char* argv[]) {
 
   Map map;
   PreProcess(pose_path,feature_path ,frame_pair_path, map);
+  std::cout<<"ok\n";
 
   BASolver ba_solver;
   Point3dProcessor p3d_processor;

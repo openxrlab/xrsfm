@@ -1,5 +1,5 @@
 {
-	"image_dir_path": "/data/ECIM/SfM/ECIM_1DSFM/Trafalgar/images/",
-	"retrival_path": "/data/ECIM/SfM/ECIM_Mat_old/Trafalgar/nv50_all.txt",
-	"output_path": "/data/OpenData/Trafalgar/"
+	"image_dir_path": "/data/ECIM/SfM/Garden/images/",
+	"retrival_path": "/data/ECIM/SfM/Garden/results/pairs-sfm.txt",
+	"output_path": "/data/ECIM/SfM/Garden/results/"
 }

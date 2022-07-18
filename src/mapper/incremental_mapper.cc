@@ -31,6 +31,7 @@ void IncrementalMapper::Reconstruct(Map &map){
     timer.reg.resume();
     const int frame_id = map.MaxPoint3dFrameId();
     if (frame_id == -1) break;
+    printf("Iter %d %d %s\n", iter, frame_id, map.frames_[frame_id].name.c_str());
     if (!RegisterImage(frame_id, map)){ 
       if(options.stop_when_register_fail)break;
       map.frames_[frame_id].registered_fail = true;
@@ -38,7 +39,6 @@ void IncrementalMapper::Reconstruct(Map &map){
     }
     map.current_frame_id_ = frame_id;
     timer.reg.stop();
-    printf("Iter %d %d %s\n", iter, frame_id, map.frames_[frame_id].name.c_str());
 
     // 2) Check & Correct Frame Pose
    if(options.correct_pose)error_corrector.CheckAndCorrectPose(map, frame_id, iter);
@@ -67,9 +67,10 @@ void IncrementalMapper::Reconstruct(Map &map){
   }
   timer.tot.stop();
 
-  ba_solver.GBA(map);
+  // ba_solver.GBA(map);
 
   for (auto& timer_ptr : timer.timer_vec) {
     timer_ptr->print();
   } 
 }
+ 
