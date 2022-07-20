@@ -127,7 +127,12 @@ void ViewerThread::update_map_colmap(const Map &map) {
 void ViewerThread::update_cameras(const std::vector<Pose> &pose_vec) {
   cameras = pose_vec;
   colors_cam.assign(cameras.size(), red);
-  for(int i = 0;i<cameras.size()/2;++i){
+  int len = cameras.size()/2;
+  for(int i = 0;i<len;++i){
     colors_cam[i] = green;
+    double dist = (cameras[i].center()-cameras[len+i].center()).norm();
+    if(dist>1.0){
+      colors_cam[i] = blue;
+    }
   }
 }

@@ -56,9 +56,10 @@ void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2, const std::vec
   cv::Scalar color;
   for (size_t i = 0; i < matches.size(); ++i) {
     auto match = matches[i];
+    // std::cout<<match.id1<<" "<<match.id2<<std::endl;
     color = mask.empty() || mask[i] ? cv_green : cv_red;
-    if (!mask.empty() && !mask[i])
-      line(img, kpts1[match.id1].pt, kpts2[match.id2].pt + cv::Point2f(img1.cols, 0), color, 1);
+    // if (!mask.empty() && !mask[i])
+    line(img, kpts1[match.id1].pt, kpts2[match.id2].pt + cv::Point2f(img1.cols, 0), color, 1);
   }
   constexpr double scale = 1.0;
   resize(img, img, cv::Size(int(img.cols * scale), int(img.rows * scale))); /**/

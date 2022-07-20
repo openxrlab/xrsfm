@@ -13,11 +13,11 @@ generate code, e.g., Auto, All, Maxwell, Pascal, ...")
 # Find packages
 ################################################################################
 
-find_package(OpenCV 3 REQUIRED)
+# find_package(OpenCV 3 REQUIRED)
 
-find_package(Eigen3 REQUIRED)
+# find_package(Eigen3 REQUIRED)
 
-find_package(Ceres REQUIRED)
+# find_package(Ceres REQUIRED)
 
 # for sift gpu & view
 set(OpenGL_GL_PREFERENCE "LEGACY")#for const
@@ -27,8 +27,8 @@ find_package(GLEW REQUIRED)
 
 find_package(Pangolin REQUIRED)
 
-# set(XRPrimer_DIR "/home/yzc/Projects/xrprimer/install/lib/cmake")
-# find_package(XRPrimer REQUIRED)
+set(XRPrimer_DIR "/home/yzc/Projects/xrprimer/install/lib/cmake")
+find_package(XRPrimer REQUIRED)
 
 if (CUDA_ENABLED)
     find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
@@ -162,16 +162,17 @@ target_include_directories(ecim
         ${CMAKE_SOURCE_DIR}/src/geometry/colmap
         ${CMAKE_SOURCE_DIR}/3rdparty/SiftGPU
         ${EIGEN3_INCLUDE_DIRS}
-        /data1/Code/TVCG_CoLi/MGBA/3rdparty/ceres-solver/internal/
+        # /data1/Code/TVCG_CoLi/MGBA/3rdparty/ceres-solver/internal/
         )
 
 target_link_libraries(ecim
         sift_gpu
-        ${OpenCV_LIBS}
-        ${EIGEN3_LIBS}
-        ${CERES_LIBRARIES}
+        # ${OpenCV_LIBS}
+        # ${EIGEN3_LIBS}
+        # ${CERES_LIBRARIES}
         ${Pangolin_LIBRARIES}
         stdc++fs 
+        XRPrimer::xrprimer
         )
  
 
@@ -199,6 +200,13 @@ target_link_libraries(run_matching ecim)
 add_executable(run_triangulation src/run_triangulation.cc)
 target_link_libraries(run_triangulation ecim)
 
-add_executable(view_loc src/view_loc_result.cc)
+# add_executable(view_loc src/view_loc_result.cc)
+# target_link_libraries(view_loc ecim)
+ 
+
+add_executable(view_loc src/view_loc.cc)
 target_link_libraries(view_loc ecim)
+ 
+add_executable(test src/test.cc)
+target_link_libraries(test ecim)
  

@@ -206,20 +206,6 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id, double
       if (CreatePoint3d1(observations, map)) num_create++;
     } else if (num_track >= 1) {  
       auto [best_track_id,best_angle_error] = GetMaxAngle(map,observed_track_ids,frame_id,p2d_id); 
-      // int best_track_id = -1;
-      // double best_angle_error = 100; 
-      // for (const auto &track_id : observed_track_ids) {
-      //   const auto &track = map.tracks_[track_id];
-      //   if (track.observations_.count(frame_id) != 0) continue;
-      //   Eigen::Vector3d p3d = track.point3d_;
-      //   Eigen::Vector3d ray1 = (frame.Tcw.q * p3d + frame.Tcw.t).normalized();
-      //   Eigen::Vector3d ray2 = (frame.points_normalized[p2d_id].homogeneous()).normalized();
-      //   const double angle_error = std::acos(ray1.dot(ray2));
-      //   if (angle_error < best_angle_error) { 
-      //     best_track_id = track_id;
-      //     best_angle_error = angle_error;
-      //   } 
-      // } 
       if (best_angle_error < const_angle_th) {
         ContinueTrackUpdate(best_track_id, frame_id, p2d_id, map);
         num_extend++;
@@ -232,7 +218,7 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id, double
       }
     }
   }
-  printf("Tri %d %d/%d %d/%d %d\n", frame_id, num_create, num_zero_track, num_extend, num_one_track, num_multi_track);
+  printf("Tri %d %d/%d %d/%d+%d\n", frame_id, num_create, num_zero_track, num_extend, num_one_track, num_multi_track);
   return num_create + num_extend;
 }
 

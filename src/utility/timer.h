@@ -47,9 +47,9 @@ class Timer {
   void print() { printf(format.c_str(), time_count); };
 
   void log(std::ofstream &time_log_stream) {
-    char buffer[128];
-    sprintf(buffer, format.c_str(), time_count);
-    time_log_stream << buffer;
+    // char buffer[128];
+    // sprintf(buffer, format.c_str(), time_count);
+    // time_log_stream << buffer;
   }
 };
 

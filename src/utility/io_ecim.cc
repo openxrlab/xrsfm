@@ -104,8 +104,7 @@ void ReadCamerasBinary(const std::string &path, std::vector<Camera> &cameras) {
     camera.camera_params[0] = camera.camera_params[1] =param[0];
     camera.camera_params[2] = param[1];
     camera.camera_params[3] = param[2];
-    camera.distort_params[0] = param[3]; 
-    printf("%d\n", camera.id);
+    camera.distort_params[0] = param[3];  
   }
 }
 
