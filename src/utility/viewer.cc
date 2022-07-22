@@ -131,8 +131,8 @@ void ViewerThread::update_cameras(const std::vector<Pose> &pose_vec) {
   for(int i = 0;i<len;++i){
     colors_cam[i] = green;
     double dist = (cameras[i].center()-cameras[len+i].center()).norm();
-    if(dist>1.0){
-      colors_cam[i] = blue;
-    }
+    // if(dist>1.0){
+    //   colors_cam[i] = blue;
+    // }
   }
 }

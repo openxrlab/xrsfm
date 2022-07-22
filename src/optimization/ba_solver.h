@@ -15,13 +15,9 @@ class BASolver {
   BASolver() {}
 
   void ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool use_key = false);
-  void KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bool order_frames);
-  void KGBA1(Map &map, const std::vector<int> fix_key_frame_ids, const bool order_frames);
-  void GBA(Map &map, bool accurate = true, bool fix_all_frames = false);
-  void GBA1(Map &map, bool accurate = true, bool fix_all_frames = false);
-  void LBA(int frame_id, Map &map);
-  void LBA1(int frame_id, Map &map);
-
+  void KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bool order_frames); 
+  void GBA(Map &map, bool accurate = true, bool fix_all_frames = false); 
+  void LBA(int frame_id, Map &map); 
 
  private:
   ceres::Solver::Options InitSolverOptions();

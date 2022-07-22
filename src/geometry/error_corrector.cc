@@ -211,7 +211,7 @@ bool ErrorCorrector::CheckAndCorrectPose(Map &map, int frame_id, int iter) {
       printf("%d ", id);
     }
     printf("\n");
-    ba_solver_->KGBA1(map, matched_frame_ids, true);
+    ba_solver_->KGBA(map, matched_frame_ids, true);
     p3d_processor_->FilterPoints3d(map, p3d_processor_->th_rpe_gba_, p3d_processor_->th_angle_gba_);
     // TODO num_image_reg_pre = num_image_reg;
   }

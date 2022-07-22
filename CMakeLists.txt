@@ -13,11 +13,14 @@ generate code, e.g., Auto, All, Maxwell, Pascal, ...")
 # Find packages
 ################################################################################
 
-# find_package(OpenCV 3 REQUIRED)
+# find_package(OpenCV 4 REQUIRED)
 
 # find_package(Eigen3 REQUIRED)
 
 # find_package(Ceres REQUIRED)
+
+set(XRPrimer_DIR "/home/yzc/Projects/xrprimer/install/lib/cmake")
+find_package(XRPrimer REQUIRED)
 
 # for sift gpu & view
 set(OpenGL_GL_PREFERENCE "LEGACY")#for const
@@ -26,9 +29,6 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 
 find_package(Pangolin REQUIRED)
-
-set(XRPrimer_DIR "/home/yzc/Projects/xrprimer/install/lib/cmake")
-find_package(XRPrimer REQUIRED)
 
 if (CUDA_ENABLED)
     find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
@@ -42,7 +42,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++14 -msse4 -fopenmp -fpermissive -w -pthread")#for const
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -g")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -g -ggdb")
-set(CMAKE_BUILD_TYPE "release")
+set(CMAKE_BUILD_TYPE "Release")
 
 if (OPENGL_ENABLED)
     add_definitions("-DOPENGL_ENABLED")
@@ -144,14 +144,7 @@ add_library(ecim
         src/utility/viewer_handler.cc
         src/utility/viewer.cc
         src/utility/io_ecim.cc
-
-
-        src/optimization/mgba/optim/local_parameterization.cc
-        src/optimization/mgba/optim/lm_minimizer.cc
-        src/optimization/mgba/optim/linear_solver_weight.cc
-        # optim/linear_solver_refine.cc
-        src/optimization/mgba/run_ba.cc
-        src/optimization/mgba/run_ba_ceres.cc
+ 
         )
 
 
@@ -167,7 +160,7 @@ target_include_directories(ecim
 
 target_link_libraries(ecim
         sift_gpu
-        # ${OpenCV_LIBS}
+        ${OpenCV_LIBS}
         # ${EIGEN3_LIBS}
         # ${CERES_LIBRARIES}
         ${Pangolin_LIBRARIES}
@@ -187,26 +180,7 @@ target_link_libraries(rec_kitti ecim)
 
 add_executable(run_matching src/run_matching.cc)
 target_link_libraries(run_matching ecim)
-
-# add_executable(run_kitti src/run_kitti_simple.cc)
-# target_link_libraries(run_kitti ecim)
-
-# add_executable(run_uno src/run_uno_simple.cc)
-# target_link_libraries(run_uno ecim)
-  
-# add_executable(rec_seq src/rec_seq.cc)
-# target_link_libraries(rec_seq ecim)
-
+ 
 add_executable(run_triangulation src/run_triangulation.cc)
 target_link_libraries(run_triangulation ecim)
-
-# add_executable(view_loc src/view_loc_result.cc)
-# target_link_libraries(view_loc ecim)
- 
-
-add_executable(view_loc src/view_loc.cc)
-target_link_libraries(view_loc ecim)
- 
-add_executable(test src/test.cc)
-target_link_libraries(test ecim)
  
