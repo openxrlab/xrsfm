@@ -9,6 +9,7 @@
 
 #include "lie_algebra.h"
 
+namespace xrsfm{
 typedef Eigen::Vector2d Point2d;
 typedef Eigen::Vector3d Point3d;
 
@@ -220,5 +221,6 @@ class ConerCost : public ceres::SizedCostFunction<3, 4, 3, 1, 3> {
   double w;
   vector3 p3d_ori;
 };
+}
 
 #endif  // CERESBA_COST_FACTOR_H

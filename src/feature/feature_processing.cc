@@ -14,12 +14,12 @@
 #include "geometry/essential.h"
 #include "base/map.h"
 #include "optim/loransac.h"
-#include "optim/ransac.h"
-#include "orb_extractor.h"
+#include "optim/ransac.h" 
 #include "sift_extractor.h"
 #include "utility/io_ecim.hpp"
 #include "utility/timer.h"
 
+namespace xrsfm{
 const int max_match = 16384;
 bool b_verbose_matches_option = true;
 bool b_verbose_matches_size = false;
@@ -229,7 +229,7 @@ void FeatureMatchingUnorder(const std::vector<Frame> &frames, std::vector<FrameP
         points1_normalized.push_back(frame_candidat.points_normalized[match.id1]);
         points2_normalized.push_back(frame.points_normalized[match.id2]);
       }
-      itslam::solve_essential(points1_normalized, points2_normalized, 10.0 / 525, frame_pair.E,
+      xrsfm::solve_essential(points1_normalized, points2_normalized, 10.0 / 525, frame_pair.E,
                               frame_pair.inlier_num, frame_pair.inlier_mask);
       const int inlier_threshold =
           std::max(min_num_inlier, (int)(min_ratio_inlier * frame_pair.matches.size()));
@@ -239,8 +239,8 @@ void FeatureMatchingUnorder(const std::vector<Frame> &frames, std::vector<FrameP
 
       if (id_candidat < id - 1 && frame_pair.inlier_num < inlier_threshold) break;
       frame_pairs.emplace_back(frame_pair);
-      //            DrawFeatureMatches(images[id_candidat], images[id], frame_candidat.keypoints_,
-      //            frame.keypoints_, frame_pair.matches, frame_pair.inlier_mask);
+      //  DrawFeatureMatches(images[id_candidat], images[id], frame_candidat.keypoints_,
+      //  frame.keypoints_, frame_pair.matches, frame_pair.inlier_mask);
     }
   }
 }
@@ -276,7 +276,7 @@ void FeatureMatchingSeq(const std::vector<Frame> &frames, std::vector<FramePair>
         points2_normalized.push_back(frame.points_normalized[match.id2]);
       }
       // TODO why 10.0 / 525
-      itslam::solve_essential(points1_normalized, points2_normalized, 10.0 / 525, frame_pair.E,
+      xrsfm::solve_essential(points1_normalized, points2_normalized, 10.0 / 525, frame_pair.E,
                               frame_pair.inlier_num, frame_pair.inlier_mask);
       const int inlier_threshold =
           std::max(min_num_inlier, (int)(min_ratio_inlier * frame_pair.matches.size()));
@@ -329,7 +329,7 @@ void FeatureMatching(const std::vector<Frame> &frames,
         points1_normalized.push_back(frame1.points_normalized[match.id1]);
         points2_normalized.push_back(frame2.points_normalized[match.id2]);
       }
-      itslam::solve_essential(points1_normalized, points2_normalized, 10.0 / 525, frame_pair.E,
+      xrsfm::solve_essential(points1_normalized, points2_normalized, 10.0 / 525, frame_pair.E,
                               frame_pair.inlier_num, frame_pair.inlier_mask);
     } else {
       std::vector<Eigen::Vector2d> points1, points2;
@@ -627,4 +627,5 @@ void ExpansionAndMatching(Map &map, const std::map<int, std::vector<int>> &id2ra
     timer_searching.print();
     timer_matching.print();
   }
+}
 }

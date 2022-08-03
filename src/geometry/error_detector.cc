@@ -1,5 +1,6 @@
 #include "geometry/error_corrector.h"
 
+namespace xrsfm{
 bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp, std::vector<char> &inlier_mask) { 
   // if (fp.id1 == 294 && fp.id2 == 295) return false;  // seq 06
   // if (fp.id1 <900 &&fp.id2>600) return false;  // seq 07
@@ -163,4 +164,5 @@ void ErrorDetector::StoreRelativePose(Map &map, int frame_id, std::ofstream &fil
     }
   }
   file << "-1" << std::endl;
+}
 }

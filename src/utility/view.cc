@@ -5,9 +5,11 @@
 
 #include <pangolin/pangolin.h>
 #include <unistd.h>
+#include <thread>
 
 #include "viewer_handle.h"
 
+namespace xrsfm{
 #define OPEN_VIEW
 constexpr int width = 1024, height = 768, focal = 500;
 const cv::Scalar cv_green(0, 255, 0), cv_gray(80, 80, 80), cv_blue(255, 0, 0), cv_yellow(0, 255, 255),
@@ -231,7 +233,6 @@ void DrawPoints(const std::vector<Eigen::Vector3d> &points, const std::vector<Ei
   glEnd();
 }
 
-#include <thread>
 
 void Viewer::Init() {
 #ifdef OPEN_VIEW
@@ -563,4 +564,5 @@ void Viewer::DrawColor(const Map &map, bool stop) {
     usleep(500);
   }
 #endif
+}
 }

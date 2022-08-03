@@ -44,7 +44,7 @@ extern "C" {
 }
 
 using namespace std;
-using namespace cv;
+using namespace cv; 
 
 int main(int argc, char *argv[]){  
     std::string image_dir = argv[1];

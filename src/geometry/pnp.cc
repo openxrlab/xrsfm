@@ -8,6 +8,7 @@
 #include "colmap/optim/loransac.h"
 #include "umeyama.h"
 
+namespace xrsfm{
 bool RegisterImage(const int frame_id, Map &map) {
   constexpr int min_num_correspondence = 20;
   constexpr double max_error_pixel = 8.0;
@@ -138,7 +139,7 @@ bool ComputeRegisterInlierLoop(const int _frame_id, LoopInfo &loop_info, Map &ma
 bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
   Frame &next_frame = map.frames_[_frame_id];
 
-  std::vector<benchmark::vector<3>> gt_positions(0), in_positions(0);
+  std::vector<vector<3>> gt_positions(0), in_positions(0);
   std::vector<std::pair<double, double>> depth_obs_vec;
   int max_inlier = 0;
   Pose best_pose;
@@ -196,7 +197,7 @@ bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
       sum += depth_obs_vec[0].first / depth_obs_vec[0].second;
     }
     loop_info.scale_obs = sum / depth_obs_vec.size();
-    benchmark::SRT srt = benchmark::umeyama(gt_positions, in_positions, false);
+    SRT srt = umeyama(gt_positions, in_positions, false);
     loop_info.scale_obs = srt.scale;
     printf("s12: %lf %lf\n", 1.0 / (sum / depth_obs_vec.size()), srt.scale);
     std::cout << srt.t.transpose() << std::endl;
@@ -404,4 +405,5 @@ bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options, const st
   //    }
 
   return true;
+}
 }

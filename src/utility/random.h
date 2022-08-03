@@ -13,7 +13,7 @@
 
 #include "global.h"
 
-namespace itslam {
+namespace xrsfm {
 
 inline unsigned int get_random_seed() {
   static std::random_device rd;
@@ -171,6 +171,6 @@ class RandomWalk {
   double sdt;
 };
 
-}  // namespace itslam
+}  // namespace xrsfm
 
 #endif  // ITSLAM_RANDOM_H

@@ -15,6 +15,7 @@
 
 // #define USE_ORB
 
+namespace xrsfm{
 bool CreateSiftGPUMatcher(SiftMatchGPU *sift_match_gpu);
 
 void SiftMatch(const FeatureDescriptors &descs1, const FeatureDescriptors &descs2,
@@ -78,4 +79,6 @@ void CreateClusterMap(const Map &map, const std::vector<int> &root_of_frames,
                       size_t &initial_clusterid1, size_t &initial_clusterid2,
                       std::map<std::string, int> &name2clusterindex_map,
                       std::vector<ImageSize> &clusterimage_size);
+
+}
 #endif  // WSFM_FEATURE_PROCESSING_H

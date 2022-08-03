@@ -8,6 +8,7 @@
 
 #include <numeric>
 
+namespace xrsfm{
 std::unique_ptr<SiftGPU> SiftExtractor::create_siftgpu() {
   std::vector<int> gpu_indices(1, 0);
   int num_cuda_devices = 1;
@@ -164,4 +165,5 @@ void SiftExtractor::ExtractUINT8(const cv::Mat &image, std::vector<cv::KeyPoint>
   FeatureDescriptors float_desc;
   ExtractFLOAT(image, keypoints, float_desc);
   descriptors = FeatureDescriptorsToUnsignedByte(float_desc);
+}
 }

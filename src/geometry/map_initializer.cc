@@ -3,10 +3,11 @@
 //
 
 #include "geometry/map_initializer.h"
-
 #include "geometry/colmap/base/triangulation.h"
 #include "geometry/essential.h"
 #include "geometry/triangluate_svd.h"
+
+namespace xrsfm{
 
 bool CheckInitFramePair(const Map &map, FramePair &frame_pair) {
   auto &frame1 = map.frames_[frame_pair.id1],&frame2 = map.frames_[frame_pair.id2];
@@ -22,11 +23,11 @@ bool CheckInitFramePair(const Map &map, FramePair &frame_pair) {
   }
   const double th = 10.0 / map.cameras_[frame1.camera_id].fx();
   //add solve homograph
-  itslam::solve_essential(points1, points2, th, frame_pair.E, inlier_num, inlier_mask);
+  xrsfm::solve_essential(points1, points2, th, frame_pair.E, inlier_num, inlier_mask);
  
   inlier_mask.clear();
   std::vector<Eigen::Vector3d> point3ds;
-  itslam::decompose_rt(frame_pair.E, points1, points2, frame_pair.R, frame_pair.t, point3ds, inlier_mask);
+  xrsfm::decompose_rt(frame_pair.E, points1, points2, frame_pair.R, frame_pair.t, point3ds, inlier_mask);
   Pose pose1 = Pose(Eigen::Quaterniond::Identity(), Eigen::Vector3d::Zero());
   Pose pose2 = Pose(Eigen::Quaterniond(frame_pair.R), frame_pair.t);
   int id_p3d = 0,num_p3d = 0,num_p3d_valid = 0;
@@ -111,12 +112,12 @@ void InitializeMap(Map &map, FramePair &frame_pair) {
     points2.push_back(frame2.points_normalized[frame_pair.matches[i].id2]);
   }
   const double th = 10.0 / map.cameras_[frame1.camera_id].fx();
-  itslam::solve_essential(points1, points2, th, frame_pair.E, inlier_num, inlier_mask);
+  xrsfm::solve_essential(points1, points2, th, frame_pair.E, inlier_num, inlier_mask);
   printf("Init essential %d/%zu\n",inlier_num,points1.size());
   
   inlier_mask.clear();
   std::vector<Eigen::Vector3d> point3ds;
-  itslam::decompose_rt(frame_pair.E, points1, points2, frame_pair.R, frame_pair.t, point3ds, inlier_mask);
+  xrsfm::decompose_rt(frame_pair.E, points1, points2, frame_pair.R, frame_pair.t, point3ds, inlier_mask);
 
   frame1.Tcw = Pose(Eigen::Quaterniond::Identity(), Eigen::Vector3d::Zero());
   frame1.registered = frame1.is_keyframe = true;
@@ -154,4 +155,6 @@ void InitializeMap(Map &map, FramePair &frame_pair) {
   map.frameid2covisible_frameids_[id1].emplace_back(id2);
   map.frameid2covisible_frameids_[id2].emplace_back(id1); 
   printf("Initialize Triangulated num: %d/%zu\n", tri_num, points1.size());
+}
+
 }

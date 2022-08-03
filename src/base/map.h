@@ -6,6 +6,8 @@
 #include "types.h"
 #include "camera.hpp"
 
+
+namespace xrsfm{
 constexpr int MIN_OBS_NUM_LEVEL = 20;
 
 class Track {
@@ -195,5 +197,5 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id, const b
 void UpdateByRefFrame(Map &map);
 
 bool CheckMeaNumber(Map &map, int frame_id);
-
+}
 #endif  // MAP_H

@@ -10,6 +10,7 @@
 #include "base/map.h"
 #include "utility/timer.h"
 
+namespace xrsfm{
 class BASolver {
  public:
   BASolver() {}
@@ -24,5 +25,5 @@ class BASolver {
   void SetUp(ceres::Problem &problem, Map &map, Frame &frame);
   void SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame, int frame_id);
 };
-
+}
 #endif  // ECIM_BA_SOLVER_H

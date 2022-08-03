@@ -5,10 +5,11 @@
 #include <unordered_set>
 
 #include "feature/feature_processing.h"
-#include "base/camera.h"
 #include "base/map.h"
 #include "utility/io_ecim.hpp"
 #include "utility/timer.h"
+
+using namespace xrsfm;
 
 void SetUpFramePoints(std::vector<Frame>& frames) {
   for (auto& frame : frames) {

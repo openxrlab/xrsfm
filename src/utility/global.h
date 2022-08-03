@@ -10,16 +10,10 @@
 
 #include <Eigen/Eigen>
 
-//#include "version.h"
-
-//#include "patch/patch.h"
-
-#define GRAVITY_NOMINAL 9.80665
-
 /**
  * @brief The main namespace for all itslam components.
  **/
-namespace itslam {
+namespace xrsfm {
 
 /**
  * @brief Dense matrix type used in itslam.
@@ -79,35 +73,6 @@ using quaternion = Eigen::Quaternion<double>;
 
 inline constexpr size_t nil() { return size_t(-1); }
 
-// struct IMUData {
-//    double t;    // timestamp
-//    vector<3> w; // gyro measurement
-//    vector<3> a; // accelerometer measurement
-//};
-//
-// struct Image {
-//    double t;
-//    vector<3> g; // don't touch this!
-//    virtual ~Image() = default;
-//    virtual void detect_keypoints(std::vector<vector<2>> &keypoints, size_t
-//    max_points = 0) const = 0; virtual void track_keypoints(const Image
-//    *next_image, const std::vector<vector<2>> &curr_keypoints,
-//    std::vector<vector<2>> &next_keypoints, std::vector<char> &result_status)
-//    const = 0; virtual void show_direction(const std::string &name, const
-//    vector<3> &direction, const matrix<3> &K) const {} virtual void
-//    detect_segments(std::vector<std::pair<vector<2>, vector<2>>> &segments)
-//    const {
-//        segments.clear();
-//    }
-//    virtual void show_segments(ITSLAM_UNUSED_ATTR const
-//    std::vector<std::pair<vector<2>, vector<2>>> &segments) const {
-//        ITSLAM_UNUSED_EXPR(segments);
-//    }
-//};
-
-}  // namespace itslam
-
-//#include "system/diagnosis.h"
-//#include "utility/debug.h"
+}  // namespace xrsfm
 
 #endif  // ITSLAM_GLOBAL_H

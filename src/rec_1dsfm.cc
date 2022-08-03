@@ -2,19 +2,14 @@
 #include <fstream>
 
 #include "3rdparty/json/json.hpp"
-#include "geometry/essential.h"
-#include "geometry/pnp.h"
-#include "geometry/track_processor.h"
-#include "base/camera.h"
 #include "base/map.h"
-#include "geometry/map_initializer.h"
-#include "optimization/ba_solver.h"
+#include "mapper/incremental_mapper.h"
 #include "utility/io_ecim.hpp"
 #include "utility/io_feature.hpp"
 #include "utility/timer.h"
 #include "utility/viewer.h"
-#include "mapper/incremental_mapper.h"
  
+using namespace xrsfm;
 
 void PreProcess(const std::string image_dir_path, const std::string bin_path, Map& map) {
   std::vector<Frame> frames;

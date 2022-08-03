@@ -17,6 +17,7 @@
 #include "base/map.h"
 #include "io_feature.hpp"
 
+namespace xrsfm{
 using Clock = std::chrono::high_resolution_clock;
 
 inline double tloop(const Clock::time_point &t_start, const Clock::time_point &t_end) {
@@ -547,3 +548,4 @@ void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames);
 void ReadImagesBinaryForTriangulation(const std::string &path, std::map<int, Frame> &frames);
 
 void ReadFramePairBinaryForTriangulation(const std::string &path, std::vector<FramePair> &frame_pairs);
+}

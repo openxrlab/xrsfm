@@ -3,20 +3,13 @@
 
 #include "3rdparty/json/json.hpp"
 #include "base/map.h"
-#include "base/camera.h"
-#include "geometry/pnp.h"
-#include "geometry/essential.h"
-#include "geometry/track_processor.h"
-#include "geometry/error_corrector.h"
-#include "geometry/map_initializer.h"
-#include "optimization/ba_solver.h"
+#include "mapper/incremental_mapper.h"
 #include "utility/io_ecim.hpp"
 #include "utility/io_feature.hpp"
 #include "utility/timer.h"
-#include "utility/view.h"
 #include "utility/viewer.h"
-#include "mapper/incremental_mapper.h"
 
+using namespace xrsfm;
 int camera_param_id = -1;
 
 void PreProcess(const std::string dir_path, Map& map) {

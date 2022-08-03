@@ -4,6 +4,8 @@
 
 #include "io_ecim.hpp"
 
+
+namespace xrsfm{
 void WriteCamerasBinary(const std::string &path, const std::vector<Camera> &cameras) {
   std::ofstream file(path, std::ios::trunc | std::ios::binary);
   CHECK(file.is_open()) << path;
@@ -288,4 +290,5 @@ void WriteColMapDataBinary2(const std::string &output_path, const Map &map) {
   WriteCamerasBinary(output_path + "cameras.bin", map.cameras_);
   WriteImagesBinary2(output_path + "images.bin", map.frame_map_);
   WritePoints3DBinary2(output_path + "points3D.bin", map.track_map_);
+}
 }

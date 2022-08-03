@@ -6,6 +6,7 @@
 #define WSFM_MHANDLER_H
 
 #include <pangolin/handler/handler.h>
+
 namespace pangolin {
 struct MyHandler3D : Handler3D {
   MyHandler3D(OpenGlRenderState &cam_state, AxisDirection enforce_up = AxisNone, float trans_scale = 1.0f,

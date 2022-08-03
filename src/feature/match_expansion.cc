@@ -1,5 +1,6 @@
 #include "match_expansion.h"
 
+namespace xrsfm{
 void MatchMap::PatchInit(const Map &map) {
   m_patch_track_num = 0;
   m_patch_tracks.clear();
@@ -706,4 +707,5 @@ std::map<int, std::vector<int>> MatchExpansionSolver::GetCovisibilityInfo(int fr
     }
   }
   return frame_patch_set;
+}
 }

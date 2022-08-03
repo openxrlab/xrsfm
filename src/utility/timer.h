@@ -5,12 +5,13 @@
 #ifndef WARG_TIMER_H
 #define WARG_TIMER_H
 
-#endif  // WARG_TIMER_H
 
 #include <chrono>
 #include <string>
 #include <utility>
+#include <vector>
 
+namespace xrsfm{
 #define TIMING(a, b) \
   {                  \
     a.resume();      \
@@ -68,3 +69,5 @@ struct TimerArray {
     timer_vec = {&tot, &reg, &tri, &fil, &merge, &che, &lba, &gba};
   }
 };
+}
+#endif  // WARG_TIMER_H

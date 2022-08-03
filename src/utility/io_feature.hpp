@@ -14,6 +14,7 @@
 #include "base/map.h"
 #include "3rdparty/json/json.hpp"
 
+namespace xrsfm{
 inline nlohmann::json LoadJSON(const std::string config_path) {
   nlohmann::json config_json;
   std::ifstream ifs(config_path);
@@ -220,4 +221,4 @@ inline void SaveImageSize(const std::string &file_name, const std::vector<ImageS
     write_data(file, size.height);
   }
 }
-
+}

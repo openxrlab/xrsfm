@@ -430,4 +430,4 @@ void decompose_rt(const Eigen::Matrix3d &E, const std::vector<vector<2>> &points
   result_points = points_array[best_k];
   result_status = status_array[best_k];
 }
-}  // namespace itslam
+}  // namespace xrsfm

@@ -12,12 +12,12 @@
 #include "geometry/essential.h"
 #include "base/map.h"
 #include "optim/loransac.h"
-#include "optim/ransac.h"
-#include "orb_extractor.h"
+#include "optim/ransac.h" 
 #include "sift_extractor.h"
 #include "utility/io_ecim.hpp"
 #include "utility/timer.h"
 
+namespace xrsfm{
 void FeatureExtract(const std::string &dir_path, const Camera &camera,
                     const std::vector<cv::Mat> &images, std::vector<Frame> &frames) {
 #ifndef USE_ORB
@@ -159,4 +159,5 @@ void FeatureExtractMixData(const std::vector<Camera> &cameras,
     frame.track_ids_.resize(num_points, -1);
     frames.emplace_back(frame);
   }
+}
 }

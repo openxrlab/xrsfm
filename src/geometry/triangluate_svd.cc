@@ -4,6 +4,8 @@
 
 #include "triangluate_svd.h"
 
+
+namespace xrsfm{
 double CalculateTriangulationAngle(const Eigen::Vector3d &center1, const Eigen::Vector3d &center2,
                                    const Eigen::Vector3d &point3D) {
   const double baseline_length_squared = (center1 - center2).squaredNorm();
@@ -25,9 +27,9 @@ double CalculateTriangulationAngle(const Eigen::Vector3d &center1, const Eigen::
   return std::min(angle, M_PI - angle);
 }
 
-itslam::vector<4> triangulate_point(const std::vector<itslam::matrix<3, 4>> &Ps,
-                                    const std::vector<itslam::vector<2>> &points) {
-  itslam::matrix<Eigen::Dynamic, 4> A(points.size() * 2, 4);
+xrsfm::vector<4> triangulate_point(const std::vector<xrsfm::matrix<3, 4>> &Ps,
+                                    const std::vector<xrsfm::vector<2>> &points) {
+  xrsfm::matrix<Eigen::Dynamic, 4> A(points.size() * 2, 4);
   for (size_t i = 0; i < points.size(); ++i) {
     A.row(i * 2 + 0) = points[i](0) * Ps[i].row(2) - Ps[i].row(0);
     A.row(i * 2 + 1) = points[i](1) * Ps[i].row(2) - Ps[i].row(1);
@@ -35,13 +37,13 @@ itslam::vector<4> triangulate_point(const std::vector<itslam::matrix<3, 4>> &Ps,
   return A.jacobiSvd(Eigen::ComputeFullV).matrixV().col(3);
 }
 
-bool triangulate_point_scored(const std::vector<itslam::matrix<3, 4>> &Ps, const std::vector<itslam::vector<2>> &points,
-                              itslam::vector<3> &p, double &score) {
+bool triangulate_point_scored(const std::vector<xrsfm::matrix<3, 4>> &Ps, const std::vector<xrsfm::vector<2>> &points,
+                              xrsfm::vector<3> &p, double &score) {
   if (Ps.size() < 2) return false;
-  itslam::vector<4> q = triangulate_point(Ps, points);
+  xrsfm::vector<4> q = triangulate_point(Ps, points);
   score = 0;
   for (size_t i = 0; i < points.size(); ++i) {
-    itslam::vector<3> qi = Ps[i] * q;
+    xrsfm::vector<3> qi = Ps[i] * q;
     if (!(qi[2] * q[3] > 0)) {  // z<0
       return false;
     }
@@ -57,8 +59,9 @@ bool triangulate_point_scored(const std::vector<itslam::matrix<3, 4>> &Ps, const
   return true;
 }
 
-bool triangulate_point_checked(const std::vector<itslam::matrix<3, 4>> &Ps,
-                               const std::vector<itslam::vector<2>> &points, itslam::vector<3> &p) {
+bool triangulate_point_checked(const std::vector<xrsfm::matrix<3, 4>> &Ps,
+                               const std::vector<xrsfm::vector<2>> &points, xrsfm::vector<3> &p) {
   double score;
   return triangulate_point_scored(Ps, points, p, score);
+}
 }

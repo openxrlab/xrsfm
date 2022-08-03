@@ -3,6 +3,8 @@
 
 #include <Eigen/Eigen>
 
+
+namespace xrsfm{
 typedef Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> UINT8Descriptors;
 typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> FeatureDescriptors;
 
@@ -52,5 +54,5 @@ struct Pose {
    
   inline Pose scale(double s) { return Pose(q, s * t); }
 };
-
+}
 #endif  // TYPES_H

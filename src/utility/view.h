@@ -12,6 +12,7 @@
 #include "base/map.h"
 #include "viewer_handle.h"
 
+namespace xrsfm{
 void DrawFeature(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints);
 
 void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2, const std::vector<cv::KeyPoint> &kpts1,
@@ -51,5 +52,5 @@ class Viewer {
   double camera_size_ = 0.1;
   Map map;
 };
-
+}
 #endif  // ECIM_VIEW_H

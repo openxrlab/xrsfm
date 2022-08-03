@@ -7,6 +7,7 @@
 #include "utility/view.h"
 #include "utility/viewer.h"
 
+namespace xrsfm{
 inline double ToDeg(double theta) { return theta * 180 / M_PI; }
 
 class ErrorDetector {
@@ -39,5 +40,5 @@ class ErrorCorrector {
   Point3dProcessor *p3d_processor_;
   ErrorDetector error_detector;
 };
-
+}
 #endif

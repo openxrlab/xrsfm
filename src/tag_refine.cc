@@ -11,6 +11,7 @@
 #include "utility/viewer.h"
  
 using namespace ceres;
+using namespace xrsfm;
 
 void logRPE(const Map &map) {
   int count = 0;

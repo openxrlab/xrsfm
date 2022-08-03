@@ -4,10 +4,11 @@
 
 #include "track_processor.h"
 
+#include "base/camera.h"
 #include "geometry/colmap/estimators/triangulation.h"
 #include "geometry/triangluate_svd.h"
-#include "base/camera.h"
 
+namespace xrsfm{
 double ReprojectionError(const Pose &pose, const Eigen::Vector2d &point2d, const Eigen::Vector3d &point3d) {
   Eigen::Vector3d p_c = pose.q * point3d + pose.t;
   Eigen::Vector2d residual = p_c.hnormalized() - point2d;
@@ -77,20 +78,20 @@ void SetTrackOutlier(Map &map, Track &track) {
 }
 
 bool CreatePoint3d(const std::vector<std::pair<int, int>> observations, Map &map) {
-  std::vector<itslam::matrix<3, 4>> Ps;
-  std::vector<itslam::vector<2>> ps;
+  std::vector<xrsfm::matrix<3, 4>> Ps;
+  std::vector<xrsfm::vector<2>> ps;
   // Prepare the data
   for (auto &[t_frame_id, t_p2d_id] : observations) {
     Frame &t_frame = map.frames_[t_frame_id];
-    itslam::matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
-    itslam::vector<3> T = t_frame.Tcw.t;
-    itslam::matrix<3, 4> P;
+    xrsfm::matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
+    xrsfm::vector<3> T = t_frame.Tcw.t;
+    xrsfm::matrix<3, 4> P;
     P << R, T;
     Ps.push_back(P);
     ps.push_back(t_frame.points_normalized[t_p2d_id]);
   }
   //  make new track;
-  itslam::vector<3> p;
+  xrsfm::vector<3> p;
   if (triangulate_point_checked(Ps, ps, p)) {
     AddTrack(observations, p, map);
     return true;
@@ -107,9 +108,9 @@ bool CreatePoint3d1(const std::vector<std::pair<int, int>> observations, Map &ma
     const auto &[t_frame_id, t_p2d_id] = observations[i];
     Frame &t_frame = map.frames_[t_frame_id];
     assert(t_frame.registered);
-    itslam::matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
-    itslam::vector<3> T = t_frame.Tcw.t;
-    itslam::matrix<3, 4> P;
+    xrsfm::matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
+    xrsfm::vector<3> T = t_frame.Tcw.t;
+    xrsfm::matrix<3, 4> P;
     P << R, T;
 
     point_data[i].point_normalized = t_frame.points_normalized[t_p2d_id];
@@ -131,7 +132,7 @@ bool CreatePoint3d1(const std::vector<std::pair<int, int>> observations, Map &ma
   }
 
   //  make new track;
-  itslam::vector<3> p;
+  xrsfm::vector<3> p;
   std::vector<char> inlier_mask;
   if (EstimateTriangulation(tri_options, point_data, pose_data, &inlier_mask, &p)) {
     std::vector<std::pair<int, int>> inlier_observations;
@@ -349,21 +350,21 @@ void Point3dProcessor::ReTriangulate(Map &map) {
     }
     // if (!has_negative_depth) continue;
 
-    std::vector<itslam::matrix<3, 4>> Ps;
-    std::vector<itslam::vector<2>> ps;
+    std::vector<xrsfm::matrix<3, 4>> Ps;
+    std::vector<xrsfm::vector<2>> ps;
     // Prepare the data
     for (auto &obs_info : observations) {
       Frame &t_frame = map.frames_[obs_info.first];
-      itslam::matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
-      itslam::vector<3> T = t_frame.Tcw.t;
-      itslam::matrix<3, 4> P;
+      xrsfm::matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
+      xrsfm::vector<3> T = t_frame.Tcw.t;
+      xrsfm::matrix<3, 4> P;
       P << R, T;
       Ps.push_back(P);
       ps.push_back(t_frame.points_normalized[obs_info.second]);
     }
 
     //  make new track;
-    itslam::vector<3> p;
+    xrsfm::vector<3> p;
     std::vector<char> inlier_mask;
     if (triangulate_point_checked(Ps, ps, p)) {
       track.point3d_ = p;
@@ -590,9 +591,9 @@ bool CreatePoint3dRAW(const std::vector<std::pair<Pose, Eigen::Vector2d>> &obser
   // Prepare the data
   for (size_t i = 0; i < data_size; ++i) {
     const auto &[Tcw, p2d] = observations[i];
-    itslam::matrix<3, 3> R = Tcw.q.toRotationMatrix();
-    itslam::vector<3> T = Tcw.t;
-    itslam::matrix<3, 4> P;
+    xrsfm::matrix<3, 3> R = Tcw.q.toRotationMatrix();
+    xrsfm::vector<3> T = Tcw.t;
+    xrsfm::matrix<3, 4> P;
     P << R, T;
 
     point_data[i].point_normalized = p2d;
@@ -626,4 +627,5 @@ bool CreatePoint3dRAW(const std::vector<std::pair<Pose, Eigen::Vector2d>> &obser
     return true;
   }
   return false;
+}
 }

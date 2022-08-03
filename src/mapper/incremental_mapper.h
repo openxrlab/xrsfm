@@ -11,6 +11,7 @@
 #include "optimization/ba_solver.h" 
 #include "utility/timer.h" 
 
+namespace xrsfm{
 struct IncrementalMapperOptions {
     bool correct_pose = false;
     bool stop_when_register_fail = false;
@@ -32,7 +33,7 @@ public:
     ErrorCorrector error_corrector;
     IncrementalMapperOptions options;
 };
-
+}
 
 
 #endif  // COLMAP_SRC_CONTROLLERS_INCREMENTAL_MAPPER_H_

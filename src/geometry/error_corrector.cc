@@ -2,6 +2,7 @@
 
 #include "geometry/pnp.h"
 
+namespace xrsfm{
 inline std::vector<int> GetMatchedFrameIds(Map &map, int frame_id) {
   std::vector<int> matched_frame_ids;
   for (const int &id : map.frameid2matched_frameids_[frame_id]) {
@@ -220,4 +221,5 @@ bool ErrorCorrector::CheckAndCorrectPose(Map &map, int frame_id, int iter) {
   map.tmp_frame.registered = false;
 
   return true;
+}
 }

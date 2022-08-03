@@ -1,5 +1,6 @@
 #include "incremental_mapper.h"
 
+namespace xrsfm{
 IncrementalMapper::IncrementalMapper(){
   
 }
@@ -76,5 +77,6 @@ void IncrementalMapper::Reconstruct(Map &map){
   } 
   sleep(1000);
   viewer.stop();
+}
 }
  

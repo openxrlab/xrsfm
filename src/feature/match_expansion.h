@@ -4,6 +4,8 @@
 #include "base/map.h"
 #include <glog/logging.h>
 
+
+namespace xrsfm{
 const int _T_ = 2;
 const int _Np_ = 10;
 
@@ -134,3 +136,4 @@ class MatchExpansionSolver {
 
   const bool verbose = false;
 };
+}

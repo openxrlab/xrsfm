@@ -2,6 +2,7 @@
 #include "estimators/fundamental_matrix.h"
 #include "optim/loransac.h"
 
+namespace xrsfm{
 inline void SolveFundamnetalCOLMAP(const std::vector<Eigen::Vector2d> &points1,
                                    const std::vector<Eigen::Vector2d> &points2,
                                    FramePair &frame_pair) {
@@ -19,4 +20,5 @@ inline void SolveFundamnetalCOLMAP(const std::vector<Eigen::Vector2d> &points1,
   frame_pair.inlier_num = F_report.support.num_inliers;
   frame_pair.inlier_mask = F_report.inlier_mask;
   frame_pair.F = F;
+}
 }

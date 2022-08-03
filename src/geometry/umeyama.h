@@ -6,7 +6,8 @@
 #define WARG_UMYAMA_H
 
 
-namespace benchmark {
+
+namespace xrsfm{
 
 using quaternion = Eigen::Quaternion<double>;
 

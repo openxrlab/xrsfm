@@ -11,6 +11,7 @@
 
 #include "base/map.h"
 
+namespace xrsfm{
 class ViewerThread {
  public:
   void start();
@@ -32,5 +33,5 @@ class ViewerThread {
   std::atomic<bool> worker_has_stop = false;
   std::thread worker_thread;
 };
-
+}
 #endif  // ECIM_VIEWER_H

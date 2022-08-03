@@ -9,6 +9,7 @@
 #include "geometry/track_processor.h"
 
 
+namespace xrsfm{
 int CorrespondenceGraph::GetMatch(int frame_id1, int frame_id2, std::vector<Match> &matches) {
   int count = 0;
   matches.resize(0);
@@ -785,3 +786,5 @@ void Map::LogReprojectError() {
   // avg_track_length_ = 1.0 * count_len / count_tra;
   // std::cout<<count_tra<<" "<<avg_track_length_<<std::endl;
 }
+}
+

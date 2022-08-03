@@ -4,6 +4,7 @@
 #include <Eigen/Eigen>
 // #include "xrprimer/data_structure/camera/camera.h"
 
+namespace xrsfm{
 // class Camera : public BaseCameraParameter {
 class Camera {
  public:
@@ -102,5 +103,5 @@ inline void NormalizedToImage(const Camera &c, const Eigen::Vector2d &p2d_n, Eig
   double v = c.fy() * p2d_n_d.y() + c.cy();
   p2d << u, v;
 }
-
+}
 #endif

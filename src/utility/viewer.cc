@@ -10,6 +10,8 @@
 #include "viewer_handle.h"
 
 #define OPEN_VIEW
+
+namespace xrsfm{
 constexpr int width = 1024, height = 768, focal = 500;
 const Eigen::Vector3d red(1.0, 0, 0), green(0, 1.0, 0), blue(0, 0, 1.0), yellow(1, 1, 0), grey(0.5, 0.5, 0.5),
     black(0, 0, 0);
@@ -151,5 +153,5 @@ void ViewerThread::add_tag_points(const std::map<int, std::vector<Eigen::Vector3
     }
   }
 }
-
+}
 

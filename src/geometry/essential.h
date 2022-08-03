@@ -6,7 +6,7 @@
 #include "base/map.h"
 #include "utility/global.h"
 
-namespace itslam {
+namespace xrsfm {
 
 double sampson_error(const matrix<3> &E, const vector<2> &p1, const vector<2> &p2);
 
@@ -42,10 +42,6 @@ void decompose_rt(const Eigen::Matrix3d &E, const std::vector<vector<2>> &points
                   const std::vector<vector<2>> &points2, matrix<3> &R, vector<3> &T,
                   std::vector<vector<3>> &result_points, std::vector<char> &result_status);
 
-}  // namespace itslam
-
-double CheckEssential(Map &map, FramePair &fp);
-
-bool CheckAllEssential(Map &map, int frame_id);
+}  // namespace xrsfm
 
 #endif  // ITSLAM_FIVE_POINT_H

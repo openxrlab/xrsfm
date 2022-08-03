@@ -108,8 +108,7 @@ endif ()
 add_library(ecim
         src/base/map.cc
 
-        src/feature/sift_extractor.cc
-        src/feature/orb_extractor.cc
+        src/feature/sift_extractor.cc 
         src/feature/feature_extraction.cc
         src/feature/feature_processing.cc
         src/feature/match_expansion.cc

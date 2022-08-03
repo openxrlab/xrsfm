@@ -7,8 +7,8 @@
 
 #include "base/map.h"
 
+namespace xrsfm{
 bool CreatePoint3dRAW(const std::vector<std::pair<Pose, Eigen::Vector2d>> &observations, Eigen::Vector3d &p);
-
 
 class Point3dProcessor {
  public:
@@ -37,5 +37,6 @@ class Point3dProcessor {
   int FilterPoints3d(Map &map, double max_re, double deg);
   int FilterPointsFrame(Map &map, const int frame_id, const double max_re, const double deg);
 };
+}
 
 #endif  // ECIM_POINT3DPROCESSOR_H

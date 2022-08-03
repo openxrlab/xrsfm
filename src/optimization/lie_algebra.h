@@ -5,6 +5,7 @@
 #ifndef RGBD_TEST_LIE_ALGEBRA_H
 #define RGBD_TEST_LIE_ALGEBRA_H
 
+namespace xrsfm{
 template <int Rows = Eigen::Dynamic, int Cols = Rows, bool UseRowMajor = false, typename T = double>
 using matrix = typename std::conditional<Rows != 1 && Cols != 1,
                                          Eigen::Matrix<T, Rows, Cols, UseRowMajor ? Eigen::RowMajor : Eigen::ColMajor>,
@@ -67,6 +68,7 @@ inline Eigen::Matrix3d jri(Eigen::Vector3d theta) {
               skewSymmetric(theta);
   }
   return jri;
+}
 }
 
 #endif  // RGBD_TEST_LIE_ALGEBRA_H

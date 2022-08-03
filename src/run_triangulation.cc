@@ -5,7 +5,6 @@
 #include <unordered_set>
 
 #include "feature/feature_processing.h"
-#include "base/camera.h"
 #include "base/map.h"
 #include "geometry/track_processor.h"
 #include "optimization/ba_solver.h"
@@ -14,6 +13,8 @@
 #include "utility/view.h"
 #include "utility/viewer.h"
 #include "geometry/epipolar_geometry.hpp"
+
+using namespace xrsfm;
 
 void PreProcess(const std::string pose_path,const std::string feature_path,const std::string frame_pair_path, Map& map) {
   std::vector<Frame> frames;

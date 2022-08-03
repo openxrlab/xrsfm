@@ -9,6 +9,7 @@
 #include "geometry/colmap/util/math.h"
 #include "utility/timer.h"
 
+namespace xrsfm{
 std::vector<int> num_cov;
 double weight_o = 0;
 
@@ -535,5 +536,6 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bo
 
   printf("kf: %d/%d\n", num_kf, num_rf);
   UpdateByRefFrame(map);
+}
 }
  

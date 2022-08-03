@@ -13,6 +13,7 @@
 
 #include "base/types.h"
 
+namespace xrsfm{
 template <typename T1, typename T2>
 T2 TruncateCast(const T1 value) {
   return std::min(static_cast<T1>(std::numeric_limits<T2>::max()),
@@ -115,5 +116,7 @@ class SiftExtractor {
   SiftExtractionOptions options;
   std::unique_ptr<SiftGPU> sift_gpu1;
 };
+}
 
 #endif  // WSFM_SIFT_EXTRACTOR_H
+
