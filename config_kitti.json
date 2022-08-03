@@ -1,6 +1,6 @@
 {
 	"data_path": "/data/ECIM/SfM/KITTI/",
-	"seq_name": "03",
+	"seq_name": "10",
 	"output_path": "/data/ECIM/SfM/KITTI/",
 	"camera_size": 0.1,
 	"init_id1": 0,

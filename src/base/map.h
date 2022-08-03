@@ -4,23 +4,16 @@
 #include <opencv2/opencv.hpp>
 
 #include "types.h"
+#include "camera.hpp"
 
-
-struct ImageSize {
-  int width, height;
-  ImageSize() {}
-  ImageSize(int w, int h) {
-    width = w;
-    height = h;
-  }
-};
-
+constexpr int MIN_OBS_NUM_LEVEL = 20;
 
 class Track {
  public:
   // Keyframes observing the point and associated index in keyframe
   std::map<int, int> observations_;
   Eigen::Vector3d point3d_;
+  
   double angle_;
   double error;
 
@@ -30,65 +23,6 @@ class Track {
 
   bool outlier = false;
   bool is_keypoint = false;
-};
-
-struct Pose {
-  explicit Pose(Eigen::Quaterniond _q = Eigen::Quaterniond::Identity(), Eigen::Vector3d _t = Eigen::Vector3d::Zero())
-      : q(_q), t(_t){};
-  Pose(Eigen::Matrix4d T){
-    Eigen::Matrix3d R = T.block<3,3>(0,0);
-    q = Eigen::Quaterniond(R);
-    q = q.normalized();
-    t = T.col(3).head<3>();
-  }
-  Eigen::Quaterniond q;
-  Eigen::Vector3d t;
-
-  inline Eigen::Vector3d center() { return -(q.inverse() * t); }
-
-  inline Pose inverse() {
-    Pose p;
-    p.t = -(q.inverse() * t);
-    p.q = q.inverse();
-    return p;
-  }
-
-  inline Pose mul(Pose p) {
-    p.t = (q * p.t) + t;
-    p.q = q * p.q;
-    return p;
-  }
-   
-  inline Pose scale(double s) { return Pose(q, s * t); }
-  inline void log() { std::cout << q.coeffs().transpose() << " " << t.transpose() << std::endl; }
-};
-
-class Camera {
- public:
-  explicit Camera(int _id = 0, double fx = 0, double fy = 0, double cx = 0, double cy = 0, double d = 0) {
-    id = _id;
-    camera_model = CameraModel::SIMPLE_RADIAL;
-    camera_params = {fx, fy, cx, cy};
-    distort_params = {d, 0, 0, 0, 0};
-  }
-
-  enum CameraModel { OpenCV, SIMPLE_RADIAL } camera_model;
-
-  uint32_t id = -1;
-  // double fx, fy, cx, cy;
-  std::array<double, 4> camera_params;
-  // k1 k2 p1 p2 k3
-  std::array<double, 5> distort_params;
-
-  inline const double fx() const { return camera_params[0]; }
-
-  inline const double fy() const { return camera_params[1]; }
-
-  inline const double cx() const { return camera_params[2]; }
-
-  inline const double cy() const { return camera_params[3]; }
-
-  inline void log() { printf("%d %lf %lf %lf %lf %lf\n", id, fx(), fy(), cx(), cy(), distort_params[0]); }
 };
 
 class Frame {
@@ -199,7 +133,7 @@ class Map {
   int init_id2 = -1;
   int current_frame_id_ = -1;
   double sre_key_ = 0;
-  double avg_track_length_ = 0;
+  double avg_track_length_ = 0; 
 
   void Init();
 

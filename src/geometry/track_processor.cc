@@ -537,7 +537,7 @@ bool Point3dProcessor::CheckFrameMeasurement(Map &map, int frame_id) {
     no_mea = false;
     break;
   }
-  if (no_mea) LOG(ERROR) << "NO Measurement In Frame " << frame.id;
+  if (no_mea) LOG(ERROR) << "Frame "<<frame.id<<": no measurement\n";
   return no_mea;
 }
 
@@ -546,9 +546,11 @@ void Point3dProcessor::CheckFramesMeasurement(Map &map, double th_rpe_lba, doubl
     if (!frame.registered) continue;
     if (!frame.is_keyframe) continue;
     if (CheckFrameMeasurement(map, frame.id)) {
-      LOG(ERROR) << "no measurement in KGBA";
       TriangulateFramePoint(map, frame.id, th_angle_lba);
       FilterPointsFrame(map, frame.id, th_rpe_lba, th_angle_lba);
+    }
+    if (CheckFrameMeasurement(map, frame.id)){
+      map.frames_[frame.id].registered = false;
     }
   }
 }
@@ -579,4 +581,49 @@ void Point3dProcessor::ContinueFrameTracks(const int frame_id, const std::vector
       map.AddNumCorHavePoint3D(frame_id, p2d_id);
     }
   }
+}
+
+bool CreatePoint3dRAW(const std::vector<std::pair<Pose, Eigen::Vector2d>> &observations, Eigen::Vector3d &p) {
+  size_t data_size = observations.size();
+  std::vector<colmap::TriangulationEstimator::PointData> point_data(data_size);
+  std::vector<colmap::TriangulationEstimator::PoseData> pose_data(data_size);
+  // Prepare the data
+  for (size_t i = 0; i < data_size; ++i) {
+    const auto &[Tcw, p2d] = observations[i];
+    itslam::matrix<3, 3> R = Tcw.q.toRotationMatrix();
+    itslam::vector<3> T = Tcw.t;
+    itslam::matrix<3, 4> P;
+    P << R, T;
+
+    point_data[i].point_normalized = p2d;
+    pose_data[i].proj_matrix = P;
+    pose_data[i].proj_center = Tcw.center();
+  }
+
+  colmap::EstimateTriangulationOptions tri_options;
+  tri_options.min_tri_angle = DegToRad(1.5);
+  tri_options.residual_type = colmap::TriangulationEstimator::ResidualType::ANGULAR_ERROR;
+  tri_options.ransac_options.max_error = DegToRad(2);
+  tri_options.ransac_options.confidence = 0.9999;
+  tri_options.ransac_options.min_inlier_ratio = 0.02;
+  tri_options.ransac_options.max_num_trials = 10000;
+  // Enforce exhaustive sampling for small track lengths.
+  const size_t kExhaustiveSamplingThreshold = 15;
+  if (point_data.size() <= kExhaustiveSamplingThreshold) {
+    tri_options.ransac_options.min_num_trials = NChooseK(point_data.size(), 2);
+  }
+
+  //  make new track;
+  std::vector<char> inlier_mask;
+  if (EstimateTriangulation(tri_options, point_data, pose_data, &inlier_mask, &p)) {
+    int count = 0;
+    for (int k = 0; k < observations.size(); ++k) {
+      if (inlier_mask[k]) {
+        count++;
+      }
+    }
+    printf("%d/%d\n", count, inlier_mask.size());
+    return true;
+  }
+  return false;
 }

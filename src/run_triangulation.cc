@@ -114,18 +114,7 @@ int main(int argc, const char* argv[]) {
 
   Map map;
   PreProcess(pose_path,feature_path ,frame_pair_path, map); 
-
-  // for(auto&fp:map.frame_pairs_){
-  //   std::string img_dir = "/data/2022-07-06T14-39-35/images/";
-  //   auto&f1 = map.frames_[fp.id1];
-  //   auto&f2 = map.frames_[fp.id2];
-  //   cv::Mat img1 = cv::imread(img_dir+f1.name);
-  //   cv::Mat img2 = cv::imread(img_dir+f2.name);
-  //   std::cout<<f1.name<<" "<<f2.name<<" "<<fp.matches.size()<<std::endl; 
-  //   DrawFeatureMatches(img1,img2, f1.points,f2.points,fp.matches);
-  //   cv::waitKey();
-  // }
-
+ 
   BASolver ba_solver;
   Point3dProcessor p3d_processor;
   // TriangulateImage

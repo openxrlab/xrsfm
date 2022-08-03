@@ -183,4 +183,42 @@ class ScaleCost : public ceres::SizedCostFunction<1, 1, 1> {
   double s12;
 };
 
+class ConerCost : public ceres::SizedCostFunction<3, 4, 3, 1, 3> {
+ public:
+  ConerCost(vector3 _p3d_ori, double _w) : p3d_ori(_p3d_ori), w(_w){};
+
+  virtual bool Evaluate(double const *const *parameters, double *residuals, double **jacobians) const {
+    const_map<quaternion> q(parameters[0]);
+    const_map<vector3> t(parameters[1]);
+    double s = parameters[2][0];
+    const_map<vector3> p(parameters[3]);
+    map<vector3> residual(residuals);
+
+    matrix3 R = q.toRotationMatrix();
+    residual = w * (p - (R * (s * p3d_ori) + t));
+    if (jacobians) {
+      if (jacobians[0]) {
+        map<matrix<3, 4, true>> j_q(jacobians[0]);
+        j_q.setZero();
+        j_q.leftCols<3>() = w * (R * skewSymmetric(s * p3d_ori));
+      }
+      if (jacobians[1]) {
+        map<matrix<3, 3, true>> j_t(jacobians[1]);
+        j_t = w * -matrix3::Identity();
+      }
+      if (jacobians[2]) {
+        map<matrix<3, 1, true>> j_s(jacobians[2]);
+        j_s = -w * R * p3d_ori;
+      }
+      if (jacobians[3]) {
+        map<matrix<3, 3, true>> j_p(jacobians[3]);
+        j_p = w * matrix3::Identity();
+      }
+    }
+    return true;
+  }
+  double w;
+  vector3 p3d_ori;
+};
+
 #endif  // CERESBA_COST_FACTOR_H

@@ -9,7 +9,9 @@ void IncrementalMapper::Reconstruct(Map &map){
   error_corrector.ba_solver_ = &ba_solver;
   error_corrector.p3d_processor_ = &p3d_processor;
   error_corrector.only_correct_with_sim3_ = false;
-
+  ViewerThread viewer;
+  viewer.start();
+  
   timer.tot.resume();
   // 1. Map Initialization
   FramePair init_frame_pair;
@@ -17,10 +19,9 @@ void IncrementalMapper::Reconstruct(Map &map){
     FindInitFramePair(map, init_frame_pair);
   }else{
     init_frame_pair = FindPair(map.frame_pairs_, options.init_id1, options.init_id2); 
-  }
-  std::cout<<"Found ok"<<std::endl;
-  InitializeMap(map, init_frame_pair);
-  std::cout<<"Found ok"<<std::endl;
+  } 
+  std::cout << "Found Init Frame Pair Done!" << std::endl;
+  InitializeMap(map, init_frame_pair); 
   ba_solver.GBA(map);
 
   // 2. Map Iterative Extension
@@ -64,6 +65,7 @@ void IncrementalMapper::Reconstruct(Map &map){
     }
 
     UpdateCovisiblity(map, frame_id);
+    viewer.update_map(map);
   }
   timer.tot.stop();
 
@@ -72,5 +74,7 @@ void IncrementalMapper::Reconstruct(Map &map){
   for (auto& timer_ptr : timer.timer_vec) {
     timer_ptr->print();
   } 
+  sleep(1000);
+  viewer.stop();
 }
  

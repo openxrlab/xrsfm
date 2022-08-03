@@ -18,8 +18,8 @@ class ViewerThread {
   void stop();
 
   void update_map(const Map &map);
-  void update_cameras(const std::vector<Pose> &pose_vec);
-  void update_map_colmap(const Map &map);
+  void update_map_colmap(const Map &map); 
+  void add_tag_points(const std::map<int, std::vector<Eigen::Vector3d>> &pt_world_vec);
 
   double camera_size_ = 0.1;
   std::vector<Pose> cameras;

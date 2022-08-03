@@ -2,8 +2,36 @@
 #define CAMERA_H
 
 #include <Eigen/Eigen>
+// #include "xrprimer/data_structure/camera/camera.h"
 
-class Camera;
+// class Camera : public BaseCameraParameter {
+class Camera {
+ public:
+  explicit Camera(int _id = 0, double fx = 0, double fy = 0, double cx = 0, double cy = 0, double d = 0) {
+    id = _id;
+    camera_model = CameraModel::SIMPLE_RADIAL;
+    camera_params = {fx, fy, cx, cy};
+    distort_params = {d, 0, 0, 0, 0};
+  }
+
+  enum CameraModel { OpenCV, SIMPLE_RADIAL } camera_model;
+
+  uint32_t id = -1;
+  // double fx, fy, cx, cy;
+  std::array<double, 4> camera_params;
+  // k1 k2 p1 p2 k3
+  std::array<double, 5> distort_params;
+
+  inline const double fx() const { return camera_params[0]; }
+
+  inline const double fy() const { return camera_params[1]; }
+
+  inline const double cx() const { return camera_params[2]; }
+
+  inline const double cy() const { return camera_params[3]; }
+
+  inline void log() { printf("%d %lf %lf %lf %lf %lf\n", id, fx(), fy(), cx(), cy(), distort_params[0]); }
+};
 
 template <typename T>
 inline void Distortion(const T *extra_params, const T u, const T v, T *du, T *dv) {

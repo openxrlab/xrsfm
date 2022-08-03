@@ -1,5 +1,6 @@
 {
-	"image_dir_path": "/data/ECIM/SfM/Garden/images/",
-	"retrival_path": "/data/ECIM/SfM/Garden/results/pairs-sfm.txt",
-	"output_path": "/data/ECIM/SfM/Garden/results/"
+	"image_dir_path": "/data/ECIM/SfM/ECIM_1DSFM/Yorkminster/images/",
+	"retrival_path": "/data/ECIM/SfM/ECIM_Mat_old/Yorkminster/nv50_all.txt",
+	"matching_type": "ecim",
+	"output_path": "/data/OpenData/Yorkminster/"
 }

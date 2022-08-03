@@ -11,7 +11,8 @@
 
 #define OPEN_VIEW
 constexpr int width = 1024, height = 768, focal = 500;
-const Eigen::Vector3d red(1.0, 0, 0), green(0, 1.0, 0), blue(0, 0, 1.0), yellow(1, 1, 0), grey(0.5, 0.5, 0.5);
+const Eigen::Vector3d red(1.0, 0, 0), green(0, 1.0, 0), blue(0, 0, 1.0), yellow(1, 1, 0), grey(0.5, 0.5, 0.5),
+    black(0, 0, 0);
 
 void ViewerThread::start() {
   worker_running = true;
@@ -57,7 +58,23 @@ void ViewerThread::worker_loop() {
 
     std::unique_lock lk(map_mutex);
     DrawCameras(cameras, colors_cam, camera_size_);
-    DrawPoints(points);
+    if (colors_pt.empty())
+      DrawPoints(points);
+    else { 
+      for (size_t i = 0; i < points.size(); i++) {
+        const Eigen::Vector3d pt = points.at(i);
+        const Eigen::Vector3d color = colors_pt.at(i);
+        if (color == red) {
+          glPointSize(5.0f); 
+        } else {
+          glPointSize(1.0f);
+        }
+        glBegin(GL_POINTS);
+        glColor3f(color(0), color(1), color(2));
+        glVertex3d(pt(0), pt(1), pt(2));
+        glEnd();
+      }
+    }
 
     pangolin::FinishFrame();
     usleep(2000);
@@ -118,21 +135,21 @@ void ViewerThread::update_map_colmap(const Map &map) {
     }
   }
 
-  for (const auto &[id,track] : map.track_map_) {
-    if (!track.outlier)  //&& track.is_keypoint) {
-      points.emplace_back(track.point3d_);
+  for (const auto &[id, track] : map.track_map_) {
+    if (track.outlier)continue;
+    points.emplace_back(track.point3d_);
+    colors_pt.emplace_back(black);
   }
 }
 
-void ViewerThread::update_cameras(const std::vector<Pose> &pose_vec) {
-  cameras = pose_vec;
-  colors_cam.assign(cameras.size(), red);
-  int len = cameras.size()/2;
-  for(int i = 0;i<len;++i){
-    colors_cam[i] = green;
-    double dist = (cameras[i].center()-cameras[len+i].center()).norm();
-    // if(dist>1.0){
-    //   colors_cam[i] = blue;
-    // }
+void ViewerThread::add_tag_points(const std::map<int, std::vector<Eigen::Vector3d>> &pt_world_vec) {
+  for (const auto &[id, pt_world] : pt_world_vec) {
+    if (pt_world.empty()) continue;
+    for (const auto &pt : pt_world) { 
+      points.emplace_back(pt);
+      colors_pt.emplace_back(red);
+    }
   }
 }
+
+

@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.21)
 
 project(ecim)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/CMakeHelper.cmake NO_POLICY_SCOPE)
-
 option(CUDA_ENABLED "Whether to enable CUDA, if available" ON)
 set(CUDA_ARCHS "Auto" CACHE STRING "List of CUDA architectures for which to \
 generate code, e.g., Auto, All, Maxwell, Pascal, ...")
@@ -93,7 +91,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 add_subdirectory(3rdparty/SiftGPU)
-
+add_subdirectory(3rdparty/apriltag)
 
 if (CUDA_ENABLED)
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --use_fast_math")
@@ -154,8 +152,7 @@ target_include_directories(ecim
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/src/geometry/colmap
         ${CMAKE_SOURCE_DIR}/3rdparty/SiftGPU
-        ${EIGEN3_INCLUDE_DIRS}
-        # /data1/Code/TVCG_CoLi/MGBA/3rdparty/ceres-solver/internal/
+        ${EIGEN3_INCLUDE_DIRS} 
         )
 
 target_link_libraries(ecim
@@ -168,6 +165,8 @@ target_link_libraries(ecim
         XRPrimer::xrprimer
         )
  
+add_executable(run_matching src/run_matching.cc)
+target_link_libraries(run_matching ecim)
 
 add_executable(rec_seq src/rec_seq.cc)
 target_link_libraries(rec_seq ecim)
@@ -178,9 +177,11 @@ target_link_libraries(rec_1dsfm ecim)
 add_executable(rec_kitti src/rec_kitti.cc)
 target_link_libraries(rec_kitti ecim)
 
-add_executable(run_matching src/run_matching.cc)
-target_link_libraries(run_matching ecim)
- 
 add_executable(run_triangulation src/run_triangulation.cc)
 target_link_libraries(run_triangulation ecim)
- 
+
+add_executable(tag_extract src/tag_extract.cc)
+target_link_libraries(tag_extract apriltag ${OpenCV_LIBS} stdc++fs )
+
+add_executable(tag_refine src/tag_refine.cc)
+target_link_libraries(tag_refine ecim)

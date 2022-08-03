@@ -55,8 +55,8 @@ namespace colmap {
 // @param points          Image coordinates.
 // @param normed_points   Transformed image coordinates.
 // @param matrix          3x3 transformation matrix.
-void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d>& points,
-                                   std::vector<Eigen::Vector2d>* normed_points, Eigen::Matrix3d* matrix);
+// void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d>& points,
+//                                    std::vector<Eigen::Vector2d>* normed_points, Eigen::Matrix3d* matrix);
 
 // Calculate the residuals of a set of corresponding points and a given
 // fundamental or essential matrix.
@@ -67,9 +67,9 @@ void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d>& points,
 // @param points2     Second set of corresponding points as Nx2 matrix.
 // @param E           3x3 fundamental or essential matrix.
 // @param residuals   Output vector of residuals.
-void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d>& points1,
-                                const std::vector<Eigen::Vector2d>& points2, const Eigen::Matrix3d& E,
-                                std::vector<double>* residuals);
+// void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d>& points1,
+//                                 const std::vector<Eigen::Vector2d>& points2, const Eigen::Matrix3d& E,
+//                                 std::vector<double>* residuals);
 
 // Calculate the squared reprojection error given a set of 2D-3D point
 // correspondences and a projection matrix. Returns DBL_MAX if a 3D point is

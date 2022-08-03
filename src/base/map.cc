@@ -8,6 +8,7 @@
 #include "geometry/essential.h"
 #include "geometry/track_processor.h"
 
+
 int CorrespondenceGraph::GetMatch(int frame_id1, int frame_id2, std::vector<Match> &matches) {
   int count = 0;
   matches.resize(0);
@@ -513,7 +514,7 @@ bool UpdateCovisiblity(Map &map, int frame_id) {
   if (count_covisibile_images == 0) {
     map.DeregistrationFrame(frame_id);
     map.frames_[frame_id].registered_fail = true;
-    LOG(ERROR) << "!!! fail to registered, no enough covisibility\n";
+    LOG(ERROR) << "Frame "<<frame_id<<": fail to registered , no enough covisibility\n";
     return false;
   }
 

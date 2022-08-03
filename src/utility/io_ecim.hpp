@@ -236,10 +236,7 @@ inline void SaveSfMState(const std::string &file_name, const int &iter, Map &map
 
 inline void LoadSfMState(const std::string &file_name, int &iter, Map &map) {
   std::ifstream file(file_name, std::ios::in | std::ios::binary);
-  CHECK(file.is_open());
-  if(file.is_open()){
-    std::cout<<"ok";
-  }
+  CHECK(file.is_open()); 
   read_data(file, iter);
 
   for (auto &frame : map.frames_) {

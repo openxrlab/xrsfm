@@ -624,5 +624,7 @@ void ExpansionAndMatching(Map &map, const std::map<int, std::vector<int>> &id2ra
               << all_candidates.size() << std::endl;
     std::cout << "precision: " << 100.0 * map.frame_pairs_.size() / all_candidates.size()
               << std::endl;
+    timer_searching.print();
+    timer_matching.print();
   }
 }

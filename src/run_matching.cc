@@ -137,6 +137,7 @@ void MatchingSeq(std::vector<Frame>&frames,const std::string &fp_path,std::map<i
     for (int k = 0; k < 20 && i + k < num; ++k) set_pairs.insert(std::pair<int,int>(i, i + k));
   }
   for(auto&[id1,vec]:id2rank){
+    if(id1%5!=0)continue;
     for(auto&id2:vec){
       set_pairs.insert(std::pair<int,int>(id1, id2));
     }
@@ -150,10 +151,11 @@ void MatchingSeq(std::vector<Frame>&frames,const std::string &fp_path,std::map<i
 }
 
 int main(int argc, const char* argv[]) {
-  std::string config_path = "config_open.json";
+  std::string config_path = "../config_open.json";
   auto config_json = LoadJSON(config_path);
   const std::string image_dir_path = config_json["image_dir_path"];
   const std::string retrival_path = config_json["retrival_path"];
+  const std::string matching_type = config_json["matching_type"];
   const std::string output_path = config_json["output_path"];
   std::string ftr_path = output_path + "ftr.bin";
   std::string size_path = output_path + "size.bin";
@@ -181,32 +183,35 @@ int main(int argc, const char* argv[]) {
   std::map<int, std::vector<int>> id2rank;
   LoadRetrievalRank(retrival_path, name2id, id2rank);
 
-  // MatchingSeq(frames,fp_path,id2rank);
   Timer timer("%lf s\n");
   timer.start();
-  std::vector<std::pair<int, int>> id_pairs;
-  ExtractNearestImagePairs(id2rank, 25, id_pairs);
-  std::vector<FramePair> frame_pairs;
-  FeatureMatching(frames, id_pairs, frame_pairs, true);
-  SaveFramePairs(fp_path, frame_pairs);
+  if(matching_type=="sequential"){
+    MatchingSeq(frames,fp_path,id2rank);
+  }else if(matching_type=="unordered"){
+    std::vector<std::pair<int, int>> id_pairs;
+    ExtractNearestImagePairs(id2rank, 25, id_pairs);
+    std::vector<FramePair> frame_pairs;
+    FeatureMatching(frames, id_pairs, frame_pairs, true);
+    SaveFramePairs(fp_path, frame_pairs);
+  }else{
+    std::vector<std::pair<int, int>> id_pairs;
+    ExtractNearestImagePairs(id2rank, 5, id_pairs);
+    std::vector<FramePair> frame_pairs;
+    GetInitFramePairs(fp_init_path, frames, id_pairs, frame_pairs);
+
+    const int num_iteration = 5;
+    const bool use_fundamental = true;
+    const auto [init_id1, init_id2] = GetInitId(num_image, frame_pairs);
+
+    Map map;
+    map.frames_ = frames;
+    map.frame_pairs_ = frame_pairs;
+    ExpansionAndMatching(map, id2rank, num_iteration, image_size_vec, init_id1, init_id2,
+                         use_fundamental, id_pairs);
+    SaveFramePairs(fp_path, map.frame_pairs_);
+  }
   timer.stop();
   timer.print();
-
-  // std::vector<std::pair<int, int>> id_pairs;
-  // ExtractNearestImagePairs(id2rank, 5, id_pairs);
-  // std::vector<FramePair> frame_pairs;
-  // GetInitFramePairs(fp_init_path, frames, id_pairs, frame_pairs);
-
-  // const int num_iteration = 5;
-  // const bool use_fundamental = true;
-  // const auto [init_id1, init_id2] = GetInitId(num_image, frame_pairs);
-
-  // Map map;
-  // map.frames_ = frames;
-  // map.frame_pairs_ = frame_pairs;
-  // ExpansionAndMatching(map, id2rank, num_iteration, image_size_vec, init_id1, init_id2,
-  //                      use_fundamental, id_pairs);
-  // SaveFramePairs(fp_path, map.frame_pairs_);
 
   return 0;
 }

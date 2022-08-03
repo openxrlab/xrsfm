@@ -1,7 +1,7 @@
 {
-	"bin_path": "/data/2022-07-06T14-39-35/results/",
-	"images_path": "/data/2022-07-06T14-39-35/images/",
-	"output_path": "/data/2022-07-06T14-39-35/results/1/",
+	"bin_path": "/data1/2022-07-06T14-39-35/results/",
+	"images_path": "/data1/2022-07-06T14-39-35/images/",
+	"output_path": "/data1/2022-07-06T14-39-35/results/1/",
 	"init_id1": 0,
 	"init_id2": 10
 }

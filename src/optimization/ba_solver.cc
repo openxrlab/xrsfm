@@ -247,7 +247,7 @@ inline void BASolver::SetUp(ceres::Problem &problem, Map &map, Frame &frame) {
     num_mea++;
   }
   if (num_mea == 0) {
-    LOG(ERROR) << "BA:no measurement in frame " << frame.id;
+    LOG(ERROR) << "BA: NO Measurement In Frame " << frame.id;
   } else {
     problem.SetParameterization(frame.Tcw.q.coeffs().data(), new QuatParam);
   }
@@ -271,7 +271,7 @@ inline void BASolver::SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame, 
     }
   }
   if (num_mea == 0) {
-    LOG(ERROR) << "BA:no measurement in frame " << frame.id;
+    LOG(ERROR) << "LBA: NO Measurement In Frame " << frame.id;
   } else {
     problem.SetParameterization(frame.Tcw.q.coeffs().data(), new QuatParam);
   }
@@ -442,8 +442,7 @@ void BASolver::LBA(int frame_id, Map &map) {//TODO boost
   //   }
   // }
  
-  ceres::Solver::Options solver_options = InitSolverOptions();
-  solver_options.num_threads = 1;
+  ceres::Solver::Options solver_options = InitSolverOptions(); 
   solver_options.max_num_iterations = 5;
   solver_options.function_tolerance = 1e-4;
   solver_options.parameter_tolerance = 1e-5;
@@ -527,7 +526,7 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bo
   ceres::Solver::Options solver_options = InitSolverOptions();
   solver_options.minimizer_progress_to_stdout = true;
   solver_options.initial_trust_region_radius = 1e6;
-  solver_options.max_num_iterations = 50;
+  solver_options.max_num_iterations = 20;
   solver_options.function_tolerance = 1e-4;
   solver_options.parameter_tolerance = 1e-5;
   ceres::Solver::Summary summary;

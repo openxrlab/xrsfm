@@ -7,6 +7,9 @@
 
 #include "base/map.h"
 
+bool CreatePoint3dRAW(const std::vector<std::pair<Pose, Eigen::Vector2d>> &observations, Eigen::Vector3d &p);
+
+
 class Point3dProcessor {
  public:
   Point3dProcessor(){};

@@ -27,7 +27,7 @@ void PreProcess(const std::string dir_path,const std::string images_path, Map& m
 
   // set cameras & image name
   std::vector<Camera> cameras;
-  Camera seq(0, 1000,1000, 640, 360, 0.0); 
+  Camera seq(0, 1000,1000, 640, 360, 0.0); //ReadCamera
   // Camera seq =  Camera(0, 886.420017084725,881.278105028345, 479.5, 269.5, -0.004); 
   cameras.emplace_back(seq);
   for (auto& frame : frames) {
@@ -86,12 +86,7 @@ int main(int argc, char* argv[]) {
   imapper.Reconstruct(map);
   std::cout << "Reconstruction Done!" << std::endl;
    
-  // 4. Output Trajectory
-  // std::vector<double> timestamp_vec;
-  // LoadTimeStamp(seq_path + "times.txt", timestamp_vec);
-  // UpdateFrameTimeStamp(map.frames_, timestamp_vec);
-  // WriteTrajectory(map, output_path + seq_name + "_test.tum");
-
+  // 4. Output 
   WriteColMapDataBinary(output_path , map); 
 
   return 0;
