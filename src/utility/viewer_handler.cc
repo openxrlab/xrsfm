@@ -7,11 +7,11 @@
 namespace pangolin {
 MyHandler3D::~MyHandler3D(){};
 void MyHandler3D::Keyboard(View &d, unsigned char key, int x, int y, bool pressed) {
-  if (key == 'n' && pressed) {
-    draw_current = false;
-  } else if (key == 'o' && pressed) {
-    init_viewpoint = true;
-  }
+    if (key == 'n' && pressed) {
+        draw_current = false;
+    } else if (key == 'o' && pressed) {
+        init_viewpoint = true;
+    }
 }
 
-}  // namespace pangolin
+} // namespace pangolin

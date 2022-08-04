@@ -71,8 +71,10 @@ using const_map = Eigen::Map<const T>;
  **/
 using quaternion = Eigen::Quaternion<double>;
 
-inline constexpr size_t nil() { return size_t(-1); }
+inline constexpr size_t nil() {
+    return size_t(-1);
+}
 
-}  // namespace xrsfm
+} // namespace xrsfm
 
-#endif  // ITSLAM_GLOBAL_H
+#endif // ITSLAM_GLOBAL_H

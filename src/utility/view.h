@@ -12,7 +12,7 @@
 #include "base/map.h"
 #include "viewer_handle.h"
 
-namespace xrsfm{
+namespace xrsfm {
 void DrawFeature(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints);
 
 void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2, const std::vector<cv::KeyPoint> &kpts1,
@@ -35,22 +35,22 @@ void DrawCameras(const std::vector<Pose> &cameras, const std::vector<Eigen::Vect
 void DrawPoints(const std::vector<Eigen::Vector3d> &points);
 
 class Viewer {
- public:
-  void Init();
-  void Draw(const Map &map, bool stop);
-  void DrawKey(const Map &map, bool stop);
-  void DrawLoop(const Map &map, const LoopInfo loop_info);
-  void DrawGraph(const Map &map, bool stop);
-  void DrawColor(const Map &map, bool stop);
+  public:
+    void Init();
+    void Draw(const Map &map, bool stop);
+    void DrawKey(const Map &map, bool stop);
+    void DrawLoop(const Map &map, const LoopInfo loop_info);
+    void DrawGraph(const Map &map, bool stop);
+    void DrawColor(const Map &map, bool stop);
 
-  pangolin::OpenGlRenderState s_cam;
-  pangolin::View d_cam;
-  //    pangolin::MyHandler3D *handle;
-  std::unique_ptr<pangolin::MyHandler3D> handler;
-  //    void *handle;
-  bool color_in_order_;
-  double camera_size_ = 0.1;
-  Map map;
+    pangolin::OpenGlRenderState s_cam;
+    pangolin::View d_cam;
+    //    pangolin::MyHandler3D *handle;
+    std::unique_ptr<pangolin::MyHandler3D> handler;
+    //    void *handle;
+    bool color_in_order_;
+    double camera_size_ = 0.1;
+    Map map;
 };
-}
-#endif  // ECIM_VIEW_H
+} // namespace xrsfm
+#endif // ECIM_VIEW_H

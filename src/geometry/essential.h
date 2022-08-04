@@ -18,9 +18,9 @@ std::vector<matrix<3>> solve_essential_5pt(const std::array<vector<2>, 5> &point
 
 // d(p2, E * p1)
 inline double essential_geometric_error(const matrix<3> &E, const vector<2> &p1, const vector<2> &p2) {
-  vector<3> Ep1 = E * p1.homogeneous();
-  double r = p2.homogeneous().transpose() * Ep1;
-  return r * r / Ep1.segment<2>(0).squaredNorm();
+    vector<3> Ep1 = E * p1.homogeneous();
+    double r = p2.homogeneous().transpose() * Ep1;
+    return r * r / Ep1.segment<2>(0).squaredNorm();
 }
 
 matrix<3> find_essential_matrix(const std::vector<vector<2>> &points1, const std::vector<vector<2>> &points2,
@@ -42,6 +42,6 @@ void decompose_rt(const Eigen::Matrix3d &E, const std::vector<vector<2>> &points
                   const std::vector<vector<2>> &points2, matrix<3> &R, vector<3> &T,
                   std::vector<vector<3>> &result_points, std::vector<char> &result_status);
 
-}  // namespace xrsfm
+} // namespace xrsfm
 
-#endif  // ITSLAM_FIVE_POINT_H
+#endif // ITSLAM_FIVE_POINT_H

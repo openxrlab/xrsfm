@@ -15,7 +15,7 @@
 
 // #define USE_ORB
 
-namespace xrsfm{
+namespace xrsfm {
 bool CreateSiftGPUMatcher(SiftMatchGPU *sift_match_gpu);
 
 void SiftMatch(const FeatureDescriptors &descs1, const FeatureDescriptors &descs2,
@@ -42,7 +42,7 @@ void FeatureMatchingSeq(const std::vector<Frame> &frames, std::vector<FramePair>
 void FeatureMatching(const std::vector<Frame> &frames,
                      const std::vector<std::pair<int, int>> &candidate_pairs,
                      std::vector<FramePair> &frame_pairs,
-                     bool b_use_fundamental = false);  // DONE(BCHO)
+                     bool b_use_fundamental = false); // DONE(BCHO)
 
 void FeatureMatchingUnorder(const std::vector<Frame> &frames, std::vector<FramePair> &frame_pairs);
 
@@ -59,7 +59,7 @@ void ExpansionMatching(Map &map, const int num_iteration, const std::string &nva
                        bool b_use_initial_frame_prior, bool b_use_fundamental = false,
                        bool verbose = false,
                        const std::vector<std::string> *sequential_image_names = nullptr,
-                       const std::string &output_dir = "");  // DONE(BCHO)
+                       const std::string &output_dir = ""); // DONE(BCHO)
 
 void ExpansionAndMatching(Map &map, const std::map<int, std::vector<int>> &retrieval_rank_of_frames,
                           const int num_iteration, const std::vector<ImageSize> &images,
@@ -80,5 +80,5 @@ void CreateClusterMap(const Map &map, const std::vector<int> &root_of_frames,
                       std::map<std::string, int> &name2clusterindex_map,
                       std::vector<ImageSize> &clusterimage_size);
 
-}
-#endif  // WSFM_FEATURE_PROCESSING_H
+} // namespace xrsfm
+#endif // WSFM_FEATURE_PROCESSING_H

@@ -2,16 +2,15 @@
 #ifndef INCREMENTAL_MAPPER_H_
 #define INCREMENTAL_MAPPER_H_
 
- 
-#include "base/map.h" 
+#include "base/map.h"
 #include "geometry/pnp.h"
-#include "geometry/track_processor.h" 
+#include "geometry/track_processor.h"
 #include "geometry/error_corrector.h"
 #include "geometry/map_initializer.h"
-#include "optimization/ba_solver.h" 
-#include "utility/timer.h" 
+#include "optimization/ba_solver.h"
+#include "utility/timer.h"
 
-namespace xrsfm{
+namespace xrsfm {
 struct IncrementalMapperOptions {
     bool correct_pose = false;
     bool stop_when_register_fail = false;
@@ -23,8 +22,8 @@ struct IncrementalMapperOptions {
     double th_angle_gba = 1.5;
 };
 
-class IncrementalMapper{
-public:
+class IncrementalMapper {
+  public:
     IncrementalMapper();
     void Reconstruct(Map &map);
     TimerArray timer;
@@ -33,7 +32,6 @@ public:
     ErrorCorrector error_corrector;
     IncrementalMapperOptions options;
 };
-}
+} // namespace xrsfm
 
-
-#endif  // COLMAP_SRC_CONTROLLERS_INCREMENTAL_MAPPER_H_
+#endif // COLMAP_SRC_CONTROLLERS_INCREMENTAL_MAPPER_H_

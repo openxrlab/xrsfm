@@ -10,7 +10,7 @@
 
 #include "base/map.h"
 
-namespace xrsfm{
+namespace xrsfm {
 bool ComputeRegisterInlierLoop(const int next_frame_id, LoopInfo &loop_info, Map &map);
 
 bool RegisterNextImageLoop(const int next_frame_id, LoopInfo &loop_info, Map &map);
@@ -32,5 +32,5 @@ bool RegisterNextImageLocal(const int next_frame_id, const std::set<int> cor_set
 bool SolvePnP_colmap(const std::vector<Eigen::Vector2d> &cor_points2ds,
                      const std::vector<Eigen::Vector3d> &cor_points3ds, double max_error, Pose &tcw,
                      std::vector<char> &inlier_mask);
-}
-#endif  // WSFM_PNP_H
+} // namespace xrsfm
+#endif // WSFM_PNP_H

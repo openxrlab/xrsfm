@@ -1,6 +1,6 @@
 {
-	"image_dir_path": "/data/ECIM/SfM/ECIM_1DSFM/Yorkminster/images/",
-	"retrival_path": "/data/ECIM/SfM/ECIM_Mat_old/Yorkminster/nv50_all.txt",
+	"image_dir_path": "/data/ECIM/SfM/ECIM_1DSFM/Piccadilly/images/",
+	"retrival_path": "/data/ECIM/SfM/ECIM_Mat_old/Piccadilly/nv50_all.txt",
 	"matching_type": "ecim",
-	"output_path": "/data/OpenData/Yorkminster/"
+	"output_path": "/data/OpenData/Piccadilly/"
 }

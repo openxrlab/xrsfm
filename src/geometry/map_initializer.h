@@ -7,11 +7,11 @@
 
 #include "base/map.h"
 
-namespace xrsfm{
+namespace xrsfm {
 bool FindInitFramePair(const Map &map, FramePair &init_frame_pair);
 
 void InitializeMap(Map &map, FramePair &frame_pair);
 
 void InitializeWithGT(Map &map, FramePair &frame_pair, Pose pose1, Pose pose2);
-}
-#endif  // ECIM_ECIM_MAP_INITIALIZER_H_
+} // namespace xrsfm
+#endif // ECIM_ECIM_MAP_INITIALIZER_H_
