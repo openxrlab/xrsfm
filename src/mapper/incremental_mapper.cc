@@ -10,8 +10,8 @@ void IncrementalMapper::Reconstruct(Map &map){
   error_corrector.ba_solver_ = &ba_solver;
   error_corrector.p3d_processor_ = &p3d_processor;
   error_corrector.only_correct_with_sim3_ = false;
-  ViewerThread viewer;
-  viewer.start();
+  // ViewerThread viewer;
+  // viewer.start();
   
   timer.tot.resume();
   // 1. Map Initialization
@@ -66,7 +66,7 @@ void IncrementalMapper::Reconstruct(Map &map){
     }
 
     UpdateCovisiblity(map, frame_id);
-    viewer.update_map(map);
+    // viewer.update_map(map);
   }
   timer.tot.stop();
 
@@ -75,8 +75,8 @@ void IncrementalMapper::Reconstruct(Map &map){
   for (auto& timer_ptr : timer.timer_vec) {
     timer_ptr->print();
   } 
-  sleep(1000);
-  viewer.stop();
+  // sleep(1000);
+  // viewer.stop();
 }
 }
  

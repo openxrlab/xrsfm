@@ -488,8 +488,8 @@ void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
   std::cout << summary.BriefReport() << "\n";
 }
 
-void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bool order_frames) {
-  KeyFrameSelection(map, fix_key_frame_ids, order_frames); 
+void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids, const bool is_sequential_data) {
+  KeyFrameSelection(map, fix_key_frame_ids, is_sequential_data); 
   int num_rf = 0, num_kf = 0, num_mea = 0;
 
   ceres::Problem problem;

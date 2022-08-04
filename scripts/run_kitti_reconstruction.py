@@ -1,17 +1,21 @@
 import os
 
-seq_name_list = [
-    "00",
-    "01",
-    "02",
-    "03",
-    "04",
-    "05",
-    "06",
-    "07",
-    "08",
-    "09",
-    "10"
+# seq_name_list = [
+#     "00",
+#     "01",
+#     "02",
+#     "03",
+#     "04",
+#     "05",
+#     "06",
+#     "07",
+#     "08",
+#     "09",
+#     "10"
+# ]
+seq_name_list = [ 
+    "01", 
+    "05"
 ]
  
 config_path = "/home/yzc/Projects/xrsfm/config_kitti.json"
@@ -22,7 +26,7 @@ for seq_name in seq_name_list:
 
     init_id1 = 0
     if seq_name == '01':
-        init_id1 = 500
+        init_id1 = 400
     if seq_name == '06':
         init_id1 = 200
     init_id2 = init_id1+10

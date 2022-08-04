@@ -531,10 +531,7 @@ bool UpdateCovisiblity(Map &map, int frame_id) {
   return true;
 }
 
-void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id, const bool order_frames) {
-  // constexpr int th_obs = 3;
-  // constexpr int num_min_obs = 150;
-  // constexpr double th_min_ratio = 0.5;
+void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id, const bool is_sequential_data) { 
   constexpr int th_obs = 3;
   constexpr int num_min_obs = 200;
   constexpr double th_min_ratio = 0.6;
@@ -570,8 +567,8 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id, const b
     }
     if (id_covisibility.empty()) continue;
 
-    // step3: ensure connect between ordered data
-    if (order_frames || frame.camera_id == map.cameras_.size() - 1) {
+    // step3: ensure connect between sequential data
+    if (is_sequential_data || frame.camera_id == map.cameras_.size() - 1) {
       int min_connect = INT_MAX;
       for (auto it = id_covisible_key.begin(); next(it) != id_covisible_key.end(); it++) {
         int id1 = *it, id2 = *next(it);

@@ -192,7 +192,7 @@ bool FindPair(const std::vector<FramePair> &frame_pairs, const int id1, const in
 
 bool UpdateCovisiblity(Map &map, int frame_id);
 
-void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id, const bool order_frames = false);
+void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id, const bool is_sequential_data = false);
 
 void UpdateByRefFrame(Map &map);
 

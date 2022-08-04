@@ -3,8 +3,6 @@ import os
 # seq_name_list = ['Alamo', 'Ellis_Island', 'Gendarmenmarkt', 'Madrid_Metropolis', 'Montreal_Notre_Dame', 'NYC_Library', 'Piazza_del_Popolo',
 #  'Piccadilly', 'Roman_Forum', 'Tower_of_London', 'Trafalgar', 'Union_Square', 'Vienna_Cathedral', 'Yorkminster']
  
-seq_name_list = ['Union_Square', 'Vienna_Cathedral', 'Yorkminster']
- 
 config_path = "/home/yzc/Projects/xrsfm/config_open.json"
 image_dir_path = "/data/ECIM/SfM/ECIM_1DSFM/"
 retrival_dir_path = "/data/ECIM/SfM/ECIM_Mat_old/"

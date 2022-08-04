@@ -18,9 +18,9 @@ struct IncrementalMapperOptions {
     int init_id1 = -1;
     int init_id2 = -1;
     double th_rpe_lba = 16;
-    double th_angle_lba = 2.0;
+    double th_angle_lba = 1.5;
     double th_rpe_gba = 16;
-    double th_angle_gba = 2.0;
+    double th_angle_gba = 1.5;
 };
 
 class IncrementalMapper{
