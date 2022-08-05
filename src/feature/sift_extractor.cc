@@ -5,7 +5,6 @@
 #include "sift_extractor.h"
 
 #include <GL/glew.h>
-
 #include <numeric>
 
 namespace xrsfm {

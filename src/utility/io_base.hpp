@@ -8,6 +8,7 @@
 #include <iostream>
 
 namespace xrsfm {
+
 template <typename T>
 inline void read_data(std::ifstream &file, T &data, bool log = false) {
     file.read(reinterpret_cast<char *>(&data), sizeof(T));
@@ -64,4 +65,5 @@ inline void write_data_vec_txt(std::ofstream &file, T *data, int num) {
     for (int i = 0; i < num; ++i) file << data[i] << " ";
     file << std::endl;
 }
+
 } // namespace xrsfm

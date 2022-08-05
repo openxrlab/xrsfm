@@ -1,7 +1,7 @@
 {
-	"image_dir_path": "/data/ECIM/SfM/ECIM_1DSFM/Ellis_Island/images/",
-	"bin_dir_path": "/data/OpenData/Ellis_Island//",
-	"output_path": "/data/OpenData/Ellis_Island/",
+	"image_dir_path": "/data/ECIM/SfM/ECIM_1DSFM/Yorkminster/images/",
+	"bin_dir_path": "/data/OpenData/Yorkminster//",
+	"output_path": "/data/OpenData/Yorkminster/",
 	"camera_size": 0.5,
 	"debug": 0
 }

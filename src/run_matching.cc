@@ -83,14 +83,6 @@ inline void ExtractNearestImagePairs(const std::map<int, std::vector<int>>& id2r
     });
 }
 
-inline int GetIdFromName(const std::map<std::string, int>& name2id_map, const std::string& name) {
-    if (!name2id_map.count(name)) {
-        std::cerr << "Error: can not find " << name << "\n";
-        return;
-    }
-    return name2id_map.at(name);
-}
-
 std::tuple<int, int> GetInitId(const int num_image, std::vector<FramePair>& frame_pairs) {
     std::vector<std::map<int, int>> id2cor_num_vec(num_image);
     std::vector<std::pair<int, int>> connect_number_vec(num_image);
@@ -111,23 +103,23 @@ std::tuple<int, int> GetInitId(const int num_image, std::vector<FramePair>& fram
                   return a.second > b.second;
               });
     const int init_id1 = connect_number_vec[0].first;
-    for (auto& fp : frame_pairs) {
-        if (fp.id1 == init_id1 || fp.id2 == init_id1) {
-            std::cout << "infp: " << fp.id1 << " " << fp.id2 << " " << fp.matches.size() << " "
-                      << fp.inlier_num << std::endl;
-        }
-    }
-    std::cout << "init_id1: " << connect_number_vec[0].first << " " << connect_number_vec[0].second
-              << std::endl;
+    // for (auto& fp : frame_pairs) {
+    //     if (fp.id1 == init_id1 || fp.id2 == init_id1) {
+    //         std::cout << "infp: " << fp.id1 << " " << fp.id2 << " " << fp.matches.size() << " "
+    //                   << fp.inlier_num << std::endl;
+    //     }
+    // // }
+    // std::cout << "init_id1: " << connect_number_vec[0].first << " number: " << connect_number_vec[0].second
+    //           << std::endl;
     int init_id2 = -1;
     for (auto& [id, number] : connect_number_vec) {
         if (id2cor_num_vec[init_id1].count(id) != 0 && id2cor_num_vec[init_id1][id] >= 100) {
             init_id2 = id;
-            std::cout << id << " " << number << std::endl;
+            // std::cout << id << " " << number << std::endl;
             break;
         }
     }
-    std::cout << id2cor_num_vec[init_id1][init_id2] << std::endl;
+    // std::cout << id2cor_num_vec[init_id1][init_id2] << std::endl;
     return std::tuple<int, int>(init_id1, init_id2);
 }
 
@@ -151,7 +143,7 @@ void MatchingSeq(std::vector<Frame>& frames, const std::string& fp_path, std::ma
 }
 
 int main(int argc, const char* argv[]) {
-    std::string config_path = "../config_open.json";
+    std::string config_path = "./config_open.json";
     auto config_json = LoadJSON(config_path);
     const std::string image_dir_path = config_json["image_dir_path"];
     const std::string retrival_path = config_json["retrival_path"];
@@ -177,11 +169,11 @@ int main(int argc, const char* argv[]) {
     }
     std::cout << "Load Image Info Done.\n";
 
-    // 2.extract
+    // 2.feature extraction
     GetFeatures(image_dir_path, ftr_path, frames);
     std::cout << "Extract Features Done.\n";
 
-    // 5.EC image matching
+    // 5.image matching
     std::map<int, std::vector<int>> id2rank;
     LoadRetrievalRank(retrival_path, name2id, id2rank);
     std::cout << "Load Retrieval Info Done.\n";
@@ -203,13 +195,13 @@ int main(int argc, const char* argv[]) {
         GetInitFramePairs(fp_init_path, frames, id_pairs, frame_pairs);
         std::cout << "Init Matching Done.\n";
 
-        const int num_iteration = 5;
-        const bool use_fundamental = true;
+        constexpr int num_iteration = 5;
+        constexpr bool use_fundamental = true;
         const auto [init_id1, init_id2] = GetInitId(num_image, frame_pairs);
 
         Map map;
-        map.frames_ = frames;
-        map.frame_pairs_ = frame_pairs;
+        map.frames_ = std::move(frames);
+        map.frame_pairs_ = std::move(frame_pairs);
         ExpansionAndMatching(map, id2rank, num_iteration, image_size_vec, init_id1, init_id2,
                              use_fundamental, id_pairs);
         SaveFramePairs(fp_path, map.frame_pairs_);

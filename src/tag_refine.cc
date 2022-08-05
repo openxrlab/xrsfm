@@ -10,7 +10,6 @@
 #include "utility/timer.h"
 #include "utility/viewer.h"
 
-using namespace ceres;
 using namespace xrsfm;
 
 void logRPE(const Map &map) {
@@ -126,11 +125,10 @@ int main(int argc, char *argv[]) {
         pt_world_vec[tag_id] = pt_world;
     }
 
-    //
     double scale = 1.0;
     std::map<int, Pose> tag_vec;
     std::vector<vector3> pt_tag = get_tag(tag_length);
-    Problem problem;
+    ceres::Problem problem;
     // compute scale and tag_pose
     for (auto &[tag_id, frame_obs] : tag_obs_normalized) {
         auto &pt_world = pt_world_vec[tag_id];
@@ -148,7 +146,7 @@ int main(int argc, char *argv[]) {
         auto &T_w_tag = tag_vec[tag_id];
         for (int i = 0; i < 4; ++i) {
             // pt_world = scale * T_w_tag * pt_tag;
-            ceres::CostFunction *cost_function = new ConerCost(pt_tag[i], 1.0);
+            ceres::CostFunction *cost_function = new TagCost(pt_tag[i], 1.0);
             problem.AddResidualBlock(cost_function, nullptr, T_w_tag.q.coeffs().data(), T_w_tag.t.data(), &scale,
                                      pt_world[i].data());
             problem.SetParameterBlockConstant(pt_world[i].data());

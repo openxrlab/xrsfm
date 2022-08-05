@@ -21,7 +21,8 @@ void PreProcess(const std::string dir_path, const std::string images_path, Map& 
 
     // set cameras & image name
     std::vector<Camera> cameras;
-    Camera seq(0, 1000, 1000, 640, 360, 0.0); //ReadCamera
+    // TODO: ReadCamera
+    Camera seq(0, 1000, 1000, 640, 360, 0.0);
     // Camera seq =  Camera(0, 886.420017084725,881.278105028345, 479.5, 269.5, -0.004);
     cameras.emplace_back(seq);
     for (auto& frame : frames) {

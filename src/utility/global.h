@@ -32,6 +32,7 @@ template <int Rows = Eigen::Dynamic, int Cols = Rows, bool UseRowMajor = false, 
 using matrix = typename std::conditional<Rows != 1 && Cols != 1,
                                          Eigen::Matrix<T, Rows, Cols, UseRowMajor ? Eigen::RowMajor : Eigen::ColMajor>,
                                          Eigen::Matrix<T, Rows, Cols>>::type;
+using matrix3 = matrix<3, 3>;
 
 /**
  * @brief Row vector type used in itslam.
@@ -41,6 +42,8 @@ using matrix = typename std::conditional<Rows != 1 && Cols != 1,
  **/
 template <int Rows = Eigen::Dynamic, typename T = double>
 using vector = matrix<Rows, 1, false, T>;
+using vector2 = vector<2>;
+using vector3 = vector<3>;
 
 /**
  * @brief Maps continuous memory to a compatible matrix/vector/quaternion.

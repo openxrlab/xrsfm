@@ -15,6 +15,7 @@
 #include "3rdparty/json/json.hpp"
 
 namespace xrsfm {
+
 inline nlohmann::json LoadJSON(const std::string config_path) {
     nlohmann::json config_json;
     std::ifstream ifs(config_path);
@@ -30,20 +31,6 @@ inline void LoadImageNames(const std::string &dir_path, std::vector<std::string>
         image_names.emplace_back(filename);
     }
     std::sort(image_names.begin(), image_names.end());
-}
-
-inline void LoadImages(const std::string common_path, const std::vector<std::string> &image_paths,
-                       std::vector<cv::Mat> &images) {
-    images.clear();
-    images.reserve(image_paths.size());
-    for (auto &image_path : image_paths) {
-        cv::Mat image = cv::imread(common_path + "/" + image_path);
-        images.emplace_back(image);
-        if (image.empty()) {
-            std::cout << "no image " + image_path << std::endl;
-            break;
-        }
-    }
 }
 
 inline void ReadFeatures(const std::string &file_name, std::vector<Frame> &frames, bool init_frames = false) {
@@ -140,28 +127,6 @@ inline void SaveFramePairs(const std::string &file_name,
     file.close();
 }
 
-inline void ReadCameraInfo(const std::string &file_name,
-                           std::map<std::string, int> &name2cid, std::vector<Camera> &cameras) {
-    std::ifstream file(file_name, std::ios::out | std::ios::binary);
-    std::string line;
-    while (std::getline(file, line)) {
-        if (line[0] == '#') continue;
-        if (line.size() < 10) continue;
-        Camera cam;
-        int w, h;
-        std::string image_name, model_name;
-        std::stringstream ss(line);
-        ss >> image_name >> model_name >> w >> h;
-        ss >> cam.camera_params[0] >> cam.camera_params[2] >> cam.camera_params[3] >> cam.distort_params[0];
-        cam.camera_params[1] = cam.camera_params[0];
-        // std::cout<<image_name<<" ";
-        // cam.log();
-        const int id = cameras.size();
-        cam.id = name2cid[image_name] = id;
-        cameras.emplace_back(cam);
-    }
-}
-
 inline void LoadImageSize(const std::string &file_name, std::vector<ImageSize> &image_size) {
     std::ifstream file(file_name, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
@@ -174,6 +139,20 @@ inline void LoadImageSize(const std::string &file_name, std::vector<ImageSize> &
     for (auto &size : image_size) {
         read_data(file, size.width);
         read_data(file, size.height);
+    }
+}
+
+inline void SaveImageSize(const std::string &file_name, const std::vector<ImageSize> &image_size) {
+    std::ofstream file(file_name, std::ios::out | std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Error: can not open " << file_name << "\n";
+        return;
+    }
+    int num_frames = image_size.size();
+    write_data(file, num_frames);
+    for (auto &size : image_size) {
+        write_data(file, size.width);
+        write_data(file, size.height);
     }
 }
 
@@ -207,17 +186,4 @@ inline void LoadRetrievalRank(const std::string &file_path,
     }
 }
 
-inline void SaveImageSize(const std::string &file_name, const std::vector<ImageSize> &image_size) {
-    std::ofstream file(file_name, std::ios::out | std::ios::binary);
-    if (!file.is_open()) {
-        std::cerr << "Error: can not open " << file_name << "\n";
-        return;
-    }
-    int num_frames = image_size.size();
-    write_data(file, num_frames);
-    for (auto &size : image_size) {
-        write_data(file, size.width);
-        write_data(file, size.height);
-    }
-}
 } // namespace xrsfm

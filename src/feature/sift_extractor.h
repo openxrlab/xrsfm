@@ -10,7 +10,6 @@
 #include <opencv2/opencv.hpp>
 #include <string>
 #include <vector>
-
 #include "base/types.h"
 
 namespace xrsfm {

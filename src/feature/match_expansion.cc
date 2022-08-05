@@ -384,31 +384,27 @@ void MatchExpansionSolver::Run(const Map &map, std::vector<std::pair<int, int>> 
     m_matchmap.MakeIdPair();
     m_matchmap.MakeCorrGraph(map);
     std::vector<int> connect_frames(0), reg_frames(0), strong_reg_set(0);
+    std::vector<int> may_reg_set(0);
     GetConnectedFrames(map, connect_frames);
     GetPotentialRegisteredFrames(map, 30, reg_frames);
     GetPotentialRegisteredFrames(map, 100, strong_reg_set);
-
     printf("frame number\n cov_1: %d  cov_30: %d cov_100:%d\n", connect_frames.size(), reg_frames.size(), strong_reg_set.size());
     m_matchmap.corr_graph.frame_node_vec_.clear();
-    /////////////////////////////////////////////////
-    // get frames in three set(may registered, can be registered(included by `set30`, can be
-    // registered in current iteration), can be build(included by `set100`))
-    /////////////////////////////////////////////////
-    std::vector<int> may_reg(0), can_reg(0);
-    SetSubtraction(connect_frames, strong_reg_set, can_reg);
-    GetMayreg(connect_frames, reg_frames, id2rank_vec, may_reg);
 
     /////////////////////////////////////////////////
-    // get next candidate frame pairs(output)
+    // get candidate frame pairs(output)
     /////////////////////////////////////////////////
     std::vector<FramePair> candidates;
     // 在connect中,找到共视pair,pair中至少一帧为registered
     GetCandidateCovisibility(map, reg_frames, connect_frames, id2rank_vec, id2matched_ids,
                              candidates);
-    std::cout << "#candidate image pairs:" << candidates.size() << " ";
+    std::cout << "#covisiblity candidates: " << candidates.size() << "\n";
+
     // 找到由registered与mayreg组成pair
-    GetCandidateSimilarity(5, may_reg, reg_frames, id2rank_vec, id2matched_ids, candidates);
-    std::cout << candidates.size() << std::endl;
+    // SetSubtraction(connect_frames, strong_reg_set, can_reg);
+    GetMayreg(connect_frames, reg_frames, id2rank_vec, may_reg_set);
+    GetCandidateSimilarity(5, may_reg_set, reg_frames, id2rank_vec, id2matched_ids, candidates);
+    std::cout << "#full candidates: " << candidates.size() << "\n";
 
     // remove duplicate frame pairs
     std::vector<std::set<int>> t_pair_list(map.frames_.size());
@@ -424,7 +420,7 @@ void MatchExpansionSolver::Run(const Map &map, std::vector<std::pair<int, int>> 
             image_pairs.emplace_back(i, it);
         }
     }
-    std::cout << "#filtered candidates:" << image_pairs.size() << " \n";
+    std::cout << "#filtered candidates: " << image_pairs.size() << " \n";
 }
 
 void MatchExpansionSolver::Print(const std::vector<int> &x_set) {
@@ -674,16 +670,16 @@ void MatchExpansionSolver::GetCandidateCovisibility(
                 matched_ids[id1].insert(id2);
                 matched_ids[id2].insert(id1);
                 // update
-                visit[id1][id2] = true;
-                visit[id2][id1] = true;
-                for (auto &[id1_neibor, pair_id] : id2pair_id[id1]) {
-                    visit[id2][id1_neibor] = true;
-                    visit[id1_neibor][id2] = true;
-                }
-                for (auto &[id2_neibor, pair_id] : id2pair_id[id2]) {
-                    visit[id1][id2_neibor] = true;
-                    visit[id2_neibor][id1] = true;
-                }
+                // visit[id1][id2] = true;
+                // visit[id2][id1] = true;
+                // for (auto &[id1_neibor, pair_id] : id2pair_id[id1]) {
+                //     visit[id2][id1_neibor] = true;
+                //     visit[id1_neibor][id2] = true;
+                // }
+                // for (auto &[id2_neibor, pair_id] : id2pair_id[id2]) {
+                //     visit[id1][id2_neibor] = true;
+                //     visit[id2_neibor][id1] = true;
+                // }
             }
         }
     }

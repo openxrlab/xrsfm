@@ -5,8 +5,9 @@
 #include <glog/logging.h>
 
 namespace xrsfm {
-const int _T_ = 2;
-const int _Np_ = 10;
+
+constexpr int _T_ = 2;
+constexpr int _Np_ = 10;
 
 class TrackExpansionWrapper : public Track {
   public:

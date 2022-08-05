@@ -13,6 +13,7 @@
 #include "viewer_handle.h"
 
 namespace xrsfm {
+
 void DrawFeature(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints);
 
 void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2, const std::vector<cv::KeyPoint> &kpts1,
@@ -32,8 +33,10 @@ void DrawFeatureFlow(const cv::Mat &img1, const std::vector<Eigen::Vector2d> &pt
                      const std::vector<int> &states, const std::string window_name = "feature flow");
 
 void DrawCameras(const std::vector<Pose> &cameras, const std::vector<Eigen::Vector3d> colors, double camera_size);
+
 void DrawPoints(const std::vector<Eigen::Vector3d> &points);
 
+// TODO remove a viewer
 class Viewer {
   public:
     void Init();
@@ -52,5 +55,6 @@ class Viewer {
     double camera_size_ = 0.1;
     Map map;
 };
+
 } // namespace xrsfm
 #endif // ECIM_VIEW_H

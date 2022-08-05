@@ -10,8 +10,6 @@
 #include "utility/timer.h"
 
 namespace xrsfm {
-std::vector<int> num_cov;
-double weight_o = 0;
 
 ceres::Solver::Options BASolver::InitSolverOptions() {
     ceres::Solver::Options solver_options;
@@ -23,7 +21,7 @@ ceres::Solver::Options BASolver::InitSolverOptions() {
 }
 
 void AddCovisibilityEdge(ceres::Problem &problem, Map &map, std::vector<double> &s_vec, std::vector<Pose> &twc_vec,
-                         bool use_key) {
+                         std::vector<int> &num_cov, double weight_o, bool use_key) {
     num_cov.assign(map.frames_.size(), 0);
     for (auto &frame : map.frames_) {
         if (!frame.registered) continue;
@@ -42,7 +40,7 @@ void AddCovisibilityEdge(ceres::Problem &problem, Map &map, std::vector<double> 
             auto &pose2 = twc_vec[cor_id];
             Eigen::Quaterniond q_mea = pose1.q.inverse() * pose2.q;
             Eigen::Vector3d p_mea = pose1.q.inverse() * (pose2.t - pose1.t);
-            ceres::CostFunction *cost_function = new PoseGraph3dCost1(q_mea, p_mea, weight_o);
+            ceres::CostFunction *cost_function = new PoseGraphCost(q_mea, p_mea, weight_o);
             problem.AddResidualBlock(cost_function, nullptr, pose1.q.coeffs().data(), pose1.t.data(), pose2.q.coeffs().data(),
                                      pose2.t.data(), &s1, &s2);
             count++;
@@ -53,7 +51,7 @@ void AddCovisibilityEdge(ceres::Problem &problem, Map &map, std::vector<double> 
 }
 
 void AddLoopEdge(ceres::Problem &problem, Map &map, const LoopInfo &loop_info, std::vector<double> &s_vec,
-                 std::vector<double> &s_vec_loop, std::vector<Pose> &twc_vec, bool use_key) {
+                 std::vector<double> &s_vec_loop, std::vector<Pose> &twc_vec, std::vector<int> &num_cov, double weight_o, bool use_key) {
     auto &pose1 = twc_vec[loop_info.frame_id];
     for (size_t i = 0; i < loop_info.cor_frame_ids_vec.size(); ++i) {
         auto &s1 = s_vec_loop[i];
@@ -66,7 +64,7 @@ void AddLoopEdge(ceres::Problem &problem, Map &map, const LoopInfo &loop_info, s
             Eigen::Quaterniond q_mea = pose1_mea.q.inverse() * pose2.q;
             Eigen::Vector3d p_mea = pose1_mea.q.inverse() * (pose2.t - pose1_mea.t);
 
-            ceres::CostFunction *cost_function = new PoseGraph3dCost1(q_mea, p_mea, weight_o);
+            ceres::CostFunction *cost_function = new PoseGraphCost(q_mea, p_mea, weight_o);
             problem.AddResidualBlock(cost_function, nullptr, pose1.q.coeffs().data(), pose1.t.data(), pose2.q.coeffs().data(),
                                      pose2.t.data(), &s1, &s2);
             count++;
@@ -129,6 +127,8 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool u
         }
     }
 
+    double weight_o = 0;
+    std::vector<int> num_cov;
     constexpr double max_th = 0.1;
     if (abs(loop_info.scale_obs - 1) < max_th) {
         weight_o = 1 - abs(loop_info.scale_obs - 1) / max_th;
@@ -139,9 +139,9 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool u
 
     ceres::Problem problem;
     // covisibility edge
-    AddCovisibilityEdge(problem, map, s_vec, twc_vec, use_key);
+    AddCovisibilityEdge(problem, map, s_vec, twc_vec, num_cov, weight_o, use_key);
     // loop edge
-    AddLoopEdge(problem, map, loop_info, s_vec, s_vec_loop, twc_vec, use_key);
+    AddLoopEdge(problem, map, loop_info, s_vec, s_vec_loop, twc_vec, num_cov, weight_o, use_key);
 
     if (loop_info.scale_obs != -1) {
         printf("s12:%lf %zu %zu\n", loop_info.scale_obs, loop_info.cor_frame_ids_vec[0].size(),
