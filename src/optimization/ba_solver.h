@@ -2,8 +2,8 @@
 // Created by SENSETIME\yezhichao1 on 2020/10/21.
 //
 
-#ifndef ECIM_BA_SOLVER_H
-#define ECIM_BA_SOLVER_H
+#ifndef XRSFM_SRC_OPTIMIZATION_BA_SOLVER_H
+#define XRSFM_SRC_OPTIMIZATION_BA_SOLVER_H
 
 #include <ceres/ceres.h>
 
@@ -27,4 +27,4 @@ class BASolver {
     void SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame, int frame_id);
 };
 } // namespace xrsfm
-#endif // ECIM_BA_SOLVER_H
+#endif // XRSFM_SRC_OPTIMIZATION_BA_SOLVER_H

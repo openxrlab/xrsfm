@@ -1,4 +1,7 @@
-#pragma once
+
+#ifndef XRSFM_SRC_FEATURE_MATCH_EXPANSION_H
+#define XRSFM_SRC_FEATURE_MATCH_EXPANSION_H
+
 #include <fstream>
 
 #include "base/map.h"
@@ -137,3 +140,5 @@ class MatchExpansionSolver {
     const bool verbose = false;
 };
 } // namespace xrsfm
+
+#endif

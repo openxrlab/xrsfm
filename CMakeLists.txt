@@ -30,6 +30,7 @@ find_package(Pangolin REQUIRED)
 
 if (CUDA_ENABLED)
     find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
+    message(STATUS "found")
 endif ()
 
 ################################################################################
@@ -184,3 +185,6 @@ target_link_libraries(tag_extract apriltag ${OpenCV_LIBS} stdc++fs )
 
 add_executable(tag_refine src/tag_refine.cc)
 target_link_libraries(tag_refine ecim)
+
+add_executable(test_f src/test/feature_test.cc)
+target_link_libraries(test_f ecim)

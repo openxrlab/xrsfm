@@ -2,8 +2,8 @@
 // Created by SENSETIME\yezhichao1 on 2020/12/30.
 //
 
-#ifndef ECIM_TRIANGLUATE_SVD_H
-#define ECIM_TRIANGLUATE_SVD_H
+#ifndef XRSFM_SRC_GEOMETRY_TRIANGLUATE_SVD_H
+#define XRSFM_SRC_GEOMETRY_TRIANGLUATE_SVD_H
 
 #include "utility/global.h"
 
@@ -26,4 +26,4 @@ double CalculateTriangulationAngle(const Eigen::Vector3d &center1, const Eigen::
                                    const Eigen::Vector3d &point3D);
 } // namespace xrsfm
 
-#endif // ECIM_TRIANGLUATE_SVD_H
+#endif // XRSFM_SRC_GEOMETRY_TRIANGLUATE_SVD_H

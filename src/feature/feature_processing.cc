@@ -18,6 +18,7 @@
 #include "sift_extractor.h"
 #include "utility/io_ecim.hpp"
 #include "utility/timer.h"
+#include "match_expansion.h"
 
 namespace xrsfm {
 constexpr int max_match = 16384;
@@ -277,7 +278,6 @@ void FeatureMatching(const std::vector<Frame> &frames,
     frame_pairs = std::move(frame_pairs_filter);
     std::cout << "matched image pairs: " << count_inlier_pairs << "/" << candidate_pairs.size() << std::endl;
 }
-
 
 std::vector<Match> ExtractInlierMatches(const std::vector<Match> &matches, const size_t num_inliers,
                                         const std::vector<char> &inlier_mask) {

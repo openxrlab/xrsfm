@@ -1,5 +1,6 @@
 
 #include <fstream>
+#include <unistd.h>
 
 #include "base/map.h"
 #include "base/camera.h"

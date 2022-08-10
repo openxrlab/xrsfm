@@ -2,8 +2,8 @@
 // Created by SENSETIME\yezhichao1 on 2021/1/4.
 //
 
-#ifndef ECIM_ECIM_MAP_INITIALIZER_H_
-#define ECIM_ECIM_MAP_INITIALIZER_H_
+#ifndef XRSFM_SRC_GEOMETRY_MAP_INITIALIZER_H
+#define XRSFM_SRC_GEOMETRY_MAP_INITIALIZER_H
 
 #include "base/map.h"
 
@@ -14,4 +14,4 @@ void InitializeMap(Map &map, FramePair &frame_pair);
 
 void InitializeWithGT(Map &map, FramePair &frame_pair, Pose pose1, Pose pose2);
 } // namespace xrsfm
-#endif // ECIM_ECIM_MAP_INITIALIZER_H_
+#endif // XRSFM_SRC_GEOMETRY_MAP_INITIALIZER_H

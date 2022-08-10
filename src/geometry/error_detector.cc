@@ -1,5 +1,7 @@
 #include "geometry/error_corrector.h"
 
+#include "utility/global.h"
+
 namespace xrsfm {
 bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp, std::vector<char> &inlier_mask) {
     // if (fp.id1 == 294 && fp.id2 == 295) return false;  // seq 06
@@ -15,11 +17,11 @@ bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp, std:
     if ((std::abs(fp.id1 - fp.id2) != 1) && fp.matches.size() < num_min_matches) return true;
 
     const auto &frame1 = map.frames_[fp.id1], &frame2 = map.frames_[fp.id2];
-    const Eigen::Vector3d relative_motion = frame2.center() - frame1.center();
+    const vector3 relative_motion = frame2.center() - frame1.center();
     const double distance = relative_motion.norm();
     const bool is_pure_rotation = distance < pure_rotation_th;
     if (is_pure_rotation) printf("pure rotation, distance: %lf\n", distance);
-    const Eigen::Vector3d t12 = relative_motion.normalized();
+    const vector3 t12 = relative_motion.normalized();
 
     inlier_mask.clear();
     int num_matches = 0, num_inliers = 0;
@@ -32,16 +34,16 @@ bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp, std:
                                 // double cos_theta = ray1.dot(ray2);
                                 // good_essential = cos_theta > cos_th;
         } else {
-            const Eigen::Vector2d p2d1 = frame1.points_normalized[fp.matches[i].id1];
-            const Eigen::Vector2d p2d2 = frame2.points_normalized[fp.matches[i].id2];
-            const Eigen::Vector3d ray1 = (frame1.qwc() * p2d1.homogeneous()).normalized();
-            const Eigen::Vector3d ray2 = (frame2.qwc() * p2d2.homogeneous()).normalized();
+            const vector2 p2d1 = frame1.points_normalized[fp.matches[i].id1];
+            const vector2 p2d2 = frame2.points_normalized[fp.matches[i].id2];
+            const vector3 ray1 = (frame1.qwc() * p2d1.homogeneous()).normalized();
+            const vector3 ray2 = (frame2.qwc() * p2d2.homogeneous()).normalized();
 
             const bool use_ray2 = std::abs(ray1.dot(t12)) > std::abs(ray2.dot(t12));
             // compute deg between ray2 and plane_ray1-t
-            const Eigen::Vector3d n = (ray2.cross(t12)).normalized(); // normal line of plane_ray1-t
+            const vector3 n = (ray2.cross(t12)).normalized(); // normal line of plane_ray1-t
             const double sin_theta = std::abs(n.dot(ray1));
-            const Eigen::Vector3d n1 = (ray1.cross(t12)).normalized();
+            const vector3 n1 = (ray1.cross(t12)).normalized();
             const double sin_theta1 = std::abs(n1.dot(ray2));
 
             good_relative_pose = use_ray2 ? sin_theta < sin_th : sin_theta1 < sin_th;

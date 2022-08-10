@@ -21,7 +21,7 @@ struct MyHandler3D : Handler3D {
 
   public:
     bool draw_current;
-    std::atomic<bool> init_viewpoint = false;
+    std::atomic<bool> init_viewpoint;
 };
 } // namespace pangolin
 

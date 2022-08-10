@@ -337,8 +337,8 @@ std::pair<int, int> Map::MaxPoint3dFrameIdSeq() {
     return std::pair<int, int>(best_id, max_num_p3d);
 }
 
-void Map::SearchCorrespondences(const Frame &frame, std::vector<Eigen::Vector2d> &points2d,
-                                std::vector<Eigen::Vector3d> &points3d, std::vector<std::pair<int, int>> &cor_2d_3d_ids,
+void Map::SearchCorrespondences(const Frame &frame, std::vector<vector2> &points2d,
+                                std::vector<vector3> &points3d, std::vector<std::pair<int, int>> &cor_2d_3d_ids,
                                 const bool use_p2d_normalized) {
     points2d.clear();
     points3d.clear();
@@ -368,7 +368,7 @@ void Map::SearchCorrespondences(const Frame &frame, std::vector<Eigen::Vector2d>
 }
 
 void Map::SearchCorrespondences1(const Frame &frame, const std::set<int> cor_frame_id,
-                                 std::vector<Eigen::Vector2d> &points2d, std::vector<Eigen::Vector3d> &points3d,
+                                 std::vector<vector2> &points2d, std::vector<vector3> &points3d,
                                  std::vector<std::pair<int, int>> &cor_2d_3d_ids, const bool use_p2d_normalized) {
     points2d.clear();
     points3d.clear();
@@ -398,8 +398,8 @@ void Map::SearchCorrespondences1(const Frame &frame, const std::set<int> cor_fra
     }
 }
 
-void Map::SearchCorrespondencesOrder(const Frame &frame, std::vector<Eigen::Vector2d> &points2d,
-                                     std::vector<Eigen::Vector3d> &points3d,
+void Map::SearchCorrespondencesOrder(const Frame &frame, std::vector<vector2> &points2d,
+                                     std::vector<vector3> &points3d,
                                      std::vector<std::pair<int, int>> &cor_2d_3d_ids) {
     points2d.clear();
     points3d.clear();
@@ -433,9 +433,9 @@ void Map::LogFrameReprojectError1(int frame_id) {
         if (frame.track_ids_[i] == -1) continue;
         Track &track = tracks_[frame.track_ids_[i]];
         if (track.outlier) continue;
-        Eigen::Vector3d p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
+        vector3 p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
         double z = p_c.z();
-        Eigen::Vector2d res = p_c.head<2>() / z - frame.points_normalized[i];
+        vector2 res = p_c.head<2>() / z - frame.points_normalized[i];
         count++;
         sre += res.norm();
         // if (res.norm() * 885 > 10) printf("-track id %d %d re %lf\n", frame.track_ids_[i], track.ref_id, res.norm() *
@@ -453,9 +453,9 @@ void Map::LogFrameReprojectError() {
             if (frame.track_ids_[i] == -1) continue;
             Track &track = tracks_[frame.track_ids_[i]];
             if (track.outlier) continue;
-            Eigen::Vector3d p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
+            vector3 p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
             double z = p_c.z();
-            Eigen::Vector2d res = p_c.head<2>() / z - frame.points_normalized[i];
+            vector2 res = p_c.head<2>() / z - frame.points_normalized[i];
             count++;
             sre += res.norm();
         }
@@ -757,8 +757,8 @@ void Map::LogReprojectError() {
             if (track_id == -1) continue;
             Track &track = tracks_[track_id];
             if (track.outlier) continue;
-            const Eigen::Vector3d p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
-            const Eigen::Vector2d res = p_c.hnormalized() - frame.points_normalized[i];
+            const vector3 p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
+            const vector2 res = p_c.hnormalized() - frame.points_normalized[i];
             const double focal = cameras_[frame.camera_id].fx();
 
             count++;

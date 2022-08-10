@@ -1,6 +1,7 @@
 #include "geometry/error_corrector.h"
 
 #include "geometry/pnp.h"
+#include "utility/global.h"
 
 namespace xrsfm {
 inline std::vector<int> GetMatchedFrameIds(Map &map, int frame_id) {
@@ -68,8 +69,8 @@ LoopInfo GetLoopInfo(Map &map, Frame &frame1, Frame &frame2) {
         if (track_id1 == -1 || track_id2 == -1) continue;
         const auto &track1 = map.tracks_[track_id1], &track2 = map.tracks_[track_id2];
 
-        Eigen::Vector3d p3d1 = frame1.Tcw.q * track1.point3d_ + frame1.Tcw.t;
-        Eigen::Vector3d p3d2 = frame2.Tcw.q * track2.point3d_ + frame2.Tcw.t;
+        vector3 p3d1 = frame1.Tcw.q * track1.point3d_ + frame1.Tcw.t;
+        vector3 p3d2 = frame2.Tcw.q * track2.point3d_ + frame2.Tcw.t;
         depth1 += p3d1.z();
         depth2 += p3d2.z();
         count++;
@@ -85,7 +86,7 @@ bool CheckNegtiveDepth(const Map &map, const Frame &frame1, const Frame &frame2)
     for (auto &track_id : frame1.track_ids_) {
         if (track_id == -1) continue;
         auto &track = map.tracks_[track_id];
-        const Eigen::Vector3d p3d = frame2.Tcw.q * track.point3d_ + frame2.Tcw.t;
+        const vector3 p3d = frame2.Tcw.q * track.point3d_ + frame2.Tcw.t;
         if (p3d.z() < 0) {
             return true;
         }
@@ -93,7 +94,7 @@ bool CheckNegtiveDepth(const Map &map, const Frame &frame1, const Frame &frame2)
     for (auto &track_id : frame2.track_ids_) {
         if (track_id == -1) continue;
         auto &track = map.tracks_[track_id];
-        const Eigen::Vector3d p3d = frame1.Tcw.q * track.point3d_ + frame1.Tcw.t;
+        const vector3 p3d = frame1.Tcw.q * track.point3d_ + frame1.Tcw.t;
         if (p3d.z() < 0) {
             return true;
         }
@@ -128,9 +129,9 @@ inline void MergeTrackLoop(Map &map, Frame &frame1, Frame &frame2) {
         auto &track = map.tracks_[track_id];
         if (track.observations_.count(frame1.id) != 0) continue; // may compare
 
-        Eigen::Vector3d p3d = frame2.Tcw.q * track.point3d_ + frame2.Tcw.t;
-        Eigen::Vector3d p3d1 = p3d.z() * frame1.points_normalized[i].homogeneous();
-        Eigen::Vector3d p3d2 = frame1.Tcw.q.inverse() * (p3d1 - frame1.Tcw.t);
+        vector3 p3d = frame2.Tcw.q * track.point3d_ + frame2.Tcw.t;
+        vector3 p3d1 = p3d.z() * frame1.points_normalized[i].homogeneous();
+        vector3 p3d2 = frame1.Tcw.q.inverse() * (p3d1 - frame1.Tcw.t);
 
         bool merge = false;
         const int track_id1 = frame1.track_ids_[i];
@@ -161,7 +162,7 @@ inline void MergeTrackLoop(Map &map, Frame &frame1, Frame &frame2) {
         //   for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
         //     printf("%d %d -- ", t_frame_id, t_p2d_id);
         //     auto &frame = map.frames_[t_frame_id];
-        //     Eigen::Vector3d p3d = frame.tcw.q * track.point3d_ + frame.tcw.t;
+        //     vector3 p3d = frame.tcw.q * track.point3d_ + frame.tcw.t;
         //     std::cout << p3d.transpose() << "|" << (p3d.head<2>() / p3d.z()).transpose()
         //               << frame.points_normalized[t_p2d_id].transpose() << std::endl;
         //   }

@@ -14,7 +14,7 @@ bool CheckInitFramePair(const Map &map, FramePair &frame_pair) {
 
     int inlier_num;
     std::vector<char> inlier_mask;
-    std::vector<Eigen::Vector2d> points1, points2;
+    std::vector<vector2> points1, points2;
     const int num_matches = frame_pair.matches.size();
     for (int i = 0; i < num_matches; ++i) {
         if (!frame_pair.inlier_mask[i]) continue;
@@ -26,9 +26,9 @@ bool CheckInitFramePair(const Map &map, FramePair &frame_pair) {
     xrsfm::solve_essential(points1, points2, th, frame_pair.E, inlier_num, inlier_mask);
 
     inlier_mask.clear();
-    std::vector<Eigen::Vector3d> point3ds;
+    std::vector<vector3> point3ds;
     xrsfm::decompose_rt(frame_pair.E, points1, points2, frame_pair.R, frame_pair.t, point3ds, inlier_mask);
-    Pose pose1 = Pose(Eigen::Quaterniond::Identity(), Eigen::Vector3d::Zero());
+    Pose pose1 = Pose(Eigen::Quaterniond::Identity(), vector3::Zero());
     Pose pose2 = Pose(Eigen::Quaterniond(frame_pair.R), frame_pair.t);
     int id_p3d = 0, num_p3d = 0, num_p3d_valid = 0;
     for (size_t i = 0; i < num_matches; ++i) {
@@ -104,7 +104,7 @@ void InitializeMap(Map &map, FramePair &frame_pair) {
 
     int inlier_num;
     std::vector<char> inlier_mask;
-    std::vector<Eigen::Vector2d> points1, points2;
+    std::vector<vector2> points1, points2;
     const int num_matches = frame_pair.matches.size();
     for (int i = 0; i < num_matches; ++i) {
         if (!frame_pair.inlier_mask[i]) continue;
@@ -116,10 +116,10 @@ void InitializeMap(Map &map, FramePair &frame_pair) {
     printf("Init essential %d/%zu\n", inlier_num, points1.size());
 
     inlier_mask.clear();
-    std::vector<Eigen::Vector3d> point3ds;
+    std::vector<vector3> point3ds;
     xrsfm::decompose_rt(frame_pair.E, points1, points2, frame_pair.R, frame_pair.t, point3ds, inlier_mask);
 
-    frame1.Tcw = Pose(Eigen::Quaterniond::Identity(), Eigen::Vector3d::Zero());
+    frame1.Tcw = Pose(Eigen::Quaterniond::Identity(), vector3::Zero());
     frame1.registered = frame1.is_keyframe = true;
     frame1.hierarchical_level = 0;
     frame2.Tcw = Pose(Eigen::Quaterniond(frame_pair.R), frame_pair.t);

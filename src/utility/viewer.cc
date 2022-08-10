@@ -3,7 +3,6 @@
 //
 #include "viewer.h"
 
-#include <pangolin/pangolin.h>
 #include <unistd.h>
 
 #include "view.h"
@@ -13,7 +12,7 @@
 
 namespace xrsfm {
 constexpr int width = 1024, height = 768, focal = 500;
-const Eigen::Vector3d red(1.0, 0, 0), green(0, 1.0, 0), blue(0, 0, 1.0), yellow(1, 1, 0), grey(0.5, 0.5, 0.5),
+const vector3 red(1.0, 0, 0), green(0, 1.0, 0), blue(0, 0, 1.0), yellow(1, 1, 0), grey(0.5, 0.5, 0.5),
     black(0, 0, 0);
 
 void ViewerThread::start() {
@@ -58,14 +57,14 @@ void ViewerThread::worker_loop() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        std::unique_lock lk(map_mutex);
+        std::unique_lock<std::mutex> lk(map_mutex);
         DrawCameras(cameras, colors_cam, camera_size_);
         if (colors_pt.empty())
             DrawPoints(points);
         else {
             for (size_t i = 0; i < points.size(); i++) {
-                const Eigen::Vector3d pt = points.at(i);
-                const Eigen::Vector3d color = colors_pt.at(i);
+                const vector3 pt = points.at(i);
+                const vector3 color = colors_pt.at(i);
                 if (color == red) {
                     glPointSize(5.0f);
                 } else {
@@ -89,7 +88,7 @@ void ViewerThread::worker_loop() {
 }
 
 void ViewerThread::update_map(const Map &map) {
-    std::unique_lock lk(map_mutex);
+    std::unique_lock<std::mutex> lk(map_mutex);
     cameras.clear();
     colors_cam.clear();
     points.clear();
@@ -119,7 +118,7 @@ void ViewerThread::update_map(const Map &map) {
 }
 
 void ViewerThread::update_map_colmap(const Map &map) {
-    std::unique_lock lk(map_mutex);
+    std::unique_lock<std::mutex> lk(map_mutex);
     cameras.clear();
     colors_cam.clear();
     points.clear();
@@ -144,7 +143,7 @@ void ViewerThread::update_map_colmap(const Map &map) {
     }
 }
 
-void ViewerThread::add_tag_points(const std::map<int, std::vector<Eigen::Vector3d>> &pt_world_vec) {
+void ViewerThread::add_tag_points(const std::map<int, std::vector<vector3>> &pt_world_vec) {
     for (const auto &[id, pt_world] : pt_world_vec) {
         if (pt_world.empty()) continue;
         for (const auto &pt : pt_world) {

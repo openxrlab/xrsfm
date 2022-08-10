@@ -90,15 +90,15 @@ namespace {
         return Polynomial(scale * poly.coeffcients());
     }
 
-    inline matrix<3> to_matrix(const vector<9> &vec) {
-        return (matrix<3>() << vec.segment<3>(0), vec.segment<3>(3), vec.segment<3>(6)).finished();
+    inline matrix3 to_matrix(const vector<9> &vec) {
+        return (matrix3() << vec.segment<3>(0), vec.segment<3>(3), vec.segment<3>(6)).finished();
     }
 
-    inline matrix<9, 4> generate_nullspace_basis(const std::array<vector<2>, 5> &points1,
-                                                 const std::array<vector<2>, 5> &points2) {
+    inline matrix<9, 4> generate_nullspace_basis(const std::array<vector2, 5> &points1,
+                                                 const std::array<vector2, 5> &points2) {
         matrix<5, 9> A;
         for (size_t i = 0; i < 5; ++i) {
-            matrix<3> h = vector<3>(points1[i].homogeneous()) * points2[i].homogeneous().transpose();
+            matrix3 h = vector3(points1[i].homogeneous()) * points2[i].homogeneous().transpose();
             for (size_t j = 0; j < 3; ++j) {
                 A.block<1, 3>(i, j * 3) = h.row(j);
             }
@@ -108,10 +108,10 @@ namespace {
 
     inline matrix<10, 20> generate_polynomials(const matrix<9, 4> &basis) {
         typedef matrix<3, 3, false, Polynomial> matrix_poly;
-        matrix<3> Ex = to_matrix(basis.col(0));
-        matrix<3> Ey = to_matrix(basis.col(1));
-        matrix<3> Ez = to_matrix(basis.col(2));
-        matrix<3> Ew = to_matrix(basis.col(3));
+        matrix3 Ex = to_matrix(basis.col(0));
+        matrix3 Ey = to_matrix(basis.col(1));
+        matrix3 Ez = to_matrix(basis.col(2));
+        matrix3 Ew = to_matrix(basis.col(3));
 
         matrix_poly Epoly;
         for (size_t i = 0; i < 3; ++i) {
@@ -174,11 +174,11 @@ namespace {
         return action;
     }
 
-    inline std::vector<vector<3>> solve_grobner_system(const matrix<10> &action) {
+    inline std::vector<vector3> solve_grobner_system(const matrix<10> &action) {
         Eigen::EigenSolver<matrix<10>> eigen(action, true);
         vector<10, std::complex<double>> xs = eigen.eigenvalues();
 
-        std::vector<vector<3>> results;
+        std::vector<vector3> results;
         for (size_t i = 0; i < 10; ++i) {
             if (abs(xs[i].imag()) < 1.0e-10) {
                 vector<10> h = eigen.eigenvectors().col(i).real();
@@ -193,15 +193,15 @@ namespace {
     }
 } // namespace
 
-void decompose_essential(const matrix<3> &E, matrix<3> &R1, matrix<3> &R2, vector<3> &T) {
+void decompose_essential(const matrix3 &E, matrix3 &R1, matrix3 &R2, vector3 &T) {
 #ifdef ESSENTIAL_DECOMPOSE_HORN
-    matrix<3> EET = E * E.transpose();
+    matrix3 EET = E * E.transpose();
     double halfTrace = 0.5 * EET.trace();
-    vector<3> b;
+    vector3 b;
 
-    vector<3> e0e1 = E.col(0).cross(E.col(1));
-    vector<3> e1e2 = E.col(1).cross(E.col(2));
-    vector<3> e2e0 = E.col(2).cross(E.col(0));
+    vector3 e0e1 = E.col(0).cross(E.col(1));
+    vector3 e1e2 = E.col(1).cross(E.col(2));
+    vector3 e2e0 = E.col(2).cross(E.col(0));
 
 #if ESSENTIAL_DECOMPOSE_HORN == 1
     if (e0e1.norm() > e1e2.norm() && e0e1.norm() > e2e0.norm()) {
@@ -212,8 +212,8 @@ void decompose_essential(const matrix<3> &E, matrix<3> &R1, matrix<3> &R2, vecto
         b = e2e0.normalized() * sqrt(halfTrace);
     }
 #else
-    matrix<3> bbT = halfTrace * matrix<3>::Identity() - EET;
-    vector<3> bbT_diag = bbT.diagonal();
+    matrix3 bbT = halfTrace * matrix3::Identity() - EET;
+    vector3 bbT_diag = bbT.diagonal();
     if (bbT_diag(0) > bbt_diag(1) && bbT_diag(0) > bbT_diag(2)) {
         b = bbT.row(0) / sqrt(bbT_diag(0));
     } else if (bbT_diag(1) > bbT_diag(0) && bbT_diag(1) > bbT_diag(2)) {
@@ -223,30 +223,30 @@ void decompose_essential(const matrix<3> &E, matrix<3> &R1, matrix<3> &R2, vecto
     }
 #endif
 
-    matrix<3> cofactorsT;
+    matrix3 cofactorsT;
     cofactorsT.col(0) = e1e2;
     cofactorsT.col(1) = e2e0;
     cofactorsT.col(2) = e0e1;
 
-    matrix<3> skew_b;
+    matrix3 skew_b;
     skew_b << 0, -b.z(), b.y(), b.z(), 0, -b.x(), -b.y(), b.x(), 0;
-    matrix<3> bxE = skew_b * E;
+    matrix3 bxE = skew_b * E;
 
     double bTb = b.dot(b);
     R1 = (cofactorsT - bxE) / bTb;
     R2 = (cofactorsT + bxE) / bTb;
     T = b;
 #else
-    Eigen::JacobiSVD<matrix<3>> svd(E, Eigen::ComputeFullU | Eigen::ComputeFullV);
-    matrix<3> U = svd.matrixU();
-    matrix<3> VT = svd.matrixV().transpose();
+    Eigen::JacobiSVD<matrix3> svd(E, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    matrix3 U = svd.matrixU();
+    matrix3 VT = svd.matrixV().transpose();
     if (U.determinant() < 0) {
         U = -U;
     }
     if (VT.determinant() < 0) {
         VT = -VT;
     }
-    matrix<3> W;
+    matrix3 W;
     W << 0, 1, 0, -1, 0, 0, 0, 0, 1;
     R1 = U * W * VT;
     R2 = U * W.transpose() * VT;
@@ -254,28 +254,28 @@ void decompose_essential(const matrix<3> &E, matrix<3> &R1, matrix<3> &R2, vecto
 #endif
 }
 
-double sampson_error(const matrix<3> &E, const vector<2> &p1, const vector<2> &p2) {
-    vector<3> Ep1 = E * p1.homogeneous();
-    vector<3> Etp2 = E.transpose() * p2.homogeneous();
+double sampson_error(const matrix3 &E, const vector2 &p1, const vector2 &p2) {
+    vector3 Ep1 = E * p1.homogeneous();
+    vector3 Etp2 = E.transpose() * p2.homogeneous();
     double r = p2.homogeneous().transpose() * Ep1;
     return r * r * (1 / Ep1.segment<2>(0).squaredNorm() + 1 / Etp2.segment<2>(0).squaredNorm());
 }
 
-std::vector<matrix<3>> solve_essential_5pt(const std::array<vector<2>, 5> &points1,
-                                           const std::array<vector<2>, 5> &points2) {
+std::vector<matrix3> solve_essential_5pt(const std::array<vector2, 5> &points1,
+                                         const std::array<vector2, 5> &points2) {
     matrix<9, 4> basis = generate_nullspace_basis(points1, points2);
     matrix<10, 20> polynomials = generate_polynomials(basis);
     matrix<10> action = generate_action_matrix(polynomials);
-    std::vector<vector<3>> solutions = solve_grobner_system(action);
-    std::vector<matrix<3>> results(solutions.size());
+    std::vector<vector3> solutions = solve_grobner_system(action);
+    std::vector<matrix3> results(solutions.size());
     for (size_t i = 0; i < solutions.size(); ++i) {
         results[i] = to_matrix(basis * solutions[i].homogeneous());
     }
     return results;
 }
 
-matrix<3> find_essential_matrix(const std::vector<vector<2>> &points1, const std::vector<vector<2>> &points2,
-                                double threshold, double confidence, size_t max_iteration, int seed) {
+matrix3 find_essential_matrix(const std::vector<vector2> &points1, const std::vector<vector2> &points2,
+                              double threshold, double confidence, size_t max_iteration, int seed) {
     // Diagnosis::TimingItem timing = Diagnosis::time(DI_F_ESSENTIAL_RANSAC_TIME);
 #if 0
         ITSLAM_UNUSED_EXPR(max_iteration);
@@ -287,9 +287,9 @@ matrix<3> find_essential_matrix(const std::vector<vector<2>> &points1, const std
     cv::Mat cvE = cv::findEssentialMat(cvPoints1, cvPoints2, cv::Mat::eye(3, 3, CV_32FC1), cv::RANSAC, confidence, threshold, cv::noArray());
     // workaround: fuck opencv
     if (cvE.rows != 3 || cvE.cols != 3) {
-        return matrix<3>::Identity() * std::numeric_limits<double>::quiet_NaN();
+        return matrix3::Identity() * std::numeric_limits<double>::quiet_NaN();
     }
-    matrix<3> E;
+    matrix3 E;
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
             E(i, j) = cvE.at<double>(i, j);
@@ -302,7 +302,7 @@ matrix<3> find_essential_matrix(const std::vector<vector<2>> &points1, const std
     double K = log(1 - confidence);
     double threshold_sq = 2 * threshold * threshold;
 
-    matrix<3> best_E = matrix<3>::Constant(std::numeric_limits<double>::quiet_NaN());
+    matrix3 best_E = matrix3::Constant(std::numeric_limits<double>::quiet_NaN());
     size_t best_inlier = 0;
     double best_score = std::numeric_limits<double>::max();
 
@@ -310,7 +310,7 @@ matrix<3> find_essential_matrix(const std::vector<vector<2>> &points1, const std
     for (size_t iter = 0; iter < iter_max; ++iter) {
         // generate hypothesis
         lotbox.refill_all();
-        std::array<vector<2>, 5> pts1, pts2;
+        std::array<vector2, 5> pts1, pts2;
         for (size_t i = 0; i < 5; ++i) {
             size_t sample_id = lotbox.draw_without_replacement();
             pts1[i] = points1[sample_id];
@@ -318,11 +318,11 @@ matrix<3> find_essential_matrix(const std::vector<vector<2>> &points1, const std
         }
 
         // solve essential matrix
-        std::vector<matrix<3>> Es = solve_essential_5pt(pts1, pts2);
+        std::vector<matrix3> Es = solve_essential_5pt(pts1, pts2);
 
         // find best hypothesis
         for (size_t i = 0; i < Es.size(); ++i) {
-            const matrix<3> &E = Es[i];
+            const matrix3 &E = Es[i];
             size_t inlier = 0;
             double score = 0.0;
             for (size_t j = 0; j < points1.size(); ++j) {
@@ -351,8 +351,8 @@ matrix<3> find_essential_matrix(const std::vector<vector<2>> &points1, const std
 #endif
 }
 
-void solve_essential(const std::vector<vector<2>> &points1, const std::vector<vector<2>> &points2,
-                     const double threshold, matrix<3> &E, int &inlier_num, std::vector<char> &inlier_mask) {
+void solve_essential(const std::vector<vector2> &points1, const std::vector<vector2> &points2,
+                     const double threshold, matrix3 &E, int &inlier_num, std::vector<char> &inlier_mask) {
     E = find_essential_matrix(points1, points2, threshold, 0.9, 50, 0); // slow
     inlier_num = 0;
     inlier_mask.assign(points1.size(), 0);
@@ -366,8 +366,8 @@ void solve_essential(const std::vector<vector<2>> &points1, const std::vector<ve
     }
 }
 
-vector<4> triangulate_point(const matrix<3, 4> P1, const matrix<3, 4> P2, const vector<2> point1,
-                            const vector<2> point2) {
+vector<4> triangulate_point(const matrix<3, 4> P1, const matrix<3, 4> P2, const vector2 point1,
+                            const vector2 point2) {
     matrix<4> A;
     A.row(0) = point1(0) * P1.row(2) - P1.row(0);
     A.row(1) = point1(1) * P1.row(2) - P1.row(1);
@@ -377,12 +377,12 @@ vector<4> triangulate_point(const matrix<3, 4> P1, const matrix<3, 4> P2, const 
     return q;
 }
 
-bool check_point(const matrix<3, 4> P1, const matrix<3, 4> P2, const vector<2> point1, const vector<2> point2,
-                 vector<3> &p) {
+bool check_point(const matrix<3, 4> P1, const matrix<3, 4> P2, const vector2 point1, const vector2 point2,
+                 vector3 &p) {
     vector<4> q = triangulate_point(P1, P2, point1, point2);
 
-    vector<3> q1 = P1 * q;
-    vector<3> q2 = P2 * q;
+    vector3 q1 = P1 * q;
+    vector3 q2 = P2 * q;
 
     if (q1[2] * q[3] > 0 && q2[2] * q[3] > 0 && q1[2] / q[3] < 100 && q2[2] / q[3] < 100) {
         p = q.hnormalized();
@@ -391,8 +391,8 @@ bool check_point(const matrix<3, 4> P1, const matrix<3, 4> P2, const vector<2> p
     return false;
 }
 
-int check_essential_rt(const std::vector<vector<2>> &points1, const std::vector<vector<2>> &points2, const matrix<3> R,
-                       const vector<3> T, std::vector<vector<3>> &result_points, std::vector<char> &result_status) {
+int check_essential_rt(const std::vector<vector2> &points1, const std::vector<vector2> &points2, const matrix3 R,
+                       const vector3 T, std::vector<vector3> &result_points, std::vector<char> &result_status) {
     // set P1 P2
     matrix<3, 4> P1, P2;
     P1.setIdentity();
@@ -403,7 +403,7 @@ int check_essential_rt(const std::vector<vector<2>> &points1, const std::vector<
 
     int count = 0;
     for (size_t i = 0; i < points1.size(); ++i) {
-        vector<3> p;
+        vector3 p;
         if (check_point(P1, P2, points1[i], points2[i], result_points[i])) {
             result_status[i] = 1;
             count++;
@@ -417,17 +417,17 @@ int check_essential_rt(const std::vector<vector<2>> &points1, const std::vector<
     return count;
 }
 
-void decompose_rt(const Eigen::Matrix3d &E, const std::vector<vector<2>> &points1,
-                  const std::vector<vector<2>> &points2, matrix<3> &R, vector<3> &T,
-                  std::vector<vector<3>> &result_points, std::vector<char> &result_status) {
+void decompose_rt(const matrix3 &E, const std::vector<vector2> &points1,
+                  const std::vector<vector2> &points2, matrix3 &R, vector3 &T,
+                  std::vector<vector3> &result_points, std::vector<char> &result_status) {
     // decompose RT
-    matrix<3> R1, R2;
-    vector<3> T1;
+    matrix3 R1, R2;
+    vector3 T1;
     decompose_essential(E, R1, R2, T1);
-    matrix<3> Rs[] = {R1, R1, R2, R2};
-    vector<3> Ts[] = {T1, -T1, T1, -T1};
+    matrix3 Rs[] = {R1, R1, R2, R2};
+    vector3 Ts[] = {T1, -T1, T1, -T1};
     // get good R T
-    std::array<std::vector<vector<3>>, 4> points_array;
+    std::array<std::vector<vector3>, 4> points_array;
     std::array<std::vector<char>, 4> status_array;
     int best_num = 0;
     int best_k = 0;

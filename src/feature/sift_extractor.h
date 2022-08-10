@@ -2,8 +2,8 @@
 // Created by yzc on 19-4-25.
 //
 
-#ifndef WSFM_SIFT_EXTRACTOR_H
-#define WSFM_SIFT_EXTRACTOR_H
+#ifndef XRSFM_SRC_FEATURE_SIFT_EXTRACTOR_H
+#define XRSFM_SRC_FEATURE_SIFT_EXTRACTOR_H
 
 #include <SiftGPU.h>
 

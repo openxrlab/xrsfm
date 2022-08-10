@@ -1,5 +1,5 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef XRSFM_SRC_BASE_TYPES_H
+#define XRSFM_SRC_BASE_TYPES_H
 
 #include <Eigen/Eigen>
 
@@ -61,4 +61,5 @@ struct Pose {
     }
 };
 } // namespace xrsfm
-#endif // TYPES_H
+
+#endif // XRSFM_BASE_TYPES_H

@@ -1,5 +1,5 @@
-#ifndef MAP_H
-#define MAP_H
+#ifndef XRSFM_SRC_BASE_MAP_H
+#define XRSFM_SRC_BASE_MAP_H
 
 #include <opencv2/opencv.hpp>
 
@@ -203,4 +203,4 @@ void UpdateByRefFrame(Map &map);
 
 bool CheckMeaNumber(Map &map, int frame_id);
 } // namespace xrsfm
-#endif // MAP_H
+#endif // XRSFM_SRC_BASE_MAP_H

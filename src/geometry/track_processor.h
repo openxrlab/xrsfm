@@ -2,8 +2,8 @@
 // Created by SENSETIME\yezhichao1 on 2020/10/26.
 //
 
-#ifndef ECIM_POINT3DPROCESSOR_H
-#define ECIM_POINT3DPROCESSOR_H
+#ifndef XRSFM_SRC_GEOMETRY_TRACK_PROCESSOR_H
+#define XRSFM_SRC_GEOMETRY_TRACK_PROCESSOR_H
 
 #include "base/map.h"
 
@@ -39,4 +39,4 @@ class Point3dProcessor {
 };
 } // namespace xrsfm
 
-#endif // ECIM_POINT3DPROCESSOR_H
+#endif // XRSFM_SRC_GEOMETRY_TRACK_PROCESSOR_H

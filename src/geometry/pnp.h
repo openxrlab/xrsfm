@@ -2,8 +2,8 @@
 // Created by yzc on 19-4-2.
 //
 
-#ifndef WSFM_PNP_H
-#define WSFM_PNP_H
+#ifndef XRSFM_SRC_GEOMETRY_PNP_H
+#define XRSFM_SRC_GEOMETRY_PNP_H
 
 #include <Eigen/Eigen>
 #include <vector>
@@ -26,11 +26,8 @@ int RegisterNextImage1(const int next_frame_id, Map &map);
 
 bool RegisterNextImageLocal(const int next_frame_id, const std::set<int> cor_set, Map &map);
 
-// bool SolvePnP(Camera cam, std::vector<Eigen::Vector2d> cor_points2ds, std::vector<Eigen::Vector3d> cor_points3ds,
-//               Frame &frame, std::vector<int> &inlier);
-
 bool SolvePnP_colmap(const std::vector<Eigen::Vector2d> &cor_points2ds,
                      const std::vector<Eigen::Vector3d> &cor_points3ds, double max_error, Pose &tcw,
                      std::vector<char> &inlier_mask);
 } // namespace xrsfm
-#endif // WSFM_PNP_H
+#endif // XRSFM_SRC_GEOMETRY_PNP_H

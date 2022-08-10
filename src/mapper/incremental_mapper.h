@@ -1,6 +1,6 @@
 
-#ifndef INCREMENTAL_MAPPER_H_
-#define INCREMENTAL_MAPPER_H_
+#ifndef XRSFM_SRC_MAPPER_INCREMENTAL_MAPPER_H
+#define XRSFM_SRC_MAPPER_INCREMENTAL_MAPPER_H
 
 #include "base/map.h"
 #include "geometry/pnp.h"
@@ -34,4 +34,4 @@ class IncrementalMapper {
 };
 } // namespace xrsfm
 
-#endif // COLMAP_SRC_CONTROLLERS_INCREMENTAL_MAPPER_H_
+#endif // XRSFM_SRC_MAPPER_INCREMENTAL_MAPPER_H

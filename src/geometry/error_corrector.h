@@ -1,5 +1,5 @@
-#ifndef ERROR_CORRECTOR_H_
-#define ERROR_CORRECTOR_H_
+#ifndef XRSFM_SRC_GEOMETRY_ERROR_CORRECTOR_H
+#define XRSFM_SRC_GEOMETRY_ERROR_CORRECTOR_H
 
 #include "geometry/track_processor.h"
 #include "base/map.h"
@@ -14,9 +14,8 @@ inline double ToDeg(double theta) {
 
 class ErrorDetector {
   public:
-    Init(std::string image_dir, bool debug, Viewer *viewer = nullptr) {
+    Init(std::string image_dir, bool debug) {
         debug_ = debug;
-        viewer_ = viewer;
         image_dir_ = image_dir;
     };
 
@@ -26,7 +25,6 @@ class ErrorDetector {
     void StoreRelativePose(Map &map, int frame_id, std::ofstream &file);
 
     bool debug_;
-    Viewer *viewer_;
     ViewerThread *viewerTh_;
     std::string image_dir_;
 };

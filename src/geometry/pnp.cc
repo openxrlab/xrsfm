@@ -15,8 +15,8 @@ bool RegisterImage(const int frame_id, Map &map) {
 
     Frame &frame = map.frames_[frame_id];
 
-    std::vector<Eigen::Vector2d> points2ds;
-    std::vector<Eigen::Vector3d> points3ds;
+    std::vector<vector2> points2ds;
+    std::vector<vector3> points3ds;
     std::vector<std::pair<int, int>> id_pair_vec;
     map.SearchCorrespondences(frame, points2ds, points3ds, id_pair_vec, true);
     if (id_pair_vec.size() < min_num_correspondence) return false;
@@ -55,8 +55,8 @@ bool RegisterImage(const int frame_id, Map &map) {
 bool RegisterNextImage(const int _frame_id, Map &map, Pose &tcw, std::vector<std::pair<int, int>> &cor_2d_3d_ids) {
     Frame &next_frame = map.frames_[_frame_id];
     // search for 2D-3D correspondences
-    std::vector<Eigen::Vector2d> cor_points2ds;
-    std::vector<Eigen::Vector3d> cor_points3ds;
+    std::vector<vector2> cor_points2ds;
+    std::vector<vector3> cor_points3ds;
     map.SearchCorrespondences(next_frame, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
     printf("frame: %d  cor num: %zu\n", _frame_id, cor_2d_3d_ids.size());
     if (cor_2d_3d_ids.size() < 20) return false;
@@ -81,8 +81,8 @@ bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set, Ma
                             std::vector<std::pair<int, int>> &cor_2d_3d_ids) {
     Frame &next_frame = map.frames_[_frame_id];
     // search for 2D-3D correspondences
-    std::vector<Eigen::Vector2d> cor_points2ds;
-    std::vector<Eigen::Vector3d> cor_points3ds;
+    std::vector<vector2> cor_points2ds;
+    std::vector<vector3> cor_points3ds;
     map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
     printf("frame: %d  cor num: %zu\n", _frame_id, cor_2d_3d_ids.size());
     if (cor_2d_3d_ids.size() < 20) return false;
@@ -109,8 +109,8 @@ bool ComputeRegisterInlierLoop(const int _frame_id, LoopInfo &loop_info, Map &ma
     for (size_t i = 0; i < loop_info.cor_frame_ids_vec.size(); ++i) {
         const auto &cor_set = loop_info.cor_frame_ids_vec[i];
         // search for 2D-3D correspondences
-        std::vector<Eigen::Vector2d> cor_points2ds;
-        std::vector<Eigen::Vector3d> cor_points3ds;
+        std::vector<vector2> cor_points2ds;
+        std::vector<vector3> cor_points3ds;
         std::vector<std::pair<int, int>> cor_2d_3d_ids;
         map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
 
@@ -147,8 +147,8 @@ bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
     for (size_t i = 0; i < loop_info.cor_frame_ids_vec.size(); ++i) {
         const auto &cor_set = loop_info.cor_frame_ids_vec[i];
         // search for 2D-3D correspondences
-        std::vector<Eigen::Vector2d> cor_points2ds;
-        std::vector<Eigen::Vector3d> cor_points3ds;
+        std::vector<vector2> cor_points2ds;
+        std::vector<vector3> cor_points3ds;
         std::vector<std::pair<int, int>> cor_2d_3d_ids;
         map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
         printf("next frame id: %d cor number: %d\n", _frame_id, (int)cor_2d_3d_ids.size());
@@ -166,8 +166,8 @@ bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
                     const int old_track_id = next_frame.track_ids_[p2d_id];
                     auto &track1 = map.tracks_[old_track_id];
                     auto &track2 = map.tracks_[track_id];
-                    Eigen::Vector3d p3d1 = tmp1.Tcw.q * track1.point3d_ + tmp1.Tcw.t;
-                    Eigen::Vector3d p3d2 = tmp.Tcw.q * track2.point3d_ + tmp.Tcw.t;
+                    vector3 p3d1 = tmp1.Tcw.q * track1.point3d_ + tmp1.Tcw.t;
+                    vector3 p3d2 = tmp.Tcw.q * track2.point3d_ + tmp.Tcw.t;
                     depth_obs_vec.emplace_back(p3d1.z(), p3d2.z());
                     // printf("%lf %lf %lf\n", p3d1.z(), p3d2.z(), p3d1.z() / p3d2.z());
                     gt_positions.emplace_back(track1.point3d_);
@@ -202,7 +202,7 @@ bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
         printf("s12: %lf %lf\n", 1.0 / (sum / depth_obs_vec.size()), srt.scale);
         std::cout << srt.t.transpose() << std::endl;
         for (size_t i = 0; i < gt_positions.size(); ++i) {
-            Eigen::Vector3d new_p = srt.q.inverse() * (srt.scale * gt_positions[i] - srt.t);
+            vector3 new_p = srt.q.inverse() * (srt.scale * gt_positions[i] - srt.t);
             // std::cout << gt_positions[i].transpose() << " - " << in_positions[i].transpose() << " - "
             //           << new_p.transpose() << std::endl;
         }
@@ -215,8 +215,8 @@ bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
 bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set, Map &map) {
     Frame &next_frame = map.frames_[_frame_id];
     // search for 2D-3D correspondences
-    std::vector<Eigen::Vector2d> cor_points2ds;
-    std::vector<Eigen::Vector3d> cor_points3ds;
+    std::vector<vector2> cor_points2ds;
+    std::vector<vector3> cor_points3ds;
     std::vector<std::pair<int, int>> cor_2d_3d_ids;
     map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
     printf("next frame id: %d cor number: %d\n", _frame_id, (int)cor_2d_3d_ids.size());
@@ -246,8 +246,8 @@ bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set, Ma
 int RegisterNextImage1(const int frame_id, Map &map) {
     Frame &next_frame = map.frames_[frame_id];
     // search for 2D-3D correspondences
-    std::vector<Eigen::Vector2d> cor_points2ds;
-    std::vector<Eigen::Vector3d> cor_points3ds;
+    std::vector<vector2> cor_points2ds;
+    std::vector<vector3> cor_points3ds;
     std::vector<std::pair<int, int>> cor_2d_3d_ids;
     map.SearchCorrespondences(next_frame, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
     printf("next frame id: %d cor number: %d\n", frame_id, (int)cor_2d_3d_ids.size());
@@ -272,7 +272,7 @@ int RegisterNextImage1(const int frame_id, Map &map) {
     return 0;
 }
 
-bool SolvePnP(Camera cam, std::vector<Eigen::Vector2d> cor_points2ds, std::vector<Eigen::Vector3d> cor_points3ds,
+bool SolvePnP(Camera cam, std::vector<vector2> cor_points2ds, std::vector<vector3> cor_points3ds,
               Frame &frame, std::vector<int> &inlier) {
     size_t cor_num = cor_points2ds.size();
     if (cor_num < 20) {
@@ -301,12 +301,12 @@ bool SolvePnP(Camera cam, std::vector<Eigen::Vector2d> cor_points2ds, std::vecto
                                   inlier, cv::SOLVEPNP_EPNP);
     if (success) {
         Rodrigues(rvec, rmat);
-        Eigen::Matrix3d rmatrix;
+        matrix3 rmatrix;
         rmatrix << rmat.ptr<double>(0)[0], rmat.ptr<double>(0)[1], rmat.ptr<double>(0)[2], rmat.ptr<double>(1)[0],
             rmat.ptr<double>(1)[1], rmat.ptr<double>(1)[2], rmat.ptr<double>(2)[0], rmat.ptr<double>(2)[1],
             rmat.ptr<double>(2)[2];
-        Eigen::Vector3d t(tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2));
-        frame.Tcw = Pose(Eigen::Quaterniond(rmatrix), t);
+        vector3 t(tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2));
+        frame.Tcw = Pose(quaternion(rmatrix), t);
         frame.registered = true;
         printf("PnP %d/%d\n", inlier.size(), cvpt2d.size());
     }
@@ -345,11 +345,11 @@ struct AbsolutePoseEstimationOptions {
     }
 };
 
-bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options, const std::vector<Eigen::Vector2d> &points2D,
-                          const std::vector<Eigen::Vector3d> &points3D, Pose &pose, std::vector<char> *inlier_mask);
+bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options, const std::vector<vector2> &points2D,
+                          const std::vector<vector3> &points3D, Pose &pose, std::vector<char> *inlier_mask);
 
-bool SolvePnP_colmap(const std::vector<Eigen::Vector2d> &cor_points2ds,
-                     const std::vector<Eigen::Vector3d> &cor_points3ds, const double max_error, Pose &tcw,
+bool SolvePnP_colmap(const std::vector<vector2> &cor_points2ds,
+                     const std::vector<vector3> &cor_points3ds, const double max_error, Pose &tcw,
                      std::vector<char> &inlier_mask) {
     AbsolutePoseEstimationOptions abs_pose_options;
     abs_pose_options.num_threads = 1;
@@ -369,13 +369,13 @@ bool SolvePnP_colmap(const std::vector<Eigen::Vector2d> &cor_points2ds,
 
 typedef LORANSAC<P3PEstimator, EPNPEstimator> AbsolutePoseRANSAC;
 
-void EstimateAbsolutePoseKernel(const std::vector<Eigen::Vector2d> &points2D,
-                                const std::vector<Eigen::Vector3d> &points3D, const RANSACOptions &options,
+void EstimateAbsolutePoseKernel(const std::vector<vector2> &points2D,
+                                const std::vector<vector3> &points3D, const RANSACOptions &options,
                                 AbsolutePoseRANSAC::Report *report) {
     // Estimate pose for given focal length.
     AbsolutePoseRANSAC ransac(options);
 
-    std::vector<Eigen::Vector2d> points2D_N(points2D.size());
+    std::vector<vector2> points2D_N(points2D.size());
     for (size_t i = 0; i < points2D.size(); ++i) {
         points2D_N[i] = points2D[i];
     }
@@ -383,8 +383,8 @@ void EstimateAbsolutePoseKernel(const std::vector<Eigen::Vector2d> &points2D,
     *report = ransac.Estimate(points2D_N, points3D);
 }
 
-bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options, const std::vector<Eigen::Vector2d> &points2D,
-                          const std::vector<Eigen::Vector3d> &points3D, Pose &tcw, std::vector<char> *inlier_mask) {
+bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options, const std::vector<vector2> &points2D,
+                          const std::vector<vector3> &points3D, Pose &tcw, std::vector<char> *inlier_mask) {
     AbsolutePoseRANSAC::Report report;
 
     EstimateAbsolutePoseKernel(points2D, points3D, options.ransac_options, &report);
@@ -396,7 +396,7 @@ bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options, const st
     Eigen::Matrix3x4d proj_matrix;
     proj_matrix = report.model;
     *inlier_mask = report.inlier_mask;
-    Eigen::Quaterniond quat(proj_matrix.leftCols<3>());
+    quaternion quat(proj_matrix.leftCols<3>());
 
     tcw.q = quat;
     tcw.t = proj_matrix.rightCols<1>();

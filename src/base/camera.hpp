@@ -1,11 +1,10 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef XRSFM_SRC_BASE_CAMERA_HPP
+#define XRSFM_SRC_BASE_CAMERA_HPP
 
 #include <Eigen/Eigen>
-// #include "xrprimer/data_structure/camera/camera.h"
 
 namespace xrsfm {
-// class Camera : public BaseCameraParameter {
+
 class Camera {
   public:
     explicit Camera(int _id = 0, double fx = 0, double fy = 0, double cx = 0, double cy = 0, double d = 0) {

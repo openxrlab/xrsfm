@@ -9,22 +9,22 @@
 #include "geometry/triangluate_svd.h"
 
 namespace xrsfm {
-double ReprojectionError(const Pose &pose, const Eigen::Vector2d &point2d, const Eigen::Vector3d &point3d) {
-    Eigen::Vector3d p_c = pose.q * point3d + pose.t;
-    Eigen::Vector2d residual = p_c.hnormalized() - point2d;
+double ReprojectionError(const Pose &pose, const vector2 &point2d, const vector3 &point3d) {
+    vector3 p_c = pose.q * point3d + pose.t;
+    vector2 residual = p_c.hnormalized() - point2d;
     return residual.norm();
 }
 
-double Reprojection_Error(const Pose &pose, const Camera &camera, const Eigen::Vector2d &point2d,
-                          const Eigen::Vector3d &point3d) {
-    Eigen::Vector3d p_c = pose.q * point3d + pose.t;
-    Eigen::Vector2d estimate;
+double Reprojection_Error(const Pose &pose, const Camera &camera, const vector2 &point2d,
+                          const vector3 &point3d) {
+    vector3 p_c = pose.q * point3d + pose.t;
+    vector2 estimate;
     NormalizedToImage(camera, p_c.hnormalized(), estimate);
-    Eigen::Vector2d residual = estimate - point2d;
+    vector2 residual = estimate - point2d;
     return residual.norm();
 }
 
-void AddTrack(const std::vector<std::pair<int, int>> &observations, const Eigen::Vector3d &p, Map &map) {
+void AddTrack(const std::vector<std::pair<int, int>> &observations, const vector3 &p, Map &map) {
     Track track;
     track.point3d_ = p;
     track.outlier = false;
@@ -154,9 +154,9 @@ inline std::tuple<int, double> GetMaxAngle(const Map &map, const std::set<int> &
     for (const auto &track_id : observed_track_ids) {
         const auto &track = map.tracks_[track_id];
         if (track.observations_.count(frame_id) != 0) continue;
-        Eigen::Vector3d p3d = track.point3d_;
-        Eigen::Vector3d ray1 = (frame.Tcw.q * p3d + frame.Tcw.t).normalized();
-        Eigen::Vector3d ray2 = (frame.points_normalized[p2d_id].homogeneous()).normalized();
+        vector3 p3d = track.point3d_;
+        vector3 ray1 = (frame.Tcw.q * p3d + frame.Tcw.t).normalized();
+        vector3 ray2 = (frame.points_normalized[p2d_id].homogeneous()).normalized();
         const double angle_error = std::acos(ray1.dot(ray2));
         if (angle_error < best_angle_error) {
             best_track_id = track_id;
@@ -223,7 +223,7 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id, double
 }
 
 inline void UpdateTrackAngle(const std::vector<Frame> &frames, Track &track, const double min_tri_angle_rad) {
-    std::vector<Eigen::Vector3d> centers(0);
+    std::vector<vector3> centers(0);
     for (auto &obs_info : track.observations_) {
         const auto &frame = frames[obs_info.first];
         assert(frame.registered);
@@ -257,7 +257,7 @@ inline void FilterPoint3d(const double max_re, const double min_tri_angle_rad, M
         // CHECK(frame.registered);
         const auto &camera = map.cameras_[frame.camera_id];
         const double re = Reprojection_Error(frame.Tcw, camera, frame.points[p2d_id], track.point3d_);
-        const Eigen::Vector3d p3d = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
+        const vector3 p3d = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
         if (re > max_re || p3d.z() < 0.2 || p3d.z() > 100) {
             obs_to_delete.emplace_back(frame_id, p2d_id);
         } else {
@@ -317,7 +317,7 @@ void Point3dProcessor::CheckTrackDepth(const Map &map) {
         int count = 0;
         for (auto &obs_info : track.observations_) {
             const auto &frame = map.frames_[obs_info.first];
-            Eigen::Vector3d p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
+            vector3 p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
 
             auto &camera = map.cameras_[frame.camera_id];
             double re = Reprojection_Error(frame.Tcw, camera, frame.points[obs_info.second], track.point3d_);
@@ -341,7 +341,7 @@ void Point3dProcessor::ReTriangulate(Map &map) {
             Frame &t_frame = map.frames_[t_frame_id];
             if (!t_frame.registered) continue;
             observations.emplace_back(t_frame_id, t_p2d_id);
-            Eigen::Vector3d p_c = t_frame.Tcw.q * track.point3d_ + t_frame.Tcw.t;
+            vector3 p_c = t_frame.Tcw.q * track.point3d_ + t_frame.Tcw.t;
             if (p_c.z() < 0) {
                 has_negative_depth = true;
                 //                printf("%zu %d %lf\n",i,t_frame_id,p_c.z());
@@ -419,7 +419,7 @@ void Point3dProcessor::MergeTrack(Map &map, int track_id, double max_re) {
             // judge whether to merge
             bool merge_success = true;
             const double w1 = track.observations_.size(), w2 = track2.observations_.size();
-            const Eigen::Vector3d merged_p3d = (w1 * track.point3d_ + w2 * track2.point3d_) / (w1 + w2);
+            const vector3 merged_p3d = (w1 * track.point3d_ + w2 * track2.point3d_) / (w1 + w2);
             for (const Track *track_ptr : {&track, &track2}) {
                 for (const auto &[t_frame_id, t_p2d_id] : track_ptr->observations_) {
                     const auto &t_frame = map.frames_[t_frame_id];
@@ -473,7 +473,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id, double max_re) 
 
                 // judge whether to merge
                 const double w1 = track.observations_.size(), w2 = track2.observations_.size();
-                const Eigen::Vector3d merged_p3d = (w1 * track.point3d_ + w2 * track2.point3d_) / (w1 + w2);
+                const vector3 merged_p3d = (w1 * track.point3d_ + w2 * track2.point3d_) / (w1 + w2);
                 bool merge_success = true;
                 for (const Track *track_ptr : {&track, &track2}) {
                     for (const auto &[t_frame_id, t_p2d_id] : track_ptr->observations_) {
@@ -583,7 +583,7 @@ void Point3dProcessor::ContinueFrameTracks(const int frame_id, const std::vector
     }
 }
 
-bool CreatePoint3dRAW(const std::vector<std::pair<Pose, Eigen::Vector2d>> &observations, Eigen::Vector3d &p) {
+bool CreatePoint3dRAW(const std::vector<std::pair<Pose, vector2>> &observations, vector3 &p) {
     size_t data_size = observations.size();
     std::vector<colmap::TriangulationEstimator::PointData> point_data(data_size);
     std::vector<colmap::TriangulationEstimator::PoseData> pose_data(data_size);

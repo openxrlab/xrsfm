@@ -2,8 +2,8 @@
 // Created by SENSETIME\yezhichao1 on 2020/9/14.
 //
 
-#ifndef CERESBA_COST_FACTOR_H
-#define CERESBA_COST_FACTOR_H
+#ifndef XRSFM_SRC_OPTIMIZATION_COST_FACTOR_CERES_H
+#define XRSFM_SRC_OPTIMIZATION_COST_FACTOR_CERES_H
 
 #include <ceres/ceres.h>
 #include "utility/global.h"
@@ -229,4 +229,4 @@ class TagCost : public ceres::SizedCostFunction<3, 4, 3, 1, 3> {
 
 } // namespace xrsfm
 
-#endif // CERESBA_COST_FACTOR_H
+#endif // XRSFM_SRC_OPTIMIZATION_COST_FACTOR_CERES_H

@@ -39,7 +39,7 @@ void AddCovisibilityEdge(ceres::Problem &problem, Map &map, std::vector<double> 
             auto &s2 = s_vec[cor_id];
             auto &pose2 = twc_vec[cor_id];
             Eigen::Quaterniond q_mea = pose1.q.inverse() * pose2.q;
-            Eigen::Vector3d p_mea = pose1.q.inverse() * (pose2.t - pose1.t);
+            vector3 p_mea = pose1.q.inverse() * (pose2.t - pose1.t);
             ceres::CostFunction *cost_function = new PoseGraphCost(q_mea, p_mea, weight_o);
             problem.AddResidualBlock(cost_function, nullptr, pose1.q.coeffs().data(), pose1.t.data(), pose2.q.coeffs().data(),
                                      pose2.t.data(), &s1, &s2);
@@ -62,7 +62,7 @@ void AddLoopEdge(ceres::Problem &problem, Map &map, const LoopInfo &loop_info, s
             auto &s2 = s_vec[cor_id];
             auto &pose2 = twc_vec[cor_id];
             Eigen::Quaterniond q_mea = pose1_mea.q.inverse() * pose2.q;
-            Eigen::Vector3d p_mea = pose1_mea.q.inverse() * (pose2.t - pose1_mea.t);
+            vector3 p_mea = pose1_mea.q.inverse() * (pose2.t - pose1_mea.t);
 
             ceres::CostFunction *cost_function = new PoseGraphCost(q_mea, p_mea, weight_o);
             problem.AddResidualBlock(cost_function, nullptr, pose1.q.coeffs().data(), pose1.t.data(), pose2.q.coeffs().data(),
@@ -230,7 +230,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map, bool u
         int frame_id = track.ref_id;
         int p2d_id = track.observations_[frame_id];
         Pose tcw = map.frames_[frame_id].Tcw;
-        Eigen::Vector2d p2d = map.frames_[frame_id].points_normalized[p2d_id];
+        vector2 p2d = map.frames_[frame_id].points_normalized[p2d_id];
         track.point3d_ = tcw.q.inverse() * (s_vec[frame_id] * track.depth * p2d.homogeneous() - tcw.t);
     }
 }
@@ -313,8 +313,8 @@ std::vector<int> FindLocalBundle(const int frame_id, Map &map, const size_t num_
         std::make_pair(min_tri_angle_rad / 3.0, 0.3 * num_p3d), std::make_pair(min_tri_angle_rad / 4.0, 0.2 * num_p3d),
         std::make_pair(min_tri_angle_rad / 5.0, 0.1 * num_p3d), std::make_pair(min_tri_angle_rad / 6.0, 0.1 * num_p3d)};
 
-    const Eigen::Vector3d proj_center = frame.Tcw.center();
-    std::vector<Eigen::Vector3d> shared_points3D;
+    const vector3 proj_center = frame.Tcw.center();
+    std::vector<vector3> shared_points3D;
     shared_points3D.reserve(num_p3d);
     std::vector<double> tri_angles(cov_vec.size(), -1.0);
     std::vector<char> used_overlapping_images(cov_vec.size(), false);
@@ -325,7 +325,7 @@ std::vector<int> FindLocalBundle(const int frame_id, Map &map, const size_t num_
             if (used_overlapping_images[frame_id]) continue;
 
             const auto &frame_overlap = map.frames_[cov_vec[frame_id].first];
-            const Eigen::Vector3d proj_center_overlap = frame_overlap.Tcw.center();
+            const vector3 proj_center_overlap = frame_overlap.Tcw.center();
 
             // In the first iteration, compute the triangulation angle. In later
             // iterations, reuse the previously computed value.
