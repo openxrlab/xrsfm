@@ -1,0 +1,22 @@
+image: registry.sensetime.com/openxrlab/xrsfm@sha256:2748503334f5e27204cb19983737e7ea2169b45cf6cd2de59bcc53e9c4c82301
+
+stages:
+  - build
+  # - test
+
+build:
+  stage: build
+  script:
+    - mv /xrprimer ../
+    - cmake -B build && cmake --build build -j8
+  artifacts:
+    when: always
+    expire_in: 1 hrs
+    paths:
+      - build/
+    
+
+# test:
+#   stage: test
+#   script:
+#     - ./build/roam-pc/player/roam-pc-player -H -c configs/euroc.yaml --tum trajectory.tum euroc:///MH_01_easy/mav0

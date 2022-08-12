@@ -25,4 +25,4 @@ inline void SolveFundamnetalCOLMAP(const std::vector<Eigen::Vector2d> &points1,
     frame_pair.F = F;
 }
 } // namespace xrsfm
-#endif 
+#endif
