@@ -17,7 +17,7 @@ generate code, e.g., Auto, All, Maxwell, Pascal, ...")
 
 # find_package(Ceres REQUIRED)
 
-set(XRPrimer_DIR "/home/yzc/Projects/xrprimer/install/lib/cmake")
+set(XRPrimer_DIR "../xrprimer/install/lib/cmake")
 find_package(XRPrimer REQUIRED)
 
 # for sift gpu & view
