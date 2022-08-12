@@ -1,4 +1,4 @@
-image: registry.sensetime.com/openxrlab/xrsfm@sha256:2748503334f5e27204cb19983737e7ea2169b45cf6cd2de59bcc53e9c4c82301
+image: registry.sensetime.com/openxrlab/xrsfm@sha256:caad8154b3ec60828ab7d63478256ee1cf36c01b30e2e7a4719e8a08a0e35a05
 
 stages:
   - build
