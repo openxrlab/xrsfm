@@ -35,6 +35,7 @@ void FeatureExtract(const std::string &image_dir_path, std::vector<Frame> &frame
     for (int i = 0; i < frames.size(); i++) {
         Frame &frame = frames[i];
         frame.keypoints_.clear();
+        if (frame.name == "2594751100_5929c9d64b_o.jpg") continue;
         // if (frame.name == "140983607_f7b7142b1b_o.jpg") continue;
         const cv::Mat image = cv::imread(image_dir_path + frame.name);
         if (image.rows == 0) {
@@ -49,6 +50,7 @@ void FeatureExtract(const std::string &image_dir_path, std::vector<Frame> &frame
         orb(image, cv::Mat(), frame.keypoints_, frame.orb_descs_);
 #endif
     }
+    SetUpFramePoints(frames);
 }
 
 } // namespace xrsfm

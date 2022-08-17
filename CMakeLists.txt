@@ -38,7 +38,7 @@ endif ()
 ################################################################################
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++14 -msse4 -fopenmp -fpermissive -w -pthread")#for const
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++14 -msse4 -fopenmp -fpermissive -w -pthread")#-fprofile-arcs -ftest-coverage
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -g")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -g -ggdb")
 set(CMAKE_BUILD_TYPE "Release")
@@ -156,13 +156,14 @@ target_include_directories(ecim
         )
 
 target_link_libraries(ecim
-        sift_gpu
-        ${OpenCV_LIBS}
+        stdc++fs 
         # ${EIGEN3_LIBS}
         # ${CERES_LIBRARIES}
+        ${OpenCV_LIBS}
         ${Pangolin_LIBRARIES}
-        stdc++fs 
+        gtest
         XRPrimer::xrprimer
+        sift_gpu
         )
  
 add_executable(run_matching src/run_matching.cc)
@@ -178,13 +179,13 @@ add_executable(rec_kitti src/rec_kitti.cc)
 target_link_libraries(rec_kitti ecim)
 
 add_executable(run_triangulation src/run_triangulation.cc)
-target_link_libraries(run_triangulation ecim)
-
-add_executable(tag_extract src/tag_extract.cc)
-target_link_libraries(tag_extract apriltag ${OpenCV_LIBS} stdc++fs )
+target_link_libraries(run_triangulation ecim) 
 
 add_executable(tag_refine src/tag_refine.cc)
-target_link_libraries(tag_refine ecim)
+target_link_libraries(tag_refine ecim apriltag)
 
 add_executable(test_f src/test/feature_test.cc)
 target_link_libraries(test_f ecim)
+
+add_executable(test_g src/test/geometry_test.cc)
+target_link_libraries(test_g ecim) 

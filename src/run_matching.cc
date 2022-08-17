@@ -11,29 +11,17 @@
 
 using namespace xrsfm;
 
-void SetUpFramePoints(std::vector<Frame>& frames) {
-    for (auto& frame : frames) {
-        const int num_points = frame.keypoints_.size();
-        frame.points.clear();
-        frame.points_normalized.clear();
-        for (const auto& kpt : frame.keypoints_) {
-            const auto& pt = kpt.pt;
-            frame.points.emplace_back(pt.x, pt.y);
-        }
-        frame.track_ids_.assign(num_points, -1);
-    }
-}
 
 void GetFeatures(const std::string& image_dir_path, const std::string& ftr_path,
                  std::vector<Frame>& frames) {
     std::ifstream ftr_bin(ftr_path);
     if (ftr_bin.good()) {
         ReadFeatures(ftr_path, frames);
+        SetUpFramePoints(frames);
     } else {
         FeatureExtract(image_dir_path, frames);
         SaveFeatures(ftr_path, frames, true);
     }
-    SetUpFramePoints(frames);
 }
 
 void GetImageSizeVec(const std::string& image_dir_path, const std::vector<std::string>& image_names,

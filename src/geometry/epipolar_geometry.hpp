@@ -2,6 +2,7 @@
 #ifndef XRSFM_SRC_GEOMETRY_EPIPOLAR_GEOMETRY_HPP
 #define XRSFM_SRC_GEOMETRY_EPIPOLAR_GEOMETRY_HPP
 
+#include "base/map.h"
 #include "estimators/fundamental_matrix.h"
 #include "optim/loransac.h"
 

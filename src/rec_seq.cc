@@ -11,7 +11,7 @@
 
 using namespace xrsfm;
 
-void PreProcess(const std::string dir_path, const std::string images_path, Map& map) {
+void PreProcess(const std::string dir_path, const std::string images_path,const std::string camera_path, Map& map) {
     std::vector<Frame> frames;
     std::vector<FramePair> frame_pairs;
     std::vector<std::string> image_names;
@@ -22,8 +22,9 @@ void PreProcess(const std::string dir_path, const std::string images_path, Map& 
     // set cameras & image name
     std::vector<Camera> cameras;
     // TODO: ReadCamera
-    Camera seq(0, 1000, 1000, 640, 360, 0.0);
+    // Camera seq(0, 1000, 1000, 640, 360, 0.0);
     // Camera seq =  Camera(0, 886.420017084725,881.278105028345, 479.5, 269.5, -0.004);
+    Camera seq = ReadCameraIOSRecord(camera_path);
     cameras.emplace_back(seq);
     for (auto& frame : frames) {
         frame.camera_id = 0;
@@ -63,13 +64,15 @@ int main(int argc, char* argv[]) {
 
     const std::string bin_path = config_json["bin_path"];
     const std::string images_path = config_json["images_path"];
+    const std::string camera_path = config_json["camera_path"];
     const std::string output_path = config_json["output_path"];
     const int init_id1 = config_json["init_id1"];
     const int init_id2 = config_json["init_id2"];
+    std::cout << "Read Config Done!" << std::endl;
 
     // 2. Map PreProcess
     Map map;
-    PreProcess(bin_path, images_path, map);
+    PreProcess(bin_path, images_path, camera_path, map);
     std::cout << "PreProcess Done!" << std::endl;
 
     // 3. Map Reconstruction

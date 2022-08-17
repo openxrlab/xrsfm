@@ -651,7 +651,7 @@ void MatchExpansionSolver::GetCandidateCovisibility(
             // 两个connected组成pair并且中间至少一个registered frame
             if (!mask_registered[id1] && !mask_registered[id2]) continue;
             if (!mask_connected[id1] || !mask_connected[id2]) continue;
-            if (m_matchmap.GetMatcheNum(id1, id2) > 30) continue;
+            if (m_matchmap.GetMatcheNum(id1, id2) > 50) continue;
 
             // check covisible
             int num_covisibility_patch = 0;

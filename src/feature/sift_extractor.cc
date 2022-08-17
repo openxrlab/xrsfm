@@ -115,29 +115,13 @@ void SiftExtractor::ExtractFLOAT(const cv::Mat &_image, std::vector<cv::KeyPoint
     }
 
     SiftGPU *sift_gpu = sift_gpu1.get();
-
-    //    size_t num_features = 0;
-    //    const float default_dog_threshold = sift_gpu->_dog_threshold;
-    //
-    //    const int max_iter = 5;
-    //    const int min_num_feature = 100;
-    //    int iter = 0;
-    //    while (num_features < min_num_feature && iter++ < max_iter) {
-    //        const int code = sift_gpu->RunSIFT(image.cols, image.rows, image.data, GL_LUMINANCE,
-    //        GL_UNSIGNED_BYTE); const int kSuccessCode = 1; if (code != kSuccessCode) {
-    //            printf("fail\n");
-    //            return;
-    //        }
-    //        sift_gpu->_dog_threshold = 0.8 * sift_gpu->_dog_threshold;
-    //        num_features = static_cast<size_t>(sift_gpu->GetFeatureNum());
-    //    }
-    //    sift_gpu->_dog_threshold = default_dog_threshold;
+ 
+    constexpr int kSuccessCode = 1;
     const int code =
         sift_gpu->RunSIFT(image.cols, image.rows, image.data, GL_LUMINANCE, GL_UNSIGNED_BYTE);
-    const int kSuccessCode = 1;
-    if (code != kSuccessCode) {
-        printf("fail\n");
-        exit(0);
+
+    if(code != kSuccessCode){ 
+        printf("fail to extract\n"); 
         return;
     }
     size_t num_features = sift_gpu->GetFeatureNum();

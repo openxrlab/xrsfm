@@ -2,6 +2,7 @@
 #define XRSFM_SRC_BASE_TYPES_H
 
 #include <Eigen/Eigen>
+#include "utility/global.h"
 
 namespace xrsfm {
 typedef Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> UINT8Descriptors;

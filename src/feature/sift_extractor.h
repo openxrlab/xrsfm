@@ -45,8 +45,7 @@ struct SiftExtractionOptions {
     int max_image_size = 3200;
 
     // Maximum number of features to detect, keeping larger-scale features.
-    int max_num_features = 4096; //(Note)BCHO: controlled by construction function of SiftExrtraction
-                                 //(dif 8192 in colmap)
+    int max_num_features = 8192; 
 
     // First octave in the pyramid, i.e. -1 upsamples the image by one level.
     int first_octave = -1;
@@ -105,7 +104,7 @@ struct SiftExtractionOptions {
 
 class SiftExtractor {
   public:
-    SiftExtractor(int nfeatures = 4096);
+    SiftExtractor(int nfeatures = 8192);
     ~SiftExtractor();
     void ExtractFLOAT(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoints,
                       FeatureDescriptors &descriptors);
