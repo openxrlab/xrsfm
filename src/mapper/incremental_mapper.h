@@ -13,6 +13,7 @@
 namespace xrsfm {
 struct IncrementalMapperOptions {
     bool correct_pose = false;
+    bool only_with_sim3 = false;
     bool stop_when_register_fail = false;
     int init_id1 = -1;
     int init_id2 = -1;

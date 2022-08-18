@@ -8,7 +8,7 @@ void IncrementalMapper::Reconstruct(Map& map) {
     p3d_processor = Point3dProcessor(options.th_rpe_lba, options.th_angle_lba, options.th_rpe_gba, options.th_angle_lba);
     error_corrector.ba_solver_ = &ba_solver;
     error_corrector.p3d_processor_ = &p3d_processor;
-    error_corrector.only_correct_with_sim3_ = false;
+    error_corrector.only_correct_with_sim3_ = options.only_with_sim3;
     // ViewerThread viewer;
     // viewer.start();
 

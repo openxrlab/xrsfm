@@ -19,7 +19,6 @@ extern "C" {
 #include "common/getopt.h"
 }
 
-
 #include "base/map.h"
 #include "base/camera.h"
 #include "geometry/track_processor.h"
@@ -116,9 +115,9 @@ void tag_refine(std::string image_dir,std::string map_dir,std::string output_pat
         }
     }  
     for (auto &[tag_id, frame_obs] : tag_obs) {
-        std::cout << tag_id << " " << frame_obs.size() << std::endl;
         // too few measurment to triangulte
         if (frame_obs.size() < 4) continue;
+        std::cout <<"tag id:"<<tag_id << " observer number: " << frame_obs.size() << std::endl;
         for (auto &[frame_id, pts] : frame_obs) {
             std::vector<vector2> pts_normlized(4);
             for (int i = 0; i < 4; ++i) {

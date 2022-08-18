@@ -152,6 +152,7 @@ target_include_directories(ecim
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/src/geometry/colmap
         ${CMAKE_SOURCE_DIR}/3rdparty/SiftGPU
+        ${CMAKE_SOURCE_DIR}/3rdparty/apriltag
         ${EIGEN3_INCLUDE_DIRS} 
         )
 
@@ -189,3 +190,6 @@ target_link_libraries(test_f ecim)
 
 add_executable(test_g src/test/geometry_test.cc)
 target_link_libraries(test_g ecim) 
+
+add_executable(test_r src/test/reconstruction_test.cc)
+target_link_libraries(test_r ecim apriltag) 
