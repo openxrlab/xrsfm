@@ -170,14 +170,7 @@ int main(int argc, const char* argv[]) {
 
     // GBA
     ba_solver.GBA(map, true, true);
-
-    WriteColMapDataBinary(output_path, map);
-
-    // ViewerThread viewer;
-    // viewer.start();
-    // viewer.update_map(map);
-    // sleep(1000);
-    // viewer.stop();
-
+    
+    WriteColMapDataBinary(output_path, map); 
     return 0;
 }

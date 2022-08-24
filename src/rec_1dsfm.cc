@@ -45,6 +45,14 @@ void PreProcess(const std::string image_dir_path, const std::string bin_path, Ma
         }
     }
 
+    for(int i = 0;i<cameras.size();++i){
+        auto&camera = cameras[i];
+        // if distortion parameters of the camera are not estimated, the camera parameters is invalid. 
+        if(camera.distort_params[0]==0){
+            camera.set_invalid();
+        }
+    }
+
     map.frames_ = frames;
     map.cameras_ = cameras;
     map.frame_pairs_ = frame_pairs;

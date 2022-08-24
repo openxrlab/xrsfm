@@ -15,10 +15,17 @@ void IncrementalMapper::Reconstruct(Map& map) {
     timer.tot.resume();
     // 1. Map Initialization
     FramePair init_frame_pair;
-    if (options.init_id1 == -1 || options.init_id2 == -1) {
-        FindInitFramePair(map, init_frame_pair);
-    } else {
+    if (options.init_id1 != -1 && options.init_id2 != -1) {
+        std::cout<<"Init with Given Frames "<<options.init_id1<<" "<<options.init_id2<<std::endl;
         init_frame_pair = FindPair(map.frame_pairs_, options.init_id1, options.init_id2);
+    } else {
+        std::cout<<"Found Init Frame Pair "<<options.init_id1<<" "<<options.init_id2<<std::endl;
+        init_frame_pair.id1 = options.init_id1;
+        init_frame_pair.id2 = options.init_id2;
+        if(!FindInitFramePair(map, init_frame_pair)){
+            std::cout << "Fail to Find Frame Pair!!!" << std::endl;
+            exit(-1);
+        }
     }
     std::cout << "Found Init Frame Pair Done!" << std::endl;
     InitializeMap(map, init_frame_pair);

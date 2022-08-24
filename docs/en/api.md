@@ -10,3 +10,8 @@ purpose: reconstruct the scene for sequential images
 ## recover_scale
 input: images, reconstruction results\
 purpose: recover the true scale of the reconstruction 
+
+# Data Format
+
+## camera file
+## camera 

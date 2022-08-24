@@ -167,11 +167,11 @@ target_link_libraries(ecim
         stdc++fs 
         # ${EIGEN3_LIBS}
         # ${CERES_LIBRARIES}
-        ${OpenCV_LIBS}
-        ${Pangolin_LIBRARIES}
-        gtest
         XRPrimer::xrprimer
+        ${OpenCV_LIBS}
+        gtest
         sift_gpu
+        ${Pangolin_LIBRARIES}
         )
  
 add_executable(run_matching src/run_matching.cc)
@@ -189,11 +189,11 @@ target_link_libraries(rec_kitti ecim)
 add_executable(run_triangulation src/run_triangulation.cc)
 target_link_libraries(run_triangulation ecim) 
 
-add_executable(tag_extract src/tag_extract.cc)
-target_link_libraries(tag_extract ecim apriltag)
-
 add_executable(tag_refine src/tag_refine.cc)
 target_link_libraries(tag_refine ecim apriltag)
+
+add_executable(tag_extract src/tag_extract.cc)
+target_link_libraries(tag_extract ecim apriltag)
 
 add_executable(test_f src/test/feature_test.cc)
 target_link_libraries(test_f ecim)

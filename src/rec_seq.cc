@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
     std::string bin_path,images_path,camera_path,output_path;
-    int init_id1,init_id2;
+    int init_id1 = -1,init_id2 = -1;
     if (argc <= 2){
         std::string config_path = "./config_seq.json";
         if(argc == 2){
@@ -71,13 +71,17 @@ int main(int argc, char* argv[]) {
         output_path = config_json["output_path"];
         init_id1 = config_json["init_id1"];
         init_id2 = config_json["init_id2"];
-    }else if (argc == 7){
+    }else if (argc >= 5 && argc<=7){
         bin_path = argv[1];
         images_path = argv[2];
         camera_path = argv[3];
         output_path = argv[4];
-        init_id1 = std::stoi(argv[5]);
-        init_id2 = std::stoi(argv[6]);
+        if(argc>=6){
+            init_id1 = std::stoi(argv[5]);
+        }
+        if(argc==7){
+            init_id2 = std::stoi(argv[6]);
+        }
     }else{
         exit(-1);
     }

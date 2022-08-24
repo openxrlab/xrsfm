@@ -1,18 +1,22 @@
 # installation
-    # linux 
+    # linux                 ok
     # docker file
     # docker image
 # tutorial
-    # sfm steps
-    # feature matching
-    # reconstruction
-    # scale estimation
+    # sfm steps             ok
+    # feature matching      ok
+    # scene reconstruction  ok
+    # scale estimation      ok
     # run example
     # run your data
 # benchmark
-    # how to run benchmark
+    # how to run benchmark  ok
     # evaluation results
 # introduction
-    # apis
+    # apis                  ok
     # framework
     # data format
+
+# changelog
+# faq.md
+# test.md

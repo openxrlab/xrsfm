@@ -49,9 +49,7 @@ inline void ReadCameraInfo(const std::string &file_name,
         std::stringstream ss(line);
         ss >> image_name >> model_name >> w >> h;
         ss >> cam.camera_params[0] >> cam.camera_params[2] >> cam.camera_params[3] >> cam.distort_params[0];
-        cam.camera_params[1] = cam.camera_params[0];
-        // std::cout<<image_name<<" ";
-        // cam.log();
+        cam.camera_params[1] = cam.camera_params[0];  
         const int id = cameras.size();
         cam.id = name2cid[image_name] = id;
         cameras.emplace_back(cam);

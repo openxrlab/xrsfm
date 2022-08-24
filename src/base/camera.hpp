@@ -39,6 +39,14 @@ class Camera {
         return camera_params[3];
     }
 
+    inline bool valid(){
+        bool valid = (camera_params[0]!=0);
+        return valid;
+    }
+    inline bool set_invalid(){
+        camera_params[0] = 0;
+    }
+
     inline void log() {
         printf("%d %lf %lf %lf %lf %lf\n", id, fx(), fy(), cx(), cy(), distort_params[0]);
     }

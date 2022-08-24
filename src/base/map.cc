@@ -66,28 +66,16 @@ void Map::Init() {
         assert(matches.size() == frame_pair.inlier_mask.size());
         for (int i = 0; i < matches.size(); ++i) {
             if (!frame_pair.inlier_mask[i]) continue;
-            const auto &match = matches[i];
-            // if(image1.corrs_vector.size()<=match.id1||image2.corrs_vector.size()<=match.id2){
-            //   std::cout<<id1<<" "<<id2<<" "<<match.id1<<" "<<match.id2<<std::endl;
-            //   exit(0);
-            // }
+            const auto &match = matches[i]; 
             auto &corrs_vector1 = image1.corrs_vector.at(match.id1);
             auto &corrs_vector2 = image2.corrs_vector.at(match.id2);
             corrs_vector1.emplace_back(id2, match.id2);
-            corrs_vector2.emplace_back(id1, match.id1);
-            // if(id1==1581&&match.id1==989){
-            //   std::cout<<frames_.at(1581).id<<std::endl;
-            //   std::cout<<frames_.at(1581).points.size()<<std::endl;
-            //   std::cout<<frames_.at(1581).track_ids_.size()<<std::endl;
-            //   std::cout<<corr_graph_.frame_node_vec_.at(1581).corrs_vector.size()<<std::endl;
-            //   exit(0);
-            // }
+            corrs_vector2.emplace_back(id1, match.id1); 
             num_inlier_matches++;
         }
         image1.num_correspondences += num_inlier_matches;
         image2.num_correspondences += num_inlier_matches;
-    }
-    std::cout << "1\n";
+    } 
 
     for (auto &frame : frames_) {
         frame.num_correspondences_have_point3D_.assign(frame.points.size(), 0);

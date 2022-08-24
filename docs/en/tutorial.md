@@ -88,5 +88,29 @@ The program will extract the apriltag from images to calculate the scale, and en
 
 ### Run example
 
+Download test data from url and put the test data in the folder 'test data'.
+Run sequential data with the following command line 
+```
+cd xrsfm
+./bin/test_r
+```
 
 ### Run your data
+
+数据采集
+我们推荐使用采集工具拍摄图像，它会同时获取一个准确的相机内参。
+用户也可以使用其他来源的图像，但鉴于当前xrsfm并不支持相机自标定，用户需要给出相机内参，这可以由标定得到。
+更多的相机模型支持和相机自标定功能将在后续的版本中支持。
+
+数据准备
+除了上述的图像数据和相机内参外，还需要准备图像的检索结果，这部分功能目前被封装在xrloc中，详细参见URL
+
+运行重建
+
+images_path 
+retrival_path
+camera_path
+results_path
+
+./bin/run_matching ${images_path}$ ${retrival_path}$ sequential ${results_path}$
+./bin/sequential_reconstruction ${results_path}$ ${images_path}$ ${camera_path}$ ${results_path}$ 0 5

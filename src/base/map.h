@@ -13,13 +13,13 @@ class Track {
   public:
     // Keyframes observing the point and associated index in keyframe
     std::map<int, int> observations_;
-    Eigen::Vector3d point3d_;
+    vector3 point3d_ = vector3::Zero();
 
-    double angle_;
-    double error;
+    double angle_ = -1;
+    double error = -1;
 
-    int ref_id;
-    double depth;
+    int ref_id = -1;
+    double depth = -1;
     int hierarchical_level = -1;
 
     bool outlier = false;
@@ -44,8 +44,8 @@ class Frame {
     cv::Mat orb_descs_;
 
     // reconstruction
-    std::vector<Eigen::Vector2d> points;
-    std::vector<Eigen::Vector2d> points_normalized;
+    std::vector<vector2> points;
+    std::vector<vector2> points_normalized;
     std::vector<int> track_ids_;
     Pose Tcw, tcw_old;
 
@@ -69,15 +69,15 @@ class Frame {
         if (num_correspondences_have_point3D_[p2d_id] == 0) num_visible_points3D_--;
     }
 
-    inline Eigen::Vector3d center() const {
+    inline vector3 center() const {
         return -(Tcw.q.inverse() * Tcw.t);
     }
 
-    inline Eigen::Quaterniond qwc() const {
+    inline quaternion qwc() const {
         return Tcw.q.inverse();
     }
 
-    inline Eigen::Vector3d twc() const {
+    inline vector3 twc() const {
         return -(Tcw.q.inverse() * Tcw.t);
     }
 };
@@ -96,10 +96,10 @@ class FramePair {
     // inlier for essential
     int inlier_num, inlier_num_f;
     std::vector<char> inlier_mask, inlier_mask_f;
-    Eigen::Matrix3d E, F;
+    matrix3 E, F;
 
-    Eigen::Matrix3d R;
-    Eigen::Vector3d t;
+    matrix3 R;
+    vector3 t;
     double median_tri_angle;
 };
 
@@ -150,16 +150,16 @@ class Map {
 
     void DeregistrationFrame(int frame_id);
 
-    void SearchCorrespondences(const Frame &frame, std::vector<Eigen::Vector2d> &points2d,
-                               std::vector<Eigen::Vector3d> &points3d, std::vector<std::pair<int, int>> &cor_2d_3d_ids,
+    void SearchCorrespondences(const Frame &frame, std::vector<vector2> &points2d,
+                               std::vector<vector3> &points3d, std::vector<std::pair<int, int>> &cor_2d_3d_ids,
                                const bool use_p2d_normalized);
 
     void SearchCorrespondences1(const Frame &frame, const std::set<int> cor_frame_id,
-                                std::vector<Eigen::Vector2d> &points2d, std::vector<Eigen::Vector3d> &points3d,
+                                std::vector<vector2> &points2d, std::vector<vector3> &points3d,
                                 std::vector<std::pair<int, int>> &cor_2d_3d_ids, const bool use_p2d_normalized);
 
-    void SearchCorrespondencesOrder(const Frame &frame, std::vector<Eigen::Vector2d> &points2d,
-                                    std::vector<Eigen::Vector3d> &points3d,
+    void SearchCorrespondencesOrder(const Frame &frame, std::vector<vector2> &points2d,
+                                    std::vector<vector3> &points3d,
                                     std::vector<std::pair<int, int>> &cor_2d_3d_ids);
 
     int MaxPoint3dFrameId();
