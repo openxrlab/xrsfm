@@ -2,17 +2,7 @@ import os
 from argparse import ArgumentParser
 
 seq_name_list = [
-    "00",
-    "01",
-    "02",
-    "03",
-    "04",
-    "05",
-    "06",
-    "07",
-    "08",
-    "09",
-    "10"
+    "00","01","02","03","04","05","06","07","08","09","10"
 ] 
 
 def get_opts():
@@ -39,4 +29,4 @@ if __name__ == "__main__":
         images_path = data_path+seq_name+'/image_0/'
         retrival_path = retrival_dir_path+seq_name+'/retrival_100.txt'
         output_path = output_dir_path+seq_name+'/'
-        os.system(exe+' '+images_path+' '+retrival_path+' sequential '+output_path)
+        os.system(exe+' '+images_path+' '+retrival_path+' sequential '+output_path+' > '+output_path+'log_mat.txt')

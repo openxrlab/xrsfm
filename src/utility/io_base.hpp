@@ -66,4 +66,21 @@ inline void write_data_vec_txt(std::ofstream &file, T *data, int num) {
     file << std::endl;
 }
 
+
+inline void read_name(std::ifstream &file, std::string &name) {
+    name.clear();
+    char name_char;
+    do {
+        file.read(&name_char, 1);
+        if (name_char != '\0') {
+            name += name_char;
+        }
+    } while (name_char != '\0');
+}
+
+inline void write_name(std::ofstream &file,const std::string &name){
+    const std::string str = name + '\0';
+    file.write(name.c_str(), name.size());
+}
+
 } // namespace xrsfm

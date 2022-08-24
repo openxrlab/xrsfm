@@ -52,6 +52,7 @@ inline void ReadFeatures(const std::string &file_name, std::vector<Frame> &frame
 
     CHECK_EQ(num_frames,frames.size());
     for (auto &frame : frames) {
+        read_name(file, frame.name);
         int num_points = -1;
         read_data(file, num_points);
         frame.keypoints_.resize(num_points);
@@ -77,6 +78,7 @@ inline void SaveFeatures(const std::string &file_name, const std::vector<Frame> 
     int num_frames = frames.size();
     write_data(file, num_frames);
     for (const auto &frame : frames) {
+        write_name(file, frame.name);
         const int num_points = frame.keypoints_.size();
         write_data(file, num_points);
         for (int i = 0; i < num_points; ++i) {

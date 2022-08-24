@@ -21,8 +21,8 @@ namespace xrsfm {
 
 void FeatureExtract(const std::string &image_dir_path, std::vector<Frame> &frames) {
 #ifndef USE_ORB
-    const int _feature_num = 8192;
-    std::cout << "FeatureExtract:  feature number = " << _feature_num << "\n";
+    constexpr int _feature_num = 8192;
+    // std::cout << "FeatureExtract:  feature number = " << _feature_num << "\n";
     SiftExtractor sift(_feature_num);
 #else
     const int _feature_num = 2048;

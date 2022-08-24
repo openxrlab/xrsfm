@@ -111,6 +111,8 @@ images_path
 retrival_path
 camera_path
 results_path
+refined_results_path
 
 ./bin/run_matching ${images_path}$ ${retrival_path}$ sequential ${results_path}$
-./bin/sequential_reconstruction ${results_path}$ ${images_path}$ ${camera_path}$ ${results_path}$ 0 5
+./bin/sequential_reconstruction ${results_path}$ ${images_path}$ ${camera_path}$ ${results_path}$
+./bin/tag_refine ${images_path}$ ${results_path}$ ${refined_results_path}$

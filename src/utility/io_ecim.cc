@@ -27,17 +27,6 @@ void ReadCamerasBinary(const std::string &path, std::vector<Camera> &cameras) {
     }
 }
 
-void ReadName(std::ifstream &file, std::string &name) {
-    name.clear();
-    char name_char;
-    do {
-        file.read(&name_char, 1);
-        if (name_char != '\0') {
-            name += name_char;
-        }
-    } while (name_char != '\0');
-}
-
 void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames) {
     std::ifstream file(path, std::ios::binary);
     CHECK(file.is_open()) << path;
@@ -51,7 +40,7 @@ void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames) {
         frame.Tcw.q = Eigen::Quaterniond(q_vec[0], q_vec[1], q_vec[2], q_vec[3]);
         read_data(file, frame.Tcw.t);
         frame.camera_id = read_data2<uint32_t>(file);
-        ReadName(file, frame.name);
+        read_name(file, frame.name);
 
         uint64_t num_p2d = read_data2<uint64_t>(file);
         frame.points.resize(num_p2d);
@@ -107,7 +96,7 @@ void ReadImagesBinaryForTriangulation(const std::string &path, std::map<int, Fra
     for (uint64_t i = 0; i < num_frame; ++i) {
         Frame frame;
         frame.id = read_data2<uint32_t>(file);
-        ReadName(file, frame.name);
+        read_name(file, frame.name);
         const int width = read_data2<uint64_t>(file);
         const int height = read_data2<uint64_t>(file);
 
@@ -184,8 +173,7 @@ void WriteImagesBinary(const std::string &path, const std::vector<Frame> &frames
         write_data(file, q_vec); // todo
         write_data(file, frame.Tcw.t);
         write_data(file, frame.camera_id);
-        const std::string name = frame.name + '\0';
-        file.write(name.c_str(), name.size());
+        write_name(file, frame.name);
         write_data(file, num_p2d);
 
         for (size_t i = 0; i < num_p2d; ++i) {
