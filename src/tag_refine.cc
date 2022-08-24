@@ -15,11 +15,11 @@
 using namespace xrsfm;
  
 int main(int argc, char *argv[]) {
-    google::InitGoogleLogging(argv[0]);
-    constexpr double tag_length = 0.113; 
-    std::string image_dir = argv[1];
+    google::InitGoogleLogging(argv[0]); 
+    std::string images_dir = argv[1];
     std::string map_dir = argv[2];
     std::string output_path = argv[3];
-    tag_refine(image_dir,map_dir,output_path); 
+    double tag_length = std::stod(argv[4]);
+    tag_refine(images_dir,map_dir,output_path); 
     return 0;
 }

@@ -76,6 +76,47 @@ std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(std::string
     return tag_info_vec;
 }
 
+
+std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(const std::string &image_dir,const std::vector<std::string> &image_vec) { 
+    std::map<std::string,std::map<int,std::vector<vector2>>> tag_info_vec;
+    apriltag_detector_t *td = apriltag_detector_create();
+    apriltag_family_t *tf = tag36h11_create();
+    apriltag_detector_add_family(td, tf);
+
+    for (auto &image_name : image_vec) {
+        std::string img_path = image_dir + image_name;
+        cv::Mat frame, gray;
+        frame = cv::imread(img_path.c_str());
+        cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
+        image_u8_t im = {.width = gray.cols,
+                         .height = gray.rows,
+                         .stride = gray.cols,
+                         .buf = gray.data};
+
+        zarray_t *detections = apriltag_detector_detect(td, &im);
+        const int num_detect = zarray_size(detections);
+        if (num_detect == 0) continue; 
+
+        auto& tag_info = tag_info_vec[image_name];
+        for (int i = 0; i < num_detect; i++) {
+            apriltag_detection_t *det;
+            zarray_get(detections, i, &det);
+            // Do stuff with detections here.
+            std::vector<vector2> p_vec(4);
+            for (int k = 0; k < 4; ++k)
+                p_vec[k] = vector2(det->p[k][0], det->p[k][1]);
+            tag_info[det->id] = p_vec;
+        } 
+    }
+
+    // Cleanup.
+    tag36h11_destroy(tf);
+    apriltag_detector_destroy(td);
+
+    return tag_info_vec;
+}
+
+
 std::vector<vector3> get_tag(double tag_length) {
     // double tag_len = 0.113;
     std::vector<vector3> pt_tag(4);

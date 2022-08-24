@@ -16,8 +16,9 @@ seq_name_list = [
  
   
 data_path = "/data/ECIM/SfM/KITTI/"
+output_path = "/data/OpenData/" 
 
 for seq_name in seq_name_list:
     print("Begin "+seq_name)
-    os.system("evo_ape tum /data/ECIM/SfM/KITTI/gt/"+seq_name+"_tum.txt /data/ECIM/SfM/KITTI/"+seq_name+"_test.tum  -vsa")
+    os.system("evo_ape tum "+data_path+"gt/"+seq_name+"_tum.txt "+output_path+seq_name+"/"+seq_name+"_test.tum  -vsa")
     print("End "+seq_name)

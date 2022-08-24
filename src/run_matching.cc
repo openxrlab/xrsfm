@@ -12,26 +12,26 @@
 using namespace xrsfm;
 
 
-void GetFeatures(const std::string& image_dir_path, const std::string& ftr_path,
+void GetFeatures(const std::string& images_path, const std::string& ftr_path,
                  std::vector<Frame>& frames) {
     std::ifstream ftr_bin(ftr_path);
     if (ftr_bin.good()) {
         ReadFeatures(ftr_path, frames);
         SetUpFramePoints(frames);
     } else {
-        FeatureExtract(image_dir_path, frames);
+        FeatureExtract(images_path, frames);
         SaveFeatures(ftr_path, frames, true);
     }
 }
 
-void GetImageSizeVec(const std::string& image_dir_path, const std::vector<std::string>& image_names,
+void GetImageSizeVec(const std::string& images_path, const std::vector<std::string>& image_names,
                      const std::string& path, std::vector<ImageSize>& image_size) {
     std::ifstream bin(path);
     if (bin.good()) {
         LoadImageSize(path, image_size);
     } else {
         for (const auto& image_name : image_names) {
-            const cv::Mat image = cv::imread(image_dir_path + image_name);
+            const cv::Mat image = cv::imread(images_path + image_name);
             image_size.push_back(ImageSize(image.cols, image.rows));
         }
         SaveImageSize(path, image_size);
@@ -131,22 +131,37 @@ void MatchingSeq(std::vector<Frame>& frames, const std::string& fp_path, std::ma
 }
 
 int main(int argc, const char* argv[]) {
-    std::string config_path = "./config_open.json";
-    auto config_json = LoadJSON(config_path);
-    const std::string image_dir_path = config_json["image_dir_path"];
-    const std::string retrival_path = config_json["retrival_path"];
-    const std::string matching_type = config_json["matching_type"];
-    const std::string output_path = config_json["output_path"];
-    std::string ftr_path = output_path + "ftr.bin";
-    std::string size_path = output_path + "size.bin";
-    std::string fp_init_path = output_path + "fp_init.bin";
-    std::string fp_path = output_path + "fp.bin";
+    google::InitGoogleLogging(argv[0]);
+    // 1.Read Config
+    std::string images_path,retrival_path,matching_type,output_path;
+    if (argc <= 2){
+        std::string config_path = "./config_open.json";
+        if(argc == 2){
+            config_path = argv[1];
+        }
+        auto config_json = LoadJSON(config_path);
+        images_path = config_json["images_path"];
+        retrival_path = config_json["retrival_path"];
+        matching_type = config_json["matching_type"];
+        output_path = config_json["output_path"];
+    }else if (argc == 5){
+        images_path = argv[1];
+        retrival_path = argv[2];
+        matching_type = argv[3];
+        output_path = argv[4];
+    }else{
+        exit(-1);
+    }
+    const std::string ftr_path = output_path + "ftr.bin";
+    const std::string size_path = output_path + "size.bin";
+    const std::string fp_init_path = output_path + "fp_init.bin";
+    const std::string fp_path = output_path + "fp.bin";
 
     // 1.read images
     std::vector<std::string> image_names;
-    LoadImageNames(image_dir_path, image_names);
+    LoadImageNames(images_path, image_names);
     std::vector<ImageSize> image_size_vec;
-    GetImageSizeVec(image_dir_path, image_names, size_path, image_size_vec);
+    GetImageSizeVec(images_path, image_names, size_path, image_size_vec);
     std::map<std::string, int> name2id;
     const int num_image = image_names.size();
     std::vector<Frame> frames(num_image);
@@ -158,7 +173,7 @@ int main(int argc, const char* argv[]) {
     std::cout << "Load Image Info Done.\n";
 
     // 2.feature extraction
-    GetFeatures(image_dir_path, ftr_path, frames);
+    GetFeatures(images_path, ftr_path, frames);
     std::cout << "Extract Features Done.\n";
 
     // 5.image matching

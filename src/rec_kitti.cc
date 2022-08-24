@@ -9,10 +9,9 @@
 #include "utility/timer.h"
 #include "utility/viewer.h"
 
-using namespace xrsfm;
-int camera_param_id = -1;
+using namespace xrsfm; 
 
-void PreProcess(const std::string dir_path, Map& map) {
+void PreProcess(const std::string dir_path,const int camera_param_id, Map& map) {
     std::vector<Frame> frames;
     std::vector<Camera> cameras;
     std::vector<FramePair> frame_pairs;
@@ -58,29 +57,39 @@ void PreProcess(const std::string dir_path, Map& map) {
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
-    std::string config_path = "./config_kitti.json";
-    if (argc == 2) {
-        config_path = argv[1];
-    }
-    auto config_json = LoadJSON(config_path);
+    std::string bin_path,data_path,seq_name,output_path;
+    int init_id1,init_id2;
+    if (argc <= 2){
+        std::string config_path = "./config_kitti.json";
+        if(argc == 2){
+            config_path = argv[1];
+        }
+        auto config_json = LoadJSON(config_path);
+        bin_path = config_json["bin_path"];
+        data_path = config_json["data_path"];
+        seq_name = config_json["seq_name"];
+        output_path = config_json["output_path"];
 
-    const std::string data_path = config_json["data_path"];
-    const std::string seq_name = config_json["seq_name"];
-    const std::string output_path = config_json["output_path"];
-    const int init_id1 = config_json["init_id1"];
-    const int init_id2 = config_json["init_id2"];
-    const double camera_size = config_json["camera_size"];
-    const bool debug = (config_json["debug"] == 1);
-    const std::string seq_path = data_path + seq_name + '/';
-    const std::string image_dir = seq_path + "/image_0/";
-
+        init_id1 = config_json["init_id1"];
+        init_id2 = config_json["init_id2"];
+    }else if (argc == 7){
+        bin_path = argv[1];
+        data_path = argv[2];
+        seq_name = argv[3];
+        output_path = argv[4];
+        init_id1 = std::stoi(argv[5]);
+        init_id2 = std::stoi(argv[6]);
+    }else{
+        exit(-1);
+    } 
+    const std::string seq_path = data_path+seq_name+"/";
     std::map<std::string, int> name2camera_id = {{"00", 0}, {"01", 0}, {"02", 0}, {"03", 1}, {"04", 2}, {"05", 2}, {"06", 2}, {"07", 2}, {"08", 2}, {"09", 2}, {"10", 2}};
     CHECK(name2camera_id.count(seq_name) != 0) << "NO suitable camera param.";
-    camera_param_id = name2camera_id[seq_name];
+    const int camera_param_id = name2camera_id[seq_name];
 
     // 2. Map PreProcess
     Map map;
-    PreProcess(seq_path + "/open/nv50", map);
+    PreProcess(bin_path ,camera_param_id, map);
     std::cout << "PreProcess Done!" << std::endl;
 
     // 3. Map Reconstruction

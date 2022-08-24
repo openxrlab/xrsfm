@@ -56,19 +56,22 @@ void PreProcess(const std::string image_dir_path, const std::string bin_path, Ma
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
-    std::string config_path = "./config_uno.json";
-    if (argc == 2) {
-        config_path = argv[1];
-    }
-    auto config_json = LoadJSON(config_path);
-
-    const std::string image_dir_path = config_json["image_dir_path"];
-    const std::string bin_dir_path = config_json["bin_dir_path"];
-    const std::string output_path = config_json["output_path"];
-    const double camera_size = config_json["camera_size"];
-    constexpr double th_rpe_lba = 8, th_angle_lba = 2.0;
-    constexpr double th_rpe_gba = 4, th_angle_gba = 1.5;
-
+    std::string image_dir_path,bin_dir_path,output_path;
+    if (argc <= 2){
+        std::string config_path = "./config_uno.json";
+        if(argc == 2){
+            config_path = argv[1];
+        }
+        auto config_json = LoadJSON(config_path);
+        image_dir_path = config_json["image_dir_path"];
+        bin_dir_path = config_json["bin_dir_path"];
+        output_path = config_json["output_path"]; 
+    }else if (argc == 5){
+        image_dir_path = argv[1];
+        bin_dir_path = argv[2];
+        output_path = argv[3];
+    } 
+    
     // 2.Initialize Program
     Map map;
     PreProcess(image_dir_path, bin_dir_path, map);

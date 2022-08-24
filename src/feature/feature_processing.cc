@@ -248,7 +248,7 @@ void FeatureMatching(const std::vector<Frame> &frames,
 #endif
         frame_pairs.emplace_back(frame_pair);
     }
-// #pragma omp parallel for schedule(dynamic, 8)
+#pragma omp parallel for schedule(dynamic, 8)
     for (auto &frame_pair : frame_pairs) {
         if (frame_pair.matches.size() < min_num_matches) {
             continue;

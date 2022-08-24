@@ -88,8 +88,7 @@ inline void UpdateFrameTimeStamp(std::vector<Frame> &frames, std::vector<double>
 inline void WriteTrajectory(const Map &map, const std::string &trajectory_path) {
     std::ofstream trajectory_file(trajectory_path);
     for (auto &frame : map.frames_) {
-        if (!frame.registered) continue;
-        // if (!frame.is_keyframe) continue;
+        if (!frame.registered) continue; 
         Eigen::Vector3d twc = frame.twc();
         Eigen::Quaterniond qwc = frame.qwc();
         trajectory_file << std::to_string(frame.timestamp) << " " << twc[0] << " " << twc[1] << " " << twc[2] << " " << qwc.x()
@@ -107,6 +106,8 @@ void WriteColMapDataBinary2(const std::string &output_path, const Map &map);
 void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames);
 
 void ReadImagesBinaryForTriangulation(const std::string &path, std::map<int, Frame> &frames);
+
+void ReadCamerasBinary(const std::string &path, std::vector<Camera> &cameras);
 
 void ReadFramePairBinaryForTriangulation(const std::string &path, std::vector<FramePair> &frame_pairs);
 } // namespace xrsfm

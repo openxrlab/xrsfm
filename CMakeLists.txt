@@ -38,10 +38,17 @@ endif ()
 ################################################################################
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++14 -msse4 -fopenmp -fpermissive -w -pthread")#-fprofile-arcs -ftest-coverage
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++14 -msse4 -fopenmp -fpermissive -w -pthread")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -g")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -g -ggdb")
 set(CMAKE_BUILD_TYPE "Release")
+
+# OPTION (ENABLE_COVERAGE "USE GCOV" OFF)
+# MESSAGE(STATUS ENABLE_COVERAGE=${ENABLE_COVERAGE})
+# IF(ENABLE_COVERAGE)
+#     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+#     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+# ENDIF()
 
 if (OPENGL_ENABLED)
     add_definitions("-DOPENGL_ENABLED")
@@ -181,6 +188,9 @@ target_link_libraries(rec_kitti ecim)
 
 add_executable(run_triangulation src/run_triangulation.cc)
 target_link_libraries(run_triangulation ecim) 
+
+add_executable(tag_extract src/tag_extract.cc)
+target_link_libraries(tag_extract ecim apriltag)
 
 add_executable(tag_refine src/tag_refine.cc)
 target_link_libraries(tag_refine ecim apriltag)

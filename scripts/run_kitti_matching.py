@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 
 seq_name_list = [
     "00",
@@ -12,20 +13,30 @@ seq_name_list = [
     "08",
     "09",
     "10"
-]
+] 
 
-config_path = "../config_open.json"
+def get_opts():
+    parser = ArgumentParser()
 
-for seq_name in seq_name_list:
-    print("Begin "+seq_name)
-    fo = open(config_path, "w")
-    str = "{\n"
-    str += "\t\"image_dir_path\": \"/data/ECIM/SfM/KITTI/"+seq_name+"/image_0/\",\n"
-    str += "\t\"retrival_path\": \"/data/ECIM/Mat/" + \
-        seq_name+"/netvlad_image_pairs/nv100_all.txt\",\n"
-    str += "\t\"matching_type\": \"sequential\",\n"
-    str += "\t\"output_path\": \"/data/ECIM/SfM/KITTI/"+seq_name+"/open/nv50\"\n"
-    str += "}"
-    fo.write(str)
-    fo.close()
+    parser.add_argument('--data_path', type=str, required=True,
+                        help='data_path')
+    parser.add_argument('--retrival_dir_path', type=str, required=True,
+                        help='retrival_dir_path')
+    parser.add_argument('--output_dir_path', type=str, required=True,
+                        help='output_dir_path')
+    return parser.parse_args()
 
+if __name__ == "__main__":
+    args = get_opts()
+
+    exe = "./bin/run_matching" 
+    data_path = args.data_path
+    retrival_dir_path = args.retrival_dir_path
+    output_dir_path = args.output_dir_path
+
+    for seq_name in seq_name_list:
+        print("Begin "+seq_name)
+        images_path = data_path+seq_name+'/image_0/'
+        retrival_path = retrival_dir_path+seq_name+'/retrival_100.txt'
+        output_path = output_dir_path+seq_name+'/'
+        os.system(exe+' '+images_path+' '+retrival_path+' sequential '+output_path)

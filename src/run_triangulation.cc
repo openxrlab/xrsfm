@@ -16,12 +16,12 @@
 
 using namespace xrsfm;
 
-void PreProcess(const std::string pose_path, const std::string feature_path, const std::string frame_pair_path, Map& map) {
+void PreProcess(const std::string bin_path, const std::string feature_path, const std::string frame_pair_path, Map& map) {
     std::vector<Frame> frames;
     std::vector<FramePair> frame_pairs;
 
     std::map<int, Frame> frames_pose, frames_pt;
-    ReadImagesBinary(pose_path, frames_pose);
+    ReadImagesBinary(bin_path+"images.bin", frames_pose);
     ReadImagesBinaryForTriangulation(feature_path, frames_pt);
     std::cout << frames_pose.size() << " " << frames_pt.size() << std::endl;
 
@@ -44,9 +44,10 @@ void PreProcess(const std::string pose_path, const std::string feature_path, con
 
     // set cameras & image name
     std::vector<Camera> cameras;
-    Camera seq(0, 1000, 1000, 640, 360, 0.0);
+    ReadCamerasBinary(bin_path+"cameras.bin",cameras);
+    // Camera seq(0, 1000, 1000, 640, 360, 0.0);
     // Camera seq =  Camera(0, 1450,1450, 960, 720, 0.0);
-    cameras.emplace_back(seq);
+    // cameras.emplace_back(seq);
     for (auto& frame : frames) {
         frame.camera_id = 0;
     }
@@ -106,15 +107,30 @@ void PreProcess(const std::string pose_path, const std::string feature_path, con
 }
 
 int main(int argc, const char* argv[]) {
-    std::string config_path = "config_tri.json";
-    auto config_json = LoadJSON(config_path);
-    std::string pose_path = config_json["pose_path"];
-    std::string feature_path = config_json["feature_path"];
-    std::string frame_pair_path = config_json["frame_pair_path"];
-    std::string output_path = config_json["output_path"];
+    google::InitGoogleLogging(argv[0]);
+    // 1.Read Config
+    std::string bin_path,feature_path,matches_path,output_path;
+    if (argc <= 2){
+        std::string config_path = "./config_tri.json";
+        if(argc == 2){
+            config_path = argv[1];
+        }
+        auto config_json = LoadJSON(config_path);
+        bin_path = config_json["bin_path"];
+        feature_path = config_json["feature_path"];
+        matches_path = config_json["matches_path"];
+        output_path = config_json["output_path"];
+    }else if (argc == 5){
+        bin_path = argv[1];
+        feature_path = argv[2];
+        matches_path = argv[3];
+        output_path = argv[4];
+    }else{
+        exit(-1);
+    } 
 
     Map map;
-    PreProcess(pose_path, feature_path, frame_pair_path, map);
+    PreProcess(bin_path, feature_path, matches_path, map);
 
     BASolver ba_solver;
     Point3dProcessor p3d_processor;
@@ -157,11 +173,11 @@ int main(int argc, const char* argv[]) {
 
     WriteColMapDataBinary(output_path, map);
 
-    ViewerThread viewer;
-    viewer.start();
-    viewer.update_map(map);
-    sleep(1000);
-    viewer.stop();
+    // ViewerThread viewer;
+    // viewer.start();
+    // viewer.update_map(map);
+    // sleep(1000);
+    // viewer.stop();
 
     return 0;
 }
