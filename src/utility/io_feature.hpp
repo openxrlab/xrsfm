@@ -42,7 +42,6 @@ inline void ReadFeatures(const std::string &file_name, std::vector<Frame> &frame
     // points track_ids_ keypoints_ uint_descs_
     int num_frames = -1;
     read_data(file, num_frames);
-    std::cout<<num_frames<<std::endl; 
     if (init_frames) {
         frames.resize(num_frames);
         for (int i = 0; i < num_frames; ++i) {
@@ -53,8 +52,10 @@ inline void ReadFeatures(const std::string &file_name, std::vector<Frame> &frame
     CHECK_EQ(num_frames,frames.size());
     for (auto &frame : frames) {
         read_name(file, frame.name);
+        // std::cout<<frame.name<<std::endl; 
         int num_points = -1;
         read_data(file, num_points);
+        // std::cout<<num_points<<std::endl; 
         CHECK(num_points<=1e6);
         frame.keypoints_.resize(num_points);
         frame.uint_descs_.resize(num_points, 128);

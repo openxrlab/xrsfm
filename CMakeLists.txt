@@ -192,15 +192,15 @@ target_link_libraries(run_triangulation ecim)
 add_executable(tag_refine src/tag_refine.cc)
 target_link_libraries(tag_refine ecim apriltag)
 
-add_executable(tag_extract src/tag_extract.cc)
-target_link_libraries(tag_extract ecim apriltag)
+add_executable(unpack_collect_data src/unpack_collect_data.cc)
+target_link_libraries(unpack_collect_data ecim)
 
-add_executable(test_f src/test/feature_test.cc)
-target_link_libraries(test_f ecim)
+# add_executable(test_f src/test/feature_test.cc)
+# target_link_libraries(test_f ecim)
 
-add_executable(test_g src/test/geometry_test.cc)
-target_link_libraries(test_g ecim) 
+# add_executable(test_g src/test/geometry_test.cc)
+# target_link_libraries(test_g ecim) 
 
-add_executable(test_r src/test/reconstruction_test.cc)
-target_link_libraries(test_r ecim apriltag) 
+# add_executable(test_r src/test/reconstruction_test.cc)
+# target_link_libraries(test_r ecim apriltag) 
  

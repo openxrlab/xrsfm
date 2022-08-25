@@ -86,7 +86,7 @@ This step aims to recover the true scale of the reconstruction result.
 First, ensure that the input reconstruction results are correct, otherwise the whole process can not run normally.
 The program will extract the apriltag from images to calculate the scale, and ensure that the apriltag of each ID is unique in the scene.
 
-### Run example
+### Run test data to get started
 
 Download test data from url and put the test data in the folder 'test data'.
 Run sequential data with the following command line 

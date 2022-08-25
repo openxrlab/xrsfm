@@ -7,16 +7,16 @@
     # feature matching      ok
     # scene reconstruction  ok
     # scale estimation      ok
-    # run example
-    # run your data
+    # run example           ok
+    # run your data         ok
 # benchmark
     # how to run benchmark  ok
-    # evaluation results
+    # evaluation results    
 # introduction
     # apis                  ok
-    # framework
-    # data format
+    # framework             
+    # data format           ok
 
 # changelog
-# faq.md
+# faq.md                    ok
 # test.md

@@ -36,14 +36,14 @@ void FeatureExtract(const std::string &image_dir_path, std::vector<Frame> &frame
         Frame &frame = frames[i];
         frame.keypoints_.clear();
         if (frame.name == "2594751100_5929c9d64b_o.jpg") continue;
-        // if (frame.name == "140983607_f7b7142b1b_o.jpg") continue;
+        if (frame.name == "140983607_f7b7142b1b_o.jpg") continue;
         const cv::Mat image = cv::imread(image_dir_path + frame.name);
         if (image.rows == 0) {
             std::cout << "Can't read " << image_dir_path + frame.name << std::endl;
             exit(0);
         }
 #ifndef USE_ORB
-        // std::cout << image_dir_path + frame.name << std::endl;
+        std::cout << image_dir_path + frame.name << std::endl;
         sift.ExtractUINT8(image, frame.keypoints_, frame.uint_descs_);
         // std::cout << i << " " << frame.uint_descs_.rows() << std::endl;
 #else
