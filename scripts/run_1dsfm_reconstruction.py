@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 
 seq_name_list = ['Alamo', 'Ellis_Island', 'Gendarmenmarkt', 'Madrid_Metropolis', 'Montreal_Notre_Dame', 'NYC_Library', 'Piazza_del_Popolo',
  'Piccadilly', 'Roman_Forum', 'Tower_of_London', 'Trafalgar', 'Union_Square', 'Vienna_Cathedral', 'Yorkminster']
+seq_name_list = ['Trafalgar']  
 
 def get_opts():
     parser = ArgumentParser()
@@ -25,4 +26,5 @@ if __name__ == "__main__":
         images_path = data_path+seq_name+'/images/'
         bin_path = bin_dir_path+seq_name+'/'
         output_path = bin_dir_path+seq_name+'/'
-        os.system(exe+' '+images_path+' '+bin_path+' '+output_path)
+        print(exe+' '+images_path+' '+bin_path+' '+output_path)
+        os.system(exe+' '+images_path+' '+bin_path+' '+output_path+' > '+output_path+'log_rec.txt')

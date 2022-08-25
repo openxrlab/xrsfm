@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 
 seq_name_list = ['Alamo', 'Ellis_Island', 'Gendarmenmarkt', 'Madrid_Metropolis', 'Montreal_Notre_Dame', 'NYC_Library', 'Piazza_del_Popolo',
  'Piccadilly', 'Roman_Forum', 'Tower_of_London', 'Trafalgar', 'Union_Square', 'Vienna_Cathedral', 'Yorkminster']  
+seq_name_list = ['Trafalgar']  
 
 def get_opts():
     parser = ArgumentParser()
@@ -28,4 +29,5 @@ if __name__ == "__main__":
         images_path = image_dir_path+seq_name+'/images/'
         retrival_path = retrival_dir_path+seq_name+'/retrival_50.txt'
         output_path = output_dir_path+seq_name+'/'
-        os.system(exe+' '+images_path+' '+retrival_path+' ecim '+output_path)
+        # os.system(exe+' '+images_path+' '+retrival_path+' ecim '+output_path)
+        os.system(exe+' '+images_path+' '+retrival_path+' ecim '+output_path+' > '+output_path+'log_mat.txt')

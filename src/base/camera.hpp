@@ -12,6 +12,7 @@ class Camera {
         camera_model = CameraModel::SIMPLE_RADIAL;
         camera_params = {fx, fy, cx, cy};
         distort_params = {d, 0, 0, 0, 0};
+        is_valid = true;
     }
 
     enum CameraModel { OpenCV,
@@ -22,6 +23,8 @@ class Camera {
     std::array<double, 4> camera_params;
     // k1 k2 p1 p2 k3
     std::array<double, 5> distort_params;
+
+    bool is_valid;
 
     inline const double fx() const {
         return camera_params[0];
@@ -39,12 +42,11 @@ class Camera {
         return camera_params[3];
     }
 
-    inline bool valid(){
-        bool valid = (camera_params[0]!=0);
-        return valid;
+    inline bool valid(){ 
+        return is_valid;
     }
-    inline bool set_invalid(){
-        camera_params[0] = 0;
+    inline void set_invalid(){
+       is_valid = false;
     }
 
     inline void log() {

@@ -15,20 +15,21 @@ void PreProcess(const std::string image_dir_path, const std::string bin_path, Ma
     std::vector<Frame> frames;
     std::vector<Camera> cameras;
     std::vector<FramePair> frame_pairs;
-    std::vector<std::string> image_names;
+    // std::vector<std::string> image_names;
     std::map<std::string, int> name2cid;
-    LoadImageNames(image_dir_path, image_names);
+    // LoadImageNames(image_dir_path, image_names);
     ReadFeatures(bin_path + "/ftr.bin", frames, true);
     ReadFramePairs(bin_path + "/fp.bin", frame_pairs);
     ReadCameraInfo(bin_path + "/camera_info.txt", name2cid, cameras);
 
-    assert(image_names.size() == frames.size());
-    assert(cameras.size() == frames.size());
 
+    // assert(image_names.size() == frames.size());
+    assert(cameras.size() == frames.size());
+ 
     for (int i = 0; i < frames.size(); ++i) {
         auto& frame = frames.at(i);
         frame.id = i;
-        frame.name = image_names.at(i);
+        // frame.name = image_names.at(i);
         frame.camera_id = name2cid.at(frame.name);
         const auto& camera = cameras.at(frame.camera_id);
         const int num_points = frame.keypoints_.size();
@@ -43,10 +44,12 @@ void PreProcess(const std::string image_dir_path, const std::string bin_path, Ma
             frame.points.emplace_back(ept);
             frame.points_normalized.emplace_back(eptn);
         }
-    }
+    } 
 
     for(int i = 0;i<cameras.size();++i){
+    std::cout<<i<<" "<<cameras.size()<<std::endl;
         auto&camera = cameras[i];
+        // camera.log();
         // if distortion parameters of the camera are not estimated, the camera parameters is invalid. 
         if(camera.distort_params[0]==0){
             camera.set_invalid();
@@ -74,7 +77,7 @@ int main(int argc, char* argv[]) {
         image_dir_path = config_json["image_dir_path"];
         bin_dir_path = config_json["bin_dir_path"];
         output_path = config_json["output_path"]; 
-    }else if (argc == 5){
+    }else if (argc == 4){
         image_dir_path = argv[1];
         bin_dir_path = argv[2];
         output_path = argv[3];

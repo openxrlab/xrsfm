@@ -80,7 +80,7 @@ inline void read_name(std::ifstream &file, std::string &name) {
 
 inline void write_name(std::ofstream &file,const std::string &name){
     const std::string str = name + '\0';
-    file.write(name.c_str(), name.size());
+    file.write(str.c_str(), str.size());
 }
 
 } // namespace xrsfm
