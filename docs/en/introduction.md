@@ -13,17 +13,19 @@ purpose: recover the true scale of the reconstruction
 
 # Data Format
 
-## ios camera file
-ios录制的相机内参文件
+## camera intrisic file (for IOS data)
+Camera intrisic parameters acquired by RGBCaptureTool
+
 image_name model_name fx fy cx cy distortion_param
 
-## cameras file
-无序数据集的相机内参文件
+## camera intrisic file (for unordered data)
+Camera intrisic parameters for unordered dataset
+
 image_name model_name width height fx(fy) cx cy distortion_param
 
 ## retrieval file
-检索文件是一个txt文件，每行存储一对图像的名字。
-对每个图像检索固定的数目的相似图像，并且按顺序排列。
+The retrieval file is a text file, and each line record a pair of image names.
+For each image， a fixed number of similar images are retrieved and arranged in order.
 
 image1 image1_similar1
 image1 image1_similar2
@@ -36,11 +38,13 @@ image2 image2_similarK
 imageN imageN_similarK
 ...
 
-## features file
-特征文件是一个二进制文件，存储了每张图像的特征的关键点和描述子。
+## feature file
+The feature file is a binary file that stores the keypoints and descriptors of each image.
 
-## frame pairs file
-匹配文件是一个二进制文件，存储了若干个图像对的匹配结果和对极几何信息。
+
+## frame pair file
+The frame pair file is a binary file that stores the matching results and epipolar geometry information of several image pairs.
 
 ## map files
-地图数据由三个二进制文件组成，他们与COLMAP中的设置相同，你可以运行colmap gui来观察生成的地图。
+Map data consists of three binary files, which are the same as the format in colmap. You can run colmap GUI to observe the map data.
+

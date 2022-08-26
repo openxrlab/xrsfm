@@ -10,13 +10,7 @@ generate code, e.g., Auto, All, Maxwell, Pascal, ...")
 ################################################################################
 # Find packages
 ################################################################################
-
-# find_package(OpenCV 4 REQUIRED)
-
-# find_package(Eigen3 REQUIRED)
-
-# find_package(Ceres REQUIRED)
-
+ 
 set(XRPrimer_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../xrprimer/install/lib/cmake")
 find_package(XRPrimer REQUIRED)
 
@@ -42,14 +36,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++14 -msse4 -fopenmp -fpermissive
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -g")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -g -ggdb")
 set(CMAKE_BUILD_TYPE "Release")
-
-# OPTION (ENABLE_COVERAGE "USE GCOV" OFF)
-# MESSAGE(STATUS ENABLE_COVERAGE=${ENABLE_COVERAGE})
-# IF(ENABLE_COVERAGE)
-#     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-#     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
-# ENDIF()
-
+ 
 if (OPENGL_ENABLED)
     add_definitions("-DOPENGL_ENABLED")
     message(STATUS "Enabling OpenGL support")
@@ -164,9 +151,7 @@ target_include_directories(ecim
         )
 
 target_link_libraries(ecim
-        stdc++fs 
-        # ${EIGEN3_LIBS}
-        # ${CERES_LIBRARIES}
+        stdc++fs  
         XRPrimer::xrprimer
         ${OpenCV_LIBS}
         gtest
@@ -189,11 +174,12 @@ target_link_libraries(rec_kitti ecim)
 add_executable(run_triangulation src/run_triangulation.cc)
 target_link_libraries(run_triangulation ecim) 
 
-add_executable(tag_refine src/tag_refine.cc)
-target_link_libraries(tag_refine ecim apriltag)
-
 add_executable(unpack_collect_data src/unpack_collect_data.cc)
 target_link_libraries(unpack_collect_data ecim)
+
+add_executable(estimate_scale src/estimate_scale.cc)
+target_link_libraries(estimate_scale ecim apriltag)
+
 
 # add_executable(test_f src/test/feature_test.cc)
 # target_link_libraries(test_f ecim)
