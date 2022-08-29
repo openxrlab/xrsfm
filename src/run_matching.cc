@@ -178,20 +178,31 @@ int main(int argc, const char* argv[]) {
 
     // 5.image matching
     std::map<int, std::vector<int>> id2rank;
-    LoadRetrievalRank(retrival_path, name2id, id2rank);
+    bool have_retrival_info = LoadRetrievalRank(retrival_path, name2id, id2rank);
     std::cout << "Load Retrieval Info Done.\n";
 
     Timer timer("%lf s\n");
     timer.start();
     if (matching_type == "sequential") {
+        if(!have_retrival_info){
+            std::cout << "Without the retrival file, sequential matching method only matchs adjacent frames.\n";
+        }
         MatchingSeq(frames, fp_path, id2rank);
-    } else if (matching_type == "unordered") {
+    } else if (matching_type == "retrival") {
+        if(!have_retrival_info){
+            std::cout << "The retrieval file is required when using retrival-based matching!!!\n";
+            return 0;
+        }
         std::vector<std::pair<int, int>> id_pairs;
         ExtractNearestImagePairs(id2rank, 25, id_pairs);
         std::vector<FramePair> frame_pairs;
         FeatureMatching(frames, id_pairs, frame_pairs, true);
         SaveFramePairs(fp_path, frame_pairs);
-    } else {
+    } else if (matching_type == "retrival") {
+        if(!have_retrival_info){
+            std::cout << "The retrieval file is required when using covisibility-based matching!!!\n";
+            return 0;
+        }
         std::vector<std::pair<int, int>> id_pairs;
         ExtractNearestImagePairs(id2rank, 5, id_pairs);
         std::vector<FramePair> frame_pairs;

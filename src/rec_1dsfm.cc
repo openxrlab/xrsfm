@@ -11,13 +11,11 @@
 
 using namespace xrsfm;
 
-void PreProcess(const std::string image_dir_path, const std::string bin_path, Map& map) {
+void PreProcess(const std::string bin_path, Map& map) {
     std::vector<Frame> frames;
     std::vector<Camera> cameras;
     std::vector<FramePair> frame_pairs;
-    // std::vector<std::string> image_names;
     std::map<std::string, int> name2cid;
-    // LoadImageNames(image_dir_path, image_names);
     ReadFeatures(bin_path + "/ftr.bin", frames, true);
     ReadFramePairs(bin_path + "/fp.bin", frame_pairs);
     ReadCameraInfo(bin_path + "/camera_info.txt", name2cid, cameras);
@@ -67,25 +65,23 @@ void PreProcess(const std::string image_dir_path, const std::string bin_path, Ma
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
-    std::string image_dir_path,bin_dir_path,output_path;
+    std::string bin_dir_path,output_path;
     if (argc <= 2){
         std::string config_path = "./config_uno.json";
         if(argc == 2){
             config_path = argv[1];
         }
         auto config_json = LoadJSON(config_path);
-        image_dir_path = config_json["image_dir_path"];
         bin_dir_path = config_json["bin_dir_path"];
         output_path = config_json["output_path"]; 
-    }else if (argc == 4){
-        image_dir_path = argv[1];
-        bin_dir_path = argv[2];
-        output_path = argv[3];
+    }else if (argc == 3){
+        bin_dir_path = argv[1];
+        output_path = argv[2];
     } 
     
     // 2.Initialize Program
     Map map;
-    PreProcess(image_dir_path, bin_dir_path, map);
+    PreProcess(bin_dir_path, map);
     std::cout << "PreProcess Done!" << std::endl;
 
     // 3. Map Reconstruction

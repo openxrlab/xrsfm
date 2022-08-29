@@ -162,15 +162,9 @@ target_link_libraries(ecim
 add_executable(run_matching src/run_matching.cc)
 target_link_libraries(run_matching ecim)
 
-add_executable(rec_seq src/rec_seq.cc)
-target_link_libraries(rec_seq ecim)
+add_executable(run_reconstruction src/run_reconstruction.cc)
+target_link_libraries(run_reconstruction ecim)
         
-add_executable(rec_1dsfm src/rec_1dsfm.cc)
-target_link_libraries(rec_1dsfm ecim)
-
-add_executable(rec_kitti src/rec_kitti.cc)
-target_link_libraries(rec_kitti ecim)
-
 add_executable(run_triangulation src/run_triangulation.cc)
 target_link_libraries(run_triangulation ecim) 
 
@@ -180,6 +174,11 @@ target_link_libraries(unpack_collect_data ecim)
 add_executable(estimate_scale src/estimate_scale.cc)
 target_link_libraries(estimate_scale ecim apriltag)
 
+add_executable(rec_1dsfm src/rec_1dsfm.cc)
+target_link_libraries(rec_1dsfm ecim)
+
+add_executable(rec_kitti src/rec_kitti.cc)
+target_link_libraries(rec_kitti ecim)
 
 # add_executable(test_f src/test/feature_test.cc)
 # target_link_libraries(test_f ecim)

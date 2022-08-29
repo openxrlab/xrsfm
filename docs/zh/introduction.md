@@ -1,18 +1,18 @@
 # APIS
 ## run_matching
-输入: images, retrivel results, matching strategy\
+输入: images, retrivel results, matching strategy \
 功能: 从图像中提取特征并进行特征匹配
 
-## rec_sequential
-输入: images, matching results, camera intrinsic parameters,initial frame\
+## run_reconstruction
+输入: images, matching results, camera intrinsic parameters,initial frame \
 功能: 为顺序图像集重建场景
 
 ## estimate_scale
-输入: images, reconstruction results\
+输入: images, reconstruction results \
 功能: 估计重建结果的真实尺度
 
 ## unpack_collect_data
-输入：IOS录制的二进制文件
+输入：IOS录制的二进制文件 \
 功能：解析录制的二进制文件，生成图片数据和相机内参
 
 # Data Format
@@ -28,7 +28,7 @@ image_name model_name width height fx(fy) cx cy distortion_param
 ## retrieval file
 检索文件是一个文本文件，每行存储一对图像的名字。
 对每个图像检索固定的数目的相似图像，并且按顺序排列。
-
+```
 image1 image1_similar1
 image1 image1_similar2
 ...
@@ -39,6 +39,7 @@ image2 image2_similarK
 ...
 imageN imageN_similarK
 ...
+```
 
 ## features file
 特征文件是一个二进制文件，存储了每张图像的关键点和描述子。

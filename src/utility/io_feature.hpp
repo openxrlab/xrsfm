@@ -160,10 +160,11 @@ inline void SaveImageSize(const std::string &file_name, const std::vector<ImageS
     }
 }
 
-inline void LoadRetrievalRank(const std::string &file_path,
+inline bool LoadRetrievalRank(const std::string &file_path,
                               const std::map<std::string, int> &name_map,
                               std::map<int, std::vector<int>> &id2rank) {
     std::ifstream infile(file_path.c_str());
+    if(!infile.is_open())return false;
 
     std::string line;
     std::set<std::string> missing_image_names;
@@ -188,6 +189,7 @@ inline void LoadRetrievalRank(const std::string &file_path,
     for (const auto name : missing_image_names) {
         printf("Warning : missing %s in name map\n", name.c_str());
     }
+    return true;
 }
 
 } // namespace xrsfm

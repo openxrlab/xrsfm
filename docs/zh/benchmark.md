@@ -16,35 +16,35 @@ KITTI数据集可以在（url）中下载。
 
 运行下列python脚本来进行匹配阶段
 ```
-python3 ./scripts/run_kitti_matching.py --data_path dataset_path --retrival_dir_path download_path --output_dir_path output_path
+python3 ./scripts/run_kitti_matching.py --data_path ${dataset_path}$ --retrival_dir_path ${retrival_dir_path}$ --output_dir_path ${output_dir_path}$
 ```
 
 ### 重建阶段
 
 运行下列python脚本来进行重建阶段
 ```
-python3 ./scripts/run_kitti_reconstruction.py --data_path dataset_path --bin_dir_path download_path
+python3 ./scripts/run_kitti_reconstruction.py --data_path ${dataset_path}$ --bin_dir_path ${bin_dir_path}$
 ```
 
 ## 在1DSfM数据集上进行评估
 
 ### 数据准备
 
-1DSfM数据集可以在（url）中下载。
+1DSfM数据集可以在[项目网页](https://www.cs.cornell.edu/projects/1dsfm/)中下载。
 作为必要的输入，可以从（url）下载KITTI数据集的图像检索结果。
 
 ### 匹配阶段
 
 运行下列python脚本来进行匹配阶段
 ```
-python3 ./scripts/run_1dsfm_matching.py --data_path dataset_path --retrival_dir_path download_path --output_dir_path output_path
+python3 ./scripts/run_1dsfm_matching.py --data_path ${dataset_path}$ --retrival_dir_path ${retrival_dir_path}$ --output_dir_path ${output_dir_path}$
 ```
 
 ### 重建阶段
 
 运行下列python脚本来进行重建阶段
 ```
-python3 ./scripts/run_1dsfm_reconstruction.py --data_path dataset_path --bin_dir_path download_path
+python3 ./scripts/run_1dsfm_reconstruction.py --data_path ${dataset_path}$ --bin_dir_path ${bin_dir_path}$
 ```
 
 ## 评估结果

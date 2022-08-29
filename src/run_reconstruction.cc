@@ -11,25 +11,23 @@
 
 using namespace xrsfm;
 
-void PreProcess(const std::string dir_path, const std::string images_path,const std::string camera_path, Map& map) {
+void PreProcess(const std::string dir_path,  const std::string camera_path, Map& map) {
     std::vector<Frame> frames;
     std::vector<FramePair> frame_pairs;
     std::vector<std::string> image_names;
     ReadFeatures(dir_path + "ftr.bin", frames, true);
     ReadFramePairs(dir_path + "fp.bin", frame_pairs);
-    LoadImageNames(images_path, image_names);
+    // LoadImageNames(images_path, image_names);
 
     // set cameras & image name
-    std::vector<Camera> cameras;
-    // TODO: ReadCamera
-    // Camera seq(0, 1000, 1000, 640, 360, 0.0);
-    // Camera seq =  Camera(0, 886.420017084725,881.278105028345, 479.5, 269.5, -0.004);
+    std::vector<Camera> cameras; 
     Camera seq = ReadCameraIOSRecord(camera_path);
     seq.log();
     cameras.emplace_back(seq);
     for (auto& frame : frames) {
         frame.camera_id = 0;
-        frame.name = image_names.at(frame.id);
+        // std::cout<<image_names.at(frame.id)<<" "<<frame.name<<std::endl;
+        // frame.name = image_names.at(frame.id);
     }
 
     // set points for reconstruction
@@ -57,7 +55,7 @@ void PreProcess(const std::string dir_path, const std::string images_path,const 
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
-    std::string bin_path,images_path,camera_path,output_path;
+    std::string bin_path,camera_path,output_path;
     int init_id1 = -1,init_id2 = -1;
     if (argc <= 2){
         std::string config_path = "./config_seq.json";
@@ -65,22 +63,20 @@ int main(int argc, char* argv[]) {
             config_path = argv[1];
         }
         auto config_json = LoadJSON(config_path);
-        bin_path = config_json["bin_path"];
-        images_path = config_json["images_path"];
+        bin_path = config_json["bin_path"]; 
         camera_path = config_json["camera_path"];
         output_path = config_json["output_path"];
         init_id1 = config_json["init_id1"];
         init_id2 = config_json["init_id2"];
-    }else if (argc >= 5 && argc<=7){
-        bin_path = argv[1];
-        images_path = argv[2];
-        camera_path = argv[3];
-        output_path = argv[4];
-        if(argc>=6){
-            init_id1 = std::stoi(argv[5]);
+    }else if (argc >= 4 && argc<=6){
+        bin_path = argv[1]; 
+        camera_path = argv[2];
+        output_path = argv[3];
+        if(argc>=5){
+            init_id1 = std::stoi(argv[4]);
         }
-        if(argc==7){
-            init_id2 = std::stoi(argv[6]);
+        if(argc==6){
+            init_id2 = std::stoi(argv[5]);
         }
     }else{
         exit(-1);
@@ -89,7 +85,7 @@ int main(int argc, char* argv[]) {
 
     // 2. Map PreProcess
     Map map;
-    PreProcess(bin_path, images_path, camera_path, map);
+    PreProcess(bin_path, camera_path, map);
     std::cout << "PreProcess Done!" << std::endl;
 
     // 3. Map Reconstruction

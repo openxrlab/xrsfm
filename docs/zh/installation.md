@@ -29,10 +29,11 @@
 安装 [Pangolin](git@github.com:stevenlovegrove/Pangolin.git)
 ```
     git clone git@github.com:openxrlab/xrsfm.git
-    cd Pangolin && cmake -B build && cmake --build build -j4
+    cd Pangolin && cmake -B build && cmake --build build -j4 
+    sudo make install
 ```
 
-编译 XRSfM::
+编译 XRSfM
 ```
     git clone git@github.com:openxrlab/xrsfm.git
     cd xrsfm && cmake -B build && cmake --build build -j4

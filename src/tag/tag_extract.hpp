@@ -127,9 +127,7 @@ std::vector<vector3> get_tag(double tag_length) {
     return pt_tag;
 }
 
-void tag_refine(std::string image_dir,std::string map_dir,std::string output_path){
-    constexpr double tag_length = 0.113;
-
+void tag_refine(std::string image_dir,std::string map_dir,const double tag_length,std::string output_path){
     //load map
     Map map;
     ReadColMapDataBinary(map_dir, map);
