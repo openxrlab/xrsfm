@@ -38,9 +38,17 @@
     git clone git@github.com:openxrlab/xrsfm.git
     cd xrsfm && cmake -B build && cmake --build build -j4
 ```
-### Dockerfile
-
-
-
-### Docker image
  
+### 通过Docker镜像运行
+
+We provide a [Dockerfile](../../Dockerfile) to build an image. Ensure that you are using [docker version](https://docs.docker.com/engine/install/) >=19.03 and `"default-runtime": "nvidia"` in daemon.json.
+
+```shell
+# build an image with CUDA 7.5+
+docker build -t xrsfm .
+```
+
+Run it with
+
+```shell
+docker run --gpus all --network=host -it xrsfm

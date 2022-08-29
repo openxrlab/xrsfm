@@ -4,7 +4,7 @@
 功能: 从图像中提取特征并进行特征匹配
 
 ## run_reconstruction
-输入: images, matching results, camera intrinsic parameters,initial frame \
+输入: matching results, camera intrinsic parameters,initial frame \
 功能: 为顺序图像集重建场景
 
 ## estimate_scale

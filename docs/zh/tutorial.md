@@ -75,7 +75,7 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrival")和基�
 用户也可以使用其他来源的图像，但鉴于当前版本不支持相机自标定，用户需要给出相机内参，这可以由标定得到。
 
 ### 数据准备
-除了上述的图像数据和相机内参外，还需要准备图像的检索结果，这部分功能目前被封装在XRLocation中，详细参见（url）
+除了上述的图像数据和相机内参外，还需要准备图像的检索结果，这部分功能目前被封装在XRLocation中，详细参见[XRLocalization](https://github.com/openxrlab/xrlocalization/tree/main/docs/en/tutorials/generate_image_pairs.md)
 在运行重建前，你应该确保有以下数据：
 存储着图像数据的文件夹（images_path） ，
 检索文件（retrival_path），
