@@ -200,8 +200,10 @@ bool CheckCheirality(const Eigen::Matrix3d& R, const Eigen::Vector3d& t, const s
 // Implementation
 ////////////////////////////////////////////////////////////////////////////////
 
-Eigen::Vector4d ComposeIdentityQuaternion() { return Eigen::Vector4d(1, 0, 0, 0); }
+Eigen::Vector4d ComposeIdentityQuaternion() {
+    return Eigen::Vector4d(1, 0, 0, 0);
+}
 
-}  // namespace colmap
+} // namespace colmap
 
-#endif  // COLMAP_SRC_BASE_POSE_H_
+#endif // COLMAP_SRC_BASE_POSE_H_

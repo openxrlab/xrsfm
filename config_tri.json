@@ -1,6 +1,6 @@
 {
-	"pose_path": "/data/2022-07-06T14-39-35/refine/images.bin",
-	"feature_path": "/data/matches/features.bin",
-	"frame_pair_path": "/data/matches/matches.bin",
-	"output_path": "/data/matches/"
+	"bin_path": "/path/refine/images.bin",
+	"feature_path": "/path/features.bin",
+	"matches_path": "/path/matches.bin",
+	"output_path": "/output_path/"
 }

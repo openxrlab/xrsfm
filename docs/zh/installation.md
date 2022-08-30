@@ -7,26 +7,39 @@
 版本要求
 + C++17
 + GCC 7.5+
-+ CMake 3.15+
-+ CUDA 7.0+
++ CMake 3.16+
++ CUDA 7.5+
 + XRPrimer
++ Pangolin
 
 来自默认Ubuntu存储库的依赖项:
 
     sudo apt-get install \
+        wget\
         git \
         cmake \
         build-essential \
-        libgoogle-glog-dev \ 
-        libgflags-dev \
-        libgl1-mesa-dev \
+        python3 \
+        python3-pip \
         libglew-dev \
-        libgtest-dev
+        libatlas-base-dev
 
+安装cmake
+```
+wget https://cmake.org/files/v3.21/cmake-3.21.0-linux-x86_64.tar.gz
+tar -xf cmake-3.21.0-linux-x86_64.tar.gz
+cp -r cmake-3.21.0-linux-x86_64 /usr/share/
+ln -sf /usr/share/cmake-3.21.0-linux-x86_64/bin/cmake /usr/bin/cmake
+```
 
 安装 [XRPRimer](https://github.com/openxrlab/xrprimer)
+```
+    git clone git@github.com:openxrlab/xrsfm.git
+    cd Pangolin && cmake -B build && cmake --build build -j4 
+    sudo make install
+```
 
-安装 [Pangolin](git@github.com:stevenlovegrove/Pangolin.git)
+安装 [Pangolin](https://github.com/stevenlovegrove/Pangolin)
 ```
     git clone git@github.com:openxrlab/xrsfm.git
     cd Pangolin && cmake -B build && cmake --build build -j4 

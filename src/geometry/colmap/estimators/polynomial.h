@@ -83,13 +83,13 @@ bool FindPolynomialRootsCompanionMatrix(const Eigen::VectorXd& coeffs, Eigen::Ve
 
 template <typename T>
 T EvaluatePolynomial(const Eigen::VectorXd& coeffs, const T& x) {
-  T value = 0.0;
-  for (Eigen::VectorXd::Index i = 0; i < coeffs.size(); ++i) {
-    value = value * x + coeffs(i);
-  }
-  return value;
+    T value = 0.0;
+    for (Eigen::VectorXd::Index i = 0; i < coeffs.size(); ++i) {
+        value = value * x + coeffs(i);
+    }
+    return value;
 }
 
-}  // namespace colmap
+} // namespace colmap
 
-#endif  // COLMAP_SRC_BASE_POLYNOMIAL_H_
+#endif // COLMAP_SRC_BASE_POLYNOMIAL_H_

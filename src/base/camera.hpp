@@ -42,11 +42,11 @@ class Camera {
         return camera_params[3];
     }
 
-    inline bool valid(){ 
+    inline bool valid() {
         return is_valid;
     }
-    inline void set_invalid(){
-       is_valid = false;
+    inline void set_invalid() {
+        is_valid = false;
     }
 
     inline void log() {

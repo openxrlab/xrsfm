@@ -278,7 +278,4 @@ void WriteColMapDataBinary2(const std::string &output_path, const Map &map) {
     WritePoints3DBinary2(output_path + "points3D.bin", map.track_map_);
 }
 
-
-
-
 } // namespace xrsfm

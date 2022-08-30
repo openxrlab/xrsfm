@@ -20,10 +20,9 @@ void PreProcess(const std::string bin_path, Map& map) {
     ReadFramePairs(bin_path + "/fp.bin", frame_pairs);
     ReadCameraInfo(bin_path + "/camera_info.txt", name2cid, cameras);
 
-
     // assert(image_names.size() == frames.size());
     assert(cameras.size() == frames.size());
- 
+
     for (int i = 0; i < frames.size(); ++i) {
         auto& frame = frames.at(i);
         frame.id = i;
@@ -42,14 +41,14 @@ void PreProcess(const std::string bin_path, Map& map) {
             frame.points.emplace_back(ept);
             frame.points_normalized.emplace_back(eptn);
         }
-    } 
+    }
 
-    for(int i = 0;i<cameras.size();++i){
-        std::cout<<i<<" "<<cameras.size()<<std::endl;
-        auto&camera = cameras[i];
+    for (int i = 0; i < cameras.size(); ++i) {
+        std::cout << i << " " << cameras.size() << std::endl;
+        auto& camera = cameras[i];
         // camera.log();
-        // if distortion parameters of the camera are not estimated, the camera parameters is invalid. 
-        if(camera.distort_params[0]==0){
+        // if distortion parameters of the camera are not estimated, the camera parameters is invalid.
+        if (camera.distort_params[0] == 0) {
             camera.set_invalid();
         }
     }
@@ -65,20 +64,20 @@ void PreProcess(const std::string bin_path, Map& map) {
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
-    std::string bin_dir_path,output_path;
-    if (argc <= 2){
+    std::string bin_dir_path, output_path;
+    if (argc <= 2) {
         std::string config_path = "./config_uno.json";
-        if(argc == 2){
+        if (argc == 2) {
             config_path = argv[1];
         }
         auto config_json = LoadJSON(config_path);
         bin_dir_path = config_json["bin_dir_path"];
-        output_path = config_json["output_path"]; 
-    }else if (argc == 3){
+        output_path = config_json["output_path"];
+    } else if (argc == 3) {
         bin_dir_path = argv[1];
         output_path = argv[2];
-    } 
-    
+    }
+
     // 2.Initialize Program
     Map map;
     PreProcess(bin_dir_path, map);

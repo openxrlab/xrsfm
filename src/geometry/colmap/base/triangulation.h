@@ -108,6 +108,6 @@ std::vector<double> CalculateTriangulationAngles(const Eigen::Vector3d& proj_cen
                                                  const Eigen::Vector3d& proj_center2,
                                                  const std::vector<Eigen::Vector3d>& points3D);
 
-}  // namespace colmap
+} // namespace colmap
 
-#endif  // COLMAP_SRC_BASE_TRIANGULATION_H_
+#endif // COLMAP_SRC_BASE_TRIANGULATION_H_

@@ -1,6 +1,0 @@
-{
-	"image_dir_path": "/data/ECIM/SfM/KITTI/10/image_0/",
-	"retrival_path": "/data/OpenData/10/retrival_100.txt",
-	"matching_type": "sequential",
-	"output_path": "/data/OpenData/10/"
-}

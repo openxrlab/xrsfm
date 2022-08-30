@@ -44,135 +44,136 @@
 namespace colmap {
 double CalculateSquaredReprojectionError(const Eigen::Vector2d &point2D, const Eigen::Vector3d &point3D,
                                          const Eigen::Matrix3x4d &proj_matrix, const Camera &camera) {
-  const double proj_z = proj_matrix.row(2).dot(point3D.homogeneous());
+    const double proj_z = proj_matrix.row(2).dot(point3D.homogeneous());
 
-  // Check that point is infront of camera.
-  if (proj_z < std::numeric_limits<double>::epsilon()) {
-    return std::numeric_limits<double>::max();
-  }
+    // Check that point is infront of camera.
+    if (proj_z < std::numeric_limits<double>::epsilon()) {
+        return std::numeric_limits<double>::max();
+    }
 
-  const double proj_x = proj_matrix.row(0).dot(point3D.homogeneous());
-  const double proj_y = proj_matrix.row(1).dot(point3D.homogeneous());
-  const double inv_proj_z = 1.0 / proj_z;
+    const double proj_x = proj_matrix.row(0).dot(point3D.homogeneous());
+    const double proj_y = proj_matrix.row(1).dot(point3D.homogeneous());
+    const double inv_proj_z = 1.0 / proj_z;
 
-  const Eigen::Vector2d proj_point2D;  // = camera.WorldToImage(Eigen::Vector2d(inv_proj_z *
-                                       // proj_x, inv_proj_z * proj_y));
+    const Eigen::Vector2d proj_point2D; // = camera.WorldToImage(Eigen::Vector2d(inv_proj_z *
+                                        // proj_x, inv_proj_z * proj_y));
 
-  return (proj_point2D - point2D).squaredNorm();
+    return (proj_point2D - point2D).squaredNorm();
 }
 
 double CalculateNormalizedAngularError(const Eigen::Vector2d &point2D, const Eigen::Vector3d &point3D,
                                        const Eigen::Matrix3x4d &proj_matrix) {
-  const Eigen::Vector3d ray1 = point2D.homogeneous();
-  const Eigen::Vector3d ray2 = proj_matrix * point3D.homogeneous();
-  return std::acos(ray1.normalized().transpose() * ray2.normalized());
+    const Eigen::Vector3d ray1 = point2D.homogeneous();
+    const Eigen::Vector3d ray2 = proj_matrix * point3D.homogeneous();
+    return std::acos(ray1.normalized().transpose() * ray2.normalized());
 }
 
 void TriangulationEstimator::SetMinTriAngle(const double min_tri_angle) {
-  CHECK_GE(min_tri_angle, 0);
-  min_tri_angle_ = min_tri_angle;
+    CHECK_GE(min_tri_angle, 0);
+    min_tri_angle_ = min_tri_angle;
 }
 
-void TriangulationEstimator::SetResidualType(const ResidualType residual_type) { residual_type_ = residual_type; }
+void TriangulationEstimator::SetResidualType(const ResidualType residual_type) {
+    residual_type_ = residual_type;
+}
 
 bool HasPointPositiveDepth(const Eigen::Matrix3x4d &proj_matrix, const Eigen::Vector3d &point3D) {
-  return proj_matrix.row(2).dot(point3D.homogeneous()) >= std::numeric_limits<double>::epsilon();
+    return proj_matrix.row(2).dot(point3D.homogeneous()) >= std::numeric_limits<double>::epsilon();
 }
 
 std::vector<TriangulationEstimator::M_t> TriangulationEstimator::Estimate(const std::vector<X_t> &point_data,
                                                                           const std::vector<Y_t> &pose_data) const {
-  CHECK_GE(point_data.size(), 2);
-  CHECK_EQ(point_data.size(), pose_data.size());
+    CHECK_GE(point_data.size(), 2);
+    CHECK_EQ(point_data.size(), pose_data.size());
 
-  if (point_data.size() == 2) {
-    // Two-view triangulation.
+    if (point_data.size() == 2) {
+        // Two-view triangulation.
 
-    const M_t xyz = TriangulatePoint(pose_data[0].proj_matrix, pose_data[1].proj_matrix, point_data[0].point_normalized,
-                                     point_data[1].point_normalized);
+        const M_t xyz = TriangulatePoint(pose_data[0].proj_matrix, pose_data[1].proj_matrix, point_data[0].point_normalized,
+                                         point_data[1].point_normalized);
 
-    if (HasPointPositiveDepth(pose_data[0].proj_matrix, xyz) && HasPointPositiveDepth(pose_data[1].proj_matrix, xyz) &&
-        CalculateTriangulationAngle(pose_data[0].proj_center, pose_data[1].proj_center, xyz) >= min_tri_angle_) {
-      return std::vector<M_t>{xyz};
-    }
-  } else {
-    // Multi-view triangulation.
-
-    std::vector<Eigen::Matrix3x4d> proj_matrices;
-    proj_matrices.reserve(point_data.size());
-    std::vector<Eigen::Vector2d> points;
-    points.reserve(point_data.size());
-    for (size_t i = 0; i < point_data.size(); ++i) {
-      proj_matrices.push_back(pose_data[i].proj_matrix);
-      points.push_back(point_data[i].point_normalized);
-    }
-
-    const M_t xyz = TriangulateMultiViewPoint(proj_matrices, points);
-
-    // Check for cheirality constraint.
-    for (const auto &pose : pose_data) {
-      if (!HasPointPositiveDepth(pose.proj_matrix, xyz)) {
-        return std::vector<M_t>();
-      }
-    }
-
-    // Check for sufficient triangulation angle.
-    for (size_t i = 0; i < pose_data.size(); ++i) {
-      for (size_t j = 0; j < i; ++j) {
-        const double tri_angle = CalculateTriangulationAngle(pose_data[i].proj_center, pose_data[j].proj_center, xyz);
-        if (tri_angle >= min_tri_angle_) {
-          return std::vector<M_t>{xyz};
+        if (HasPointPositiveDepth(pose_data[0].proj_matrix, xyz) && HasPointPositiveDepth(pose_data[1].proj_matrix, xyz) && CalculateTriangulationAngle(pose_data[0].proj_center, pose_data[1].proj_center, xyz) >= min_tri_angle_) {
+            return std::vector<M_t>{xyz};
         }
-      }
-    }
-  }
+    } else {
+        // Multi-view triangulation.
 
-  return std::vector<M_t>();
+        std::vector<Eigen::Matrix3x4d> proj_matrices;
+        proj_matrices.reserve(point_data.size());
+        std::vector<Eigen::Vector2d> points;
+        points.reserve(point_data.size());
+        for (size_t i = 0; i < point_data.size(); ++i) {
+            proj_matrices.push_back(pose_data[i].proj_matrix);
+            points.push_back(point_data[i].point_normalized);
+        }
+
+        const M_t xyz = TriangulateMultiViewPoint(proj_matrices, points);
+
+        // Check for cheirality constraint.
+        for (const auto &pose : pose_data) {
+            if (!HasPointPositiveDepth(pose.proj_matrix, xyz)) {
+                return std::vector<M_t>();
+            }
+        }
+
+        // Check for sufficient triangulation angle.
+        for (size_t i = 0; i < pose_data.size(); ++i) {
+            for (size_t j = 0; j < i; ++j) {
+                const double tri_angle = CalculateTriangulationAngle(pose_data[i].proj_center, pose_data[j].proj_center, xyz);
+                if (tri_angle >= min_tri_angle_) {
+                    return std::vector<M_t>{xyz};
+                }
+            }
+        }
+    }
+
+    return std::vector<M_t>();
 }
 
 void TriangulationEstimator::Residuals(const std::vector<X_t> &point_data, const std::vector<Y_t> &pose_data,
                                        const M_t &xyz, std::vector<double> *residuals) const {
-  CHECK_EQ(point_data.size(), pose_data.size());
+    CHECK_EQ(point_data.size(), pose_data.size());
 
-  residuals->resize(point_data.size());
+    residuals->resize(point_data.size());
 
-  for (size_t i = 0; i < point_data.size(); ++i) {
-    if (residual_type_ == ResidualType::REPROJECTION_ERROR) {
-      (*residuals)[i] =
-          CalculateSquaredReprojectionError(point_data[i].point, xyz, pose_data[i].proj_matrix, *pose_data[i].camera);
-    } else if (residual_type_ == ResidualType::ANGULAR_ERROR) {
-      const double angular_error =
-          CalculateNormalizedAngularError(point_data[i].point_normalized, xyz, pose_data[i].proj_matrix);
-      (*residuals)[i] = angular_error * angular_error;
+    for (size_t i = 0; i < point_data.size(); ++i) {
+        if (residual_type_ == ResidualType::REPROJECTION_ERROR) {
+            (*residuals)[i] =
+                CalculateSquaredReprojectionError(point_data[i].point, xyz, pose_data[i].proj_matrix, *pose_data[i].camera);
+        } else if (residual_type_ == ResidualType::ANGULAR_ERROR) {
+            const double angular_error =
+                CalculateNormalizedAngularError(point_data[i].point_normalized, xyz, pose_data[i].proj_matrix);
+            (*residuals)[i] = angular_error * angular_error;
+        }
     }
-  }
 }
 
 bool EstimateTriangulation(const EstimateTriangulationOptions &options,
                            const std::vector<TriangulationEstimator::PointData> &point_data,
                            const std::vector<TriangulationEstimator::PoseData> &pose_data,
                            std::vector<char> *inlier_mask, Eigen::Vector3d *xyz) {
-  CHECK_NOTNULL(inlier_mask);
-  CHECK_NOTNULL(xyz);
-  CHECK_GE(point_data.size(), 2);
-  CHECK_EQ(point_data.size(), pose_data.size());
-  options.Check();
+    CHECK_NOTNULL(inlier_mask);
+    CHECK_NOTNULL(xyz);
+    CHECK_GE(point_data.size(), 2);
+    CHECK_EQ(point_data.size(), pose_data.size());
+    options.Check();
 
-  // Robustly estimate track using LORANSAC.
-  LORANSAC<TriangulationEstimator, TriangulationEstimator, InlierSupportMeasurer, CombinationSampler> ransac(
-      options.ransac_options);
-  ransac.estimator.SetMinTriAngle(options.min_tri_angle);
-  ransac.estimator.SetResidualType(options.residual_type);
-  ransac.local_estimator.SetMinTriAngle(options.min_tri_angle);
-  ransac.local_estimator.SetResidualType(options.residual_type);
-  const auto report = ransac.Estimate(point_data, pose_data);
-  if (!report.success) {
-    return false;
-  }
+    // Robustly estimate track using LORANSAC.
+    LORANSAC<TriangulationEstimator, TriangulationEstimator, InlierSupportMeasurer, CombinationSampler> ransac(
+        options.ransac_options);
+    ransac.estimator.SetMinTriAngle(options.min_tri_angle);
+    ransac.estimator.SetResidualType(options.residual_type);
+    ransac.local_estimator.SetMinTriAngle(options.min_tri_angle);
+    ransac.local_estimator.SetResidualType(options.residual_type);
+    const auto report = ransac.Estimate(point_data, pose_data);
+    if (!report.success) {
+        return false;
+    }
 
-  *inlier_mask = report.inlier_mask;
-  *xyz = report.model;
+    *inlier_mask = report.inlier_mask;
+    *xyz = report.model;
 
-  return report.success;
+    return report.success;
 }
 
-}  // namespace colmap
+} // namespace colmap

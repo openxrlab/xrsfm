@@ -36,7 +36,7 @@ void MatchingSeq(std::vector<Frame>& frames, const std::string& fp_path, std::ma
     SaveFramePairs(fp_path, frame_pairs);
 }
 
-void PreProcess(const std::string dir_path, const std::string images_path,const std::string camera_path, Map& map) {
+void PreProcess(const std::string dir_path, const std::string images_path, const std::string camera_path, Map& map) {
     std::vector<Frame> frames;
     std::vector<FramePair> frame_pairs;
     std::vector<std::string> image_names;
@@ -79,14 +79,14 @@ void PreProcess(const std::string dir_path, const std::string images_path,const 
     map.Init();
 }
 
-int main(int argc, char* argv[]) {  
+int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     const std::string dir_path = "/data1/XRSFM/2022-07-06T14-39-35/";
-    const std::string image_dir_path = dir_path+"images/";
-    const std::string camera_path = dir_path+"camera.txt";
-    const std::string retrival_path = dir_path+"results/pairs-sfm.txt";
-    const std::string output_path = dir_path+"ut/"; 
-    const std::string output_path1 = dir_path+"ut1/"; 
+    const std::string image_dir_path = dir_path + "images/";
+    const std::string camera_path = dir_path + "camera.txt";
+    const std::string retrival_path = dir_path + "results/pairs-sfm.txt";
+    const std::string output_path = dir_path + "ut/";
+    const std::string output_path1 = dir_path + "ut1/";
 
     std::string ftr_path = output_path + "ftr.bin";
     std::string size_path = output_path + "size.bin";
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
 
     // // 1.read images
     // std::vector<std::string> image_names;
-    // LoadImageNames(image_dir_path, image_names); 
+    // LoadImageNames(image_dir_path, image_names);
     // std::map<std::string, int> name2id;
     // const int num_image = image_names.size();
     // std::vector<Frame> frames(num_image);
@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
     // // 3.image matching
     // std::map<int, std::vector<int>> id2rank;
     // LoadRetrievalRank(retrival_path, name2id, id2rank);
-    // MatchingSeq(frames, fp_path, id2rank);  
+    // MatchingSeq(frames, fp_path, id2rank);
     // std::cout << "Match Features Done.\n";
 
     // 1. Map PreProcess
@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
     // WriteColMapDataBinary(output_path, map);
 
     // 1. refine with tag
-    tag_refine(image_dir_path,output_path,output_path1); 
+    tag_refine(image_dir_path, output_path, output_path1);
 
     return 0;
 }

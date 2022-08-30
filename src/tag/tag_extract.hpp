@@ -25,19 +25,19 @@ extern "C" {
 #include "optimization/ba_solver.h"
 #include "optimization/cost_factor_ceres.h"
 #include "utility/io_ecim.hpp"
-#include "utility/timer.h" 
+#include "utility/timer.h"
 #include "utility/viewer.h"
 
-namespace xrsfm{
+namespace xrsfm {
 
-std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(std::string image_dir) {
+std::map<std::string, std::map<int, std::vector<vector2>>> tag_extract(std::string image_dir) {
     std::vector<std::string> image_vec;
     for (const auto &fe : std::experimental::filesystem::directory_iterator(image_dir)) {
         image_vec.emplace_back(fe.path().filename());
     }
     std::sort(image_vec.begin(), image_vec.end());
 
-    std::map<std::string,std::map<int,std::vector<vector2>>> tag_info_vec;
+    std::map<std::string, std::map<int, std::vector<vector2>>> tag_info_vec;
 
     apriltag_detector_t *td = apriltag_detector_create();
     apriltag_family_t *tf = tag36h11_create();
@@ -55,9 +55,9 @@ std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(std::string
 
         zarray_t *detections = apriltag_detector_detect(td, &im);
         const int num_detect = zarray_size(detections);
-        if (num_detect == 0) continue; 
+        if (num_detect == 0) continue;
 
-        auto& tag_info = tag_info_vec[image_name];
+        auto &tag_info = tag_info_vec[image_name];
         for (int i = 0; i < num_detect; i++) {
             apriltag_detection_t *det;
             zarray_get(detections, i, &det);
@@ -66,7 +66,7 @@ std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(std::string
             for (int k = 0; k < 4; ++k)
                 p_vec[k] = vector2(det->p[k][0], det->p[k][1]);
             tag_info[det->id] = p_vec;
-        } 
+        }
     }
 
     // Cleanup.
@@ -76,9 +76,8 @@ std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(std::string
     return tag_info_vec;
 }
 
-
-std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(const std::string &image_dir,const std::vector<std::string> &image_vec) { 
-    std::map<std::string,std::map<int,std::vector<vector2>>> tag_info_vec;
+std::map<std::string, std::map<int, std::vector<vector2>>> tag_extract(const std::string &image_dir, const std::vector<std::string> &image_vec) {
+    std::map<std::string, std::map<int, std::vector<vector2>>> tag_info_vec;
     apriltag_detector_t *td = apriltag_detector_create();
     apriltag_family_t *tf = tag36h11_create();
     apriltag_detector_add_family(td, tf);
@@ -95,9 +94,9 @@ std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(const std::
 
         zarray_t *detections = apriltag_detector_detect(td, &im);
         const int num_detect = zarray_size(detections);
-        if (num_detect == 0) continue; 
+        if (num_detect == 0) continue;
 
-        auto& tag_info = tag_info_vec[image_name];
+        auto &tag_info = tag_info_vec[image_name];
         for (int i = 0; i < num_detect; i++) {
             apriltag_detection_t *det;
             zarray_get(detections, i, &det);
@@ -106,7 +105,7 @@ std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(const std::
             for (int k = 0; k < 4; ++k)
                 p_vec[k] = vector2(det->p[k][0], det->p[k][1]);
             tag_info[det->id] = p_vec;
-        } 
+        }
     }
 
     // Cleanup.
@@ -115,7 +114,6 @@ std::map<std::string,std::map<int,std::vector<vector2>>> tag_extract(const std::
 
     return tag_info_vec;
 }
-
 
 std::vector<vector3> get_tag(double tag_length) {
     // double tag_len = 0.113;
@@ -127,7 +125,7 @@ std::vector<vector3> get_tag(double tag_length) {
     return pt_tag;
 }
 
-void tag_refine(std::string image_dir,std::string map_dir,const double tag_length,std::string output_path){
+void tag_refine(std::string image_dir, std::string map_dir, const double tag_length, std::string output_path) {
     //load map
     Map map;
     ReadColMapDataBinary(map_dir, map);
@@ -144,19 +142,19 @@ void tag_refine(std::string image_dir,std::string map_dir,const double tag_lengt
         name2id[frame.name] = id;
     }
 
-    // get tag info 
+    // get tag info
     auto tag_info_vec = tag_extract(image_dir);
-    std::map<int, std::map<int, std::vector<vector2>>> tag_obs,tag_obs_normalized;
-    for(auto&[name,tag_info]:tag_info_vec){
+    std::map<int, std::map<int, std::vector<vector2>>> tag_obs, tag_obs_normalized;
+    for (auto &[name, tag_info] : tag_info_vec) {
         const int frame_id = name2id[name];
-        for(auto&[tag_id,pts]:tag_info){
+        for (auto &[tag_id, pts] : tag_info) {
             tag_obs[tag_id][frame_id] = pts;
         }
-    }  
+    }
     for (auto &[tag_id, frame_obs] : tag_obs) {
         // too few measurment to triangulte
         if (frame_obs.size() < 4) continue;
-        std::cout <<"tag id:"<<tag_id << " observer number: " << frame_obs.size() << std::endl;
+        std::cout << "tag id:" << tag_id << " observer number: " << frame_obs.size() << std::endl;
         for (auto &[frame_id, pts] : frame_obs) {
             std::vector<vector2> pts_normlized(4);
             for (int i = 0; i < 4; ++i) {
@@ -167,7 +165,7 @@ void tag_refine(std::string image_dir,std::string map_dir,const double tag_lengt
     }
 
     // compute tag points
-    const int num_tag = tag_obs.size(); 
+    const int num_tag = tag_obs.size();
     std::map<int, std::vector<vector3>> pt_world_vec;
     for (auto &[tag_id, frame_obs] : tag_obs_normalized) {
         std::vector<vector3> pt_world(4);
@@ -203,7 +201,7 @@ void tag_refine(std::string image_dir,std::string map_dir,const double tag_lengt
         }
 
         auto &T_w_tag = tag_vec[tag_id];
-        for (int i = 0; i < 4; ++i) { 
+        for (int i = 0; i < 4; ++i) {
             ceres::CostFunction *cost_function = new TagCost(pt_tag[i], 1.0);
             problem.AddResidualBlock(cost_function, nullptr, T_w_tag.q.coeffs().data(), T_w_tag.t.data(), &scale,
                                      pt_world[i].data());
@@ -257,4 +255,4 @@ void tag_refine(std::string image_dir,std::string map_dir,const double tag_lengt
     }
     WriteColMapDataBinary2(output_path, map);
 }
-}
+} // namespace xrsfm

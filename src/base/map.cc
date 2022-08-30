@@ -66,16 +66,16 @@ void Map::Init() {
         assert(matches.size() == frame_pair.inlier_mask.size());
         for (int i = 0; i < matches.size(); ++i) {
             if (!frame_pair.inlier_mask[i]) continue;
-            const auto &match = matches[i]; 
+            const auto &match = matches[i];
             auto &corrs_vector1 = image1.corrs_vector.at(match.id1);
             auto &corrs_vector2 = image2.corrs_vector.at(match.id2);
             corrs_vector1.emplace_back(id2, match.id2);
-            corrs_vector2.emplace_back(id1, match.id1); 
+            corrs_vector2.emplace_back(id1, match.id1);
             num_inlier_matches++;
         }
         image1.num_correspondences += num_inlier_matches;
         image2.num_correspondences += num_inlier_matches;
-    } 
+    }
 
     for (auto &frame : frames_) {
         frame.num_correspondences_have_point3D_.assign(frame.points.size(), 0);

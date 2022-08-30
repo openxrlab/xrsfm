@@ -45,7 +45,7 @@ struct SiftExtractionOptions {
     int max_image_size = 3200;
 
     // Maximum number of features to detect, keeping larger-scale features.
-    int max_num_features = 8192; 
+    int max_num_features = 8192;
 
     // First octave in the pyramid, i.e. -1 upsamples the image by one level.
     int first_octave = -1;

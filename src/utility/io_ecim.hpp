@@ -22,19 +22,18 @@ namespace xrsfm {
 inline Camera ReadCameraIOSRecord(const std::string &file_name) {
     std::ifstream file(file_name, std::ios::out);
     std::string line;
-    Camera cam; 
+    Camera cam;
     while (std::getline(file, line)) {
         if (line[0] == '#') continue;
         std::string image_name, model_name;
         std::stringstream ss(line);
         ss >> image_name >> model_name;
-        ss >> cam.camera_params[0] >>cam.camera_params[1]>>cam.camera_params[2] >> cam.camera_params[3] >> cam.distort_params[0];
+        ss >> cam.camera_params[0] >> cam.camera_params[1] >> cam.camera_params[2] >> cam.camera_params[3] >> cam.distort_params[0];
         cam.id = 0;
         return cam;
     }
     return cam;
 }
-
 
 inline void ReadCameraInfo(const std::string &file_name,
                            std::map<std::string, int> &name2cid, std::vector<Camera> &cameras) {
@@ -49,7 +48,7 @@ inline void ReadCameraInfo(const std::string &file_name,
         std::stringstream ss(line);
         ss >> image_name >> model_name >> w >> h;
         ss >> cam.camera_params[0] >> cam.camera_params[2] >> cam.camera_params[3] >> cam.distort_params[0];
-        cam.camera_params[1] = cam.camera_params[0];  
+        cam.camera_params[1] = cam.camera_params[0];
         const int id = cameras.size();
         cam.id = name2cid[image_name] = id;
         cameras.emplace_back(cam);
@@ -86,7 +85,7 @@ inline void UpdateFrameTimeStamp(std::vector<Frame> &frames, std::vector<double>
 inline void WriteTrajectory(const Map &map, const std::string &trajectory_path) {
     std::ofstream trajectory_file(trajectory_path);
     for (auto &frame : map.frames_) {
-        if (!frame.registered) continue; 
+        if (!frame.registered) continue;
         Eigen::Vector3d twc = frame.twc();
         Eigen::Quaterniond qwc = frame.qwc();
         trajectory_file << std::to_string(frame.timestamp) << " " << twc[0] << " " << twc[1] << " " << twc[2] << " " << qwc.x()

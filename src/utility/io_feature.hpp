@@ -49,14 +49,14 @@ inline void ReadFeatures(const std::string &file_name, std::vector<Frame> &frame
         }
     }
 
-    CHECK_EQ(num_frames,frames.size());
+    CHECK_EQ(num_frames, frames.size());
     for (auto &frame : frames) {
         read_name(file, frame.name);
-        // std::cout<<frame.name<<std::endl; 
+        // std::cout<<frame.name<<std::endl;
         int num_points = -1;
         read_data(file, num_points);
-        // std::cout<<num_points<<std::endl; 
-        CHECK(num_points<=1e6);
+        // std::cout<<num_points<<std::endl;
+        CHECK(num_points <= 1e6);
         frame.keypoints_.resize(num_points);
         frame.uint_descs_.resize(num_points, 128);
 
@@ -164,7 +164,7 @@ inline bool LoadRetrievalRank(const std::string &file_path,
                               const std::map<std::string, int> &name_map,
                               std::map<int, std::vector<int>> &id2rank) {
     std::ifstream infile(file_path.c_str());
-    if(!infile.is_open())return false;
+    if (!infile.is_open()) return false;
 
     std::string line;
     std::set<std::string> missing_image_names;

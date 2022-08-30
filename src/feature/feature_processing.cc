@@ -41,19 +41,18 @@ struct FeatureMatch {
     uint32_t point2D_idx2 = -1;
 };
 
-void SetUpFramePoints(std::vector<Frame>& frames) {
-    for (auto& frame : frames) {
+void SetUpFramePoints(std::vector<Frame> &frames) {
+    for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
         frame.points_normalized.clear();
-        for (const auto& kpt : frame.keypoints_) {
-            const auto& pt = kpt.pt;
+        for (const auto &kpt : frame.keypoints_) {
+            const auto &pt = kpt.pt;
             frame.points.emplace_back(pt.x, pt.y);
         }
         frame.track_ids_.assign(num_points, -1);
     }
 }
-
 
 bool CreateSiftGPUMatcher(SiftMatchGPU *sift_match_gpu) {
     // SiftGPU uses many global static state variables and the initialization
@@ -248,8 +247,9 @@ void FeatureMatching(const std::vector<Frame> &frames,
 #endif
         frame_pairs.emplace_back(frame_pair);
     }
-#pragma omp parallel for schedule(dynamic, 8)
-    for (auto &frame_pair : frame_pairs) {
+#pragma omp parallel for schedule(static, 8)
+    for (int i = 0; i < frame_pairs.size(); ++i) {
+        auto &frame_pair = frame_pairs[i];
         if (frame_pair.matches.size() < min_num_matches) {
             continue;
         }
@@ -283,7 +283,7 @@ void FeatureMatching(const std::vector<Frame> &frames,
         frame_pair.inlier_mask.assign(inliner_matches.size(), true);
         frame_pair.matches.swap(inliner_matches);
     }
-    
+
     std::vector<FramePair> frame_pairs_filter;
     for (auto &frame_pair : frame_pairs) {
         if (frame_pair.inlier_num == 0) continue;

@@ -21,7 +21,7 @@ void PreProcess(const std::string bin_path, const std::string feature_path, cons
     std::vector<FramePair> frame_pairs;
 
     std::map<int, Frame> frames_pose, frames_pt;
-    ReadImagesBinary(bin_path+"images.bin", frames_pose);
+    ReadImagesBinary(bin_path + "images.bin", frames_pose);
     ReadImagesBinaryForTriangulation(feature_path, frames_pt);
     std::cout << frames_pose.size() << " " << frames_pt.size() << std::endl;
 
@@ -44,7 +44,7 @@ void PreProcess(const std::string bin_path, const std::string feature_path, cons
 
     // set cameras & image name
     std::vector<Camera> cameras;
-    ReadCamerasBinary(bin_path+"cameras.bin",cameras);
+    ReadCamerasBinary(bin_path + "cameras.bin", cameras);
     // Camera seq(0, 1000, 1000, 640, 360, 0.0);
     // Camera seq =  Camera(0, 1450,1450, 960, 720, 0.0);
     // cameras.emplace_back(seq);
@@ -109,10 +109,10 @@ void PreProcess(const std::string bin_path, const std::string feature_path, cons
 int main(int argc, const char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
-    std::string bin_path,feature_path,matches_path,output_path;
-    if (argc <= 2){
+    std::string bin_path, feature_path, matches_path, output_path;
+    if (argc <= 2) {
         std::string config_path = "./config_tri.json";
-        if(argc == 2){
+        if (argc == 2) {
             config_path = argv[1];
         }
         auto config_json = LoadJSON(config_path);
@@ -120,14 +120,14 @@ int main(int argc, const char* argv[]) {
         feature_path = config_json["feature_path"];
         matches_path = config_json["matches_path"];
         output_path = config_json["output_path"];
-    }else if (argc == 5){
+    } else if (argc == 5) {
         bin_path = argv[1];
         feature_path = argv[2];
         matches_path = argv[3];
         output_path = argv[4];
-    }else{
+    } else {
         exit(-1);
-    } 
+    }
 
     Map map;
     PreProcess(bin_path, feature_path, matches_path, map);
@@ -170,7 +170,7 @@ int main(int argc, const char* argv[]) {
 
     // GBA
     ba_solver.GBA(map, true, true);
-    
-    WriteColMapDataBinary(output_path, map); 
+
+    WriteColMapDataBinary(output_path, map);
     return 0;
 }

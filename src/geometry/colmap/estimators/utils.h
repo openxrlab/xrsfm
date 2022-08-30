@@ -83,6 +83,6 @@ void ComputeSquaredReprojectionError(const std::vector<Eigen::Vector2d>& points2
                                      const std::vector<Eigen::Vector3d>& points3D, const Eigen::Matrix3x4d& proj_matrix,
                                      std::vector<double>* residuals);
 
-}  // namespace colmap
+} // namespace colmap
 
-#endif  // COLMAP_SRC_ESTIMATORS_UTILS_H_
+#endif // COLMAP_SRC_ESTIMATORS_UTILS_H_

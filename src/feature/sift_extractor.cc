@@ -115,13 +115,13 @@ void SiftExtractor::ExtractFLOAT(const cv::Mat &_image, std::vector<cv::KeyPoint
     }
 
     SiftGPU *sift_gpu = sift_gpu1.get();
- 
+
     constexpr int kSuccessCode = 1;
     const int code =
         sift_gpu->RunSIFT(image.cols, image.rows, image.data, GL_LUMINANCE, GL_UNSIGNED_BYTE);
 
-    if(code != kSuccessCode){ 
-        printf("fail to extract\n"); 
+    if (code != kSuccessCode) {
+        printf("fail to extract\n");
         return;
     }
     size_t num_features = sift_gpu->GetFeatureNum();

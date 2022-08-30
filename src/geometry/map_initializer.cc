@@ -21,10 +21,10 @@ bool CheckInitFramePair(const Map &map, FramePair &frame_pair, double min_angle 
         points1.push_back(frame1.points_normalized[frame_pair.matches[i].id1]);
         points2.push_back(frame2.points_normalized[frame_pair.matches[i].id2]);
     }
-    if(points1.size()<10)return false; 
+    if (points1.size() < 10) return false;
     const double th = 10.0 / map.cameras_[frame1.camera_id].fx();
     //add solve homograph
-    xrsfm::solve_essential(points1, points2, th, frame_pair.E, inlier_num, inlier_mask); 
+    xrsfm::solve_essential(points1, points2, th, frame_pair.E, inlier_num, inlier_mask);
 
     inlier_mask.clear();
     std::vector<vector3> point3ds;
@@ -44,7 +44,7 @@ bool CheckInitFramePair(const Map &map, FramePair &frame_pair, double min_angle 
             id_p3d++;
         }
     }
-    
+
     if (num_p3d >= 0.5 * id_p3d && num_p3d_valid >= 0.5 * num_p3d && num_p3d_valid > 200) {
         printf("id %d-%d: %d %d %d\n", frame_pair.id1, frame_pair.id2, num_p3d_valid, num_p3d, id_p3d);
         return true;
@@ -54,7 +54,7 @@ bool CheckInitFramePair(const Map &map, FramePair &frame_pair, double min_angle 
 
 bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
     std::vector<int> init_id1_candidate;
-    if(init_frame_pair.id1==-1){
+    if (init_frame_pair.id1 == -1) {
         std::vector<std::pair<int, int>> frame_info_vec;
         for (const auto &frame : map.frames_) {
             // if (map.cameras_[frame.camera_id].distort_params[0] != 0) //TODO
@@ -66,11 +66,11 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
         for (const auto &[frame_id, num_matched_frame] : frame_info_vec) {
             init_id1_candidate.emplace_back(frame_id);
         }
-    }else{
+    } else {
         init_id1_candidate.push_back(init_frame_pair.id1);
-    } 
+    }
 
-    std::cout<<init_id1_candidate.size()<<std::endl;
+    std::cout << init_id1_candidate.size() << std::endl;
 
     for (const auto &init_id1 : init_id1_candidate) {
         std::vector<int> init_id2_candidate;
@@ -96,7 +96,7 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
                 FindPair(map.frame_pairs_, init_id1, init_id2, frame_pair);
             else
                 FindPair(map.frame_pairs_, init_id2, init_id1, frame_pair);
-            if (CheckInitFramePair(map, frame_pair,16.0)) {
+            if (CheckInitFramePair(map, frame_pair, 16.0)) {
                 init_frame_pair = frame_pair;
                 return true;
             }

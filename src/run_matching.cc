@@ -11,7 +11,6 @@
 
 using namespace xrsfm;
 
-
 void GetFeatures(const std::string& images_path, const std::string& ftr_path,
                  std::vector<Frame>& frames) {
     std::ifstream ftr_bin(ftr_path);
@@ -133,10 +132,10 @@ void MatchingSeq(std::vector<Frame>& frames, const std::string& fp_path, std::ma
 int main(int argc, const char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
-    std::string images_path,retrival_path,matching_type,output_path;
-    if (argc <= 2){
-        std::string config_path = "./config_open.json";
-        if(argc == 2){
+    std::string images_path, retrival_path, matching_type, output_path;
+    if (argc <= 2) {
+        std::string config_path = "./config_mat.json";
+        if (argc == 2) {
             config_path = argv[1];
         }
         auto config_json = LoadJSON(config_path);
@@ -144,12 +143,12 @@ int main(int argc, const char* argv[]) {
         retrival_path = config_json["retrival_path"];
         matching_type = config_json["matching_type"];
         output_path = config_json["output_path"];
-    }else if (argc == 5){
+    } else if (argc == 5) {
         images_path = argv[1];
         retrival_path = argv[2];
         matching_type = argv[3];
         output_path = argv[4];
-    }else{
+    } else {
         exit(-1);
     }
     const std::string ftr_path = output_path + "ftr.bin";
@@ -184,12 +183,12 @@ int main(int argc, const char* argv[]) {
     Timer timer("%lf s\n");
     timer.start();
     if (matching_type == "sequential") {
-        if(!have_retrival_info){
+        if (!have_retrival_info) {
             std::cout << "Without the retrival file, sequential matching method only matchs adjacent frames.\n";
         }
         MatchingSeq(frames, fp_path, id2rank);
     } else if (matching_type == "retrival") {
-        if(!have_retrival_info){
+        if (!have_retrival_info) {
             std::cout << "The retrieval file is required when using retrival-based matching!!!\n";
             return 0;
         }
@@ -199,7 +198,7 @@ int main(int argc, const char* argv[]) {
         FeatureMatching(frames, id_pairs, frame_pairs, true);
         SaveFramePairs(fp_path, frame_pairs);
     } else if (matching_type == "retrival") {
-        if(!have_retrival_info){
+        if (!have_retrival_info) {
             std::cout << "The retrieval file is required when using covisibility-based matching!!!\n";
             return 0;
         }

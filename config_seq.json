@@ -1,8 +1,5 @@
 {
-	"bin_path": "/data/TestData/results/",
-	"images_path": "/data/TestData/images/",
-	"camera_path": "/data/TestData/Data.txt",
-	"output_path": "/data/TestData/results/",
-	"init_id1": 0,
-	"init_id2": 2
+	"bin_path": "/matching_output_path/", 
+	"camera_path": "/path/camera.txt",
+	"output_path": "/output_path/"
 }

@@ -16,7 +16,7 @@
 
 namespace xrsfm {
 
-void SetUpFramePoints(std::vector<Frame>& frames);
+void SetUpFramePoints(std::vector<Frame> &frames);
 
 bool CreateSiftGPUMatcher(SiftMatchGPU *sift_match_gpu);
 

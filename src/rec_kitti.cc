@@ -9,9 +9,9 @@
 #include "utility/timer.h"
 #include "utility/viewer.h"
 
-using namespace xrsfm; 
+using namespace xrsfm;
 
-void PreProcess(const std::string dir_path,const int camera_param_id, Map& map) {
+void PreProcess(const std::string dir_path, const int camera_param_id, Map& map) {
     std::vector<Frame> frames;
     std::vector<Camera> cameras;
     std::vector<FramePair> frame_pairs;
@@ -57,11 +57,11 @@ void PreProcess(const std::string dir_path,const int camera_param_id, Map& map) 
 int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
-    std::string bin_path,data_path,seq_name,output_path;
-    int init_id1,init_id2;
-    if (argc <= 2){
+    std::string bin_path, data_path, seq_name, output_path;
+    int init_id1, init_id2;
+    if (argc <= 2) {
         std::string config_path = "./config_kitti.json";
-        if(argc == 2){
+        if (argc == 2) {
             config_path = argv[1];
         }
         auto config_json = LoadJSON(config_path);
@@ -72,24 +72,24 @@ int main(int argc, char* argv[]) {
 
         init_id1 = config_json["init_id1"];
         init_id2 = config_json["init_id2"];
-    }else if (argc == 7){
+    } else if (argc == 7) {
         bin_path = argv[1];
         data_path = argv[2];
         seq_name = argv[3];
         output_path = argv[4];
         init_id1 = std::stoi(argv[5]);
         init_id2 = std::stoi(argv[6]);
-    }else{
+    } else {
         exit(-1);
-    } 
-    const std::string seq_path = data_path+seq_name+"/";
+    }
+    const std::string seq_path = data_path + seq_name + "/";
     std::map<std::string, int> name2camera_id = {{"00", 0}, {"01", 0}, {"02", 0}, {"03", 1}, {"04", 2}, {"05", 2}, {"06", 2}, {"07", 2}, {"08", 2}, {"09", 2}, {"10", 2}};
     CHECK(name2camera_id.count(seq_name) != 0) << "NO suitable camera param.";
     const int camera_param_id = name2camera_id[seq_name];
 
     // 2. Map PreProcess
     Map map;
-    PreProcess(bin_path ,camera_param_id, map);
+    PreProcess(bin_path, camera_param_id, map);
     std::cout << "PreProcess Done!" << std::endl;
 
     // 3. Map Reconstruction

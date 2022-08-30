@@ -52,9 +52,9 @@ typedef unsigned __int64 uint64_t;
 #endif
 
 // Define non-copyable or non-movable classes.
-#define NON_COPYABLE(class_name)          \
-  class_name(class_name const&) = delete; \
-  void operator=(class_name const& obj) = delete;
+#define NON_COPYABLE(class_name)            \
+    class_name(class_name const&) = delete; \
+    void operator=(class_name const& obj) = delete;
 #define NON_MOVABLE(class_name) class_name(class_name&&) = delete;
 
 #include <Eigen/Core>
@@ -67,7 +67,7 @@ typedef Eigen::Matrix<uint8_t, 3, 1> Vector3ub;
 typedef Eigen::Matrix<uint8_t, 4, 1> Vector4ub;
 typedef Eigen::Matrix<double, 6, 1> Vector6d;
 
-}  // namespace Eigen
+} // namespace Eigen
 
 namespace colmap {
 
@@ -99,7 +99,7 @@ const image_pair_t kInvalidImagePairId = std::numeric_limits<image_pair_t>::max(
 const point2D_t kInvalidPoint2DIdx = std::numeric_limits<point2D_t>::max();
 const point3D_t kInvalidPoint3DId = std::numeric_limits<point3D_t>::max();
 
-}  // namespace colmap
+} // namespace colmap
 
 // This file provides specializations of the templated hash function for
 // custom types. These are used for comparison in unordered sets/maps.
@@ -108,12 +108,12 @@ namespace std {
 // Hash function specialization for uint32_t pairs, e.g., image_t or camera_t.
 template <>
 struct hash<std::pair<uint32_t, uint32_t>> {
-  std::size_t operator()(const std::pair<uint32_t, uint32_t>& p) const {
-    const uint64_t s = (static_cast<uint64_t>(p.first) << 32) + static_cast<uint64_t>(p.second);
-    return std::hash<uint64_t>()(s);
-  }
+    std::size_t operator()(const std::pair<uint32_t, uint32_t>& p) const {
+        const uint64_t s = (static_cast<uint64_t>(p.first) << 32) + static_cast<uint64_t>(p.second);
+        return std::hash<uint64_t>()(s);
+    }
 };
 
-}  // namespace std
+} // namespace std
 
-#endif  // COLMAP_SRC_UTIL_TYPES_H_
+#endif // COLMAP_SRC_UTIL_TYPES_H_

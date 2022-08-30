@@ -52,15 +52,13 @@ TEST(GeometryTest, PnP) {
     SolvePnP_colmap(p2d_vec, pw_vec, 1.0, Tcw,
                     inlier_mask);
     // std::cout << Tcw.q.coeffs().transpose() << " " << Tcw.t.transpose() << std::endl;
-    auto dq = Tcw.q*q.inverse();
-    ASSERT_LT(abs(dq.w()-1),1e-10);
-    ASSERT_LT((Tcw.t-t).norm(),1e-10);
+    auto dq = Tcw.q * q.inverse();
+    ASSERT_LT(abs(dq.w() - 1), 1e-10);
+    ASSERT_LT((Tcw.t - t).norm(), 1e-10);
 }
 
-
-// TEST(GeometryTest, Triangulate) { 
+// TEST(GeometryTest, Triangulate) {
 // }
-
 
 int main(int argc, char* argv[]) {
     testing::InitGoogleTest(&argc, argv);

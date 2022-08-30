@@ -154,9 +154,9 @@ target_link_libraries(ecim
         stdc++fs  
         XRPrimer::xrprimer
         ${OpenCV_LIBS}
-        gtest
-        sift_gpu
+        ${GTEST_LIBRARIES}
         ${Pangolin_LIBRARIES}
+        sift_gpu
         )
  
 add_executable(run_matching src/run_matching.cc)

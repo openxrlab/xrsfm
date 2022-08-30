@@ -66,6 +66,6 @@ void StringToUpper(std::string* str);
 // Check whether the sub-string is contained in the given string.
 bool StringContains(const std::string& str, const std::string& sub_str);
 
-}  // namespace colmap
+} // namespace colmap
 
-#endif  // COLMAP_SRC_UTIL_STRING_H_
+#endif // COLMAP_SRC_UTIL_STRING_H_

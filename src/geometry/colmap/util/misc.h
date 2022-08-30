@@ -47,7 +47,7 @@ namespace colmap {
 #ifndef STRINGIFY
 #define STRINGIFY(s) STRINGIFY_(s)
 #define STRINGIFY_(s) #s
-#endif  // STRINGIFY
+#endif // STRINGIFY
 
 // Append trailing slash to string if it does not yet end with a slash.
 std::string EnsureTrailingSlash(const std::string& str);
@@ -142,52 +142,51 @@ void RemoveCommandLineArgument(const std::string& arg, int* argc, char** argv);
 
 template <typename... T>
 std::string JoinPaths(T const&... paths) {
-  boost::filesystem::path result;
-  int unpack[]{0, (result = result / boost::filesystem::path(paths), 0)...};
-  static_cast<void>(unpack);
-  return result.string();
+    boost::filesystem::path result;
+    int unpack[]{0, (result = result / boost::filesystem::path(paths), 0)...};
+    static_cast<void>(unpack);
+    return result.string();
 }
 
 template <typename T>
 bool VectorContainsValue(const std::vector<T>& vector, const T value) {
-  return std::find_if(vector.begin(), vector.end(), [value](const T element) { return element == value; }) !=
-         vector.end();
+    return std::find_if(vector.begin(), vector.end(), [value](const T element) { return element == value; }) != vector.end();
 }
 
 template <typename T>
 bool VectorContainsDuplicateValues(const std::vector<T>& vector) {
-  std::vector<T> unique_vector = vector;
-  return std::unique(unique_vector.begin(), unique_vector.end()) != unique_vector.end();
+    std::vector<T> unique_vector = vector;
+    return std::unique(unique_vector.begin(), unique_vector.end()) != unique_vector.end();
 }
 
 template <typename T>
 std::string VectorToCSV(const std::vector<T>& values) {
-  std::string string;
-  for (const T value : values) {
-    string += std::to_string(value) + ", ";
-  }
-  return string.substr(0, string.length() - 2);
+    std::string string;
+    for (const T value : values) {
+        string += std::to_string(value) + ", ";
+    }
+    return string.substr(0, string.length() - 2);
 }
 
 template <typename T>
 void ReadBinaryBlob(const std::string& path, std::vector<T>* data) {
-  std::ifstream file(path, std::ios::binary | std::ios::ate);
-  CHECK(file.is_open()) << path;
-  file.seekg(0, std::ios::end);
-  const size_t num_bytes = file.tellg();
-  CHECK_EQ(num_bytes % sizeof(T), 0);
-  data->resize(num_bytes / sizeof(T));
-  file.seekg(0, std::ios::beg);
-  ReadBinaryLittleEndian<T>(&file, data);
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    CHECK(file.is_open()) << path;
+    file.seekg(0, std::ios::end);
+    const size_t num_bytes = file.tellg();
+    CHECK_EQ(num_bytes % sizeof(T), 0);
+    data->resize(num_bytes / sizeof(T));
+    file.seekg(0, std::ios::beg);
+    ReadBinaryLittleEndian<T>(&file, data);
 }
 
 template <typename T>
 void WriteBinaryBlob(const std::string& path, const std::vector<T>& data) {
-  std::ofstream file(path, std::ios::binary);
-  CHECK(file.is_open()) << path;
-  WriteBinaryLittleEndian<T>(&file, data);
+    std::ofstream file(path, std::ios::binary);
+    CHECK(file.is_open()) << path;
+    WriteBinaryLittleEndian<T>(&file, data);
 }
 
-}  // namespace colmap
+} // namespace colmap
 
-#endif  // COLMAP_SRC_UTIL_MISC_H_
+#endif // COLMAP_SRC_UTIL_MISC_H_

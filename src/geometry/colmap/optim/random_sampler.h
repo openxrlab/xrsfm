@@ -40,20 +40,20 @@ namespace colmap {
 //
 // Note that a separate sampler should be instantiated per thread.
 class RandomSampler : public Sampler {
- public:
-  explicit RandomSampler(const size_t num_samples);
+  public:
+    explicit RandomSampler(const size_t num_samples);
 
-  void Initialize(const size_t total_num_samples) override;
+    void Initialize(const size_t total_num_samples) override;
 
-  size_t MaxNumSamples() override;
+    size_t MaxNumSamples() override;
 
-  std::vector<size_t> Sample() override;
+    std::vector<size_t> Sample() override;
 
- private:
-  const size_t num_samples_;
-  std::vector<size_t> sample_idxs_;
+  private:
+    const size_t num_samples_;
+    std::vector<size_t> sample_idxs_;
 };
 
-}  // namespace colmap
+} // namespace colmap
 
-#endif  // COLMAP_SRC_OPTIM_RANDOM_SAMPLER_H_
+#endif // COLMAP_SRC_OPTIM_RANDOM_SAMPLER_H_
