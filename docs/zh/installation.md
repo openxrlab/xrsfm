@@ -15,17 +15,18 @@
 来自默认Ubuntu存储库的依赖项:
 
     sudo apt-get install \
-        wget\
+        wget \
         git \
         cmake \
         build-essential \
         python3 \
         python3-pip \
         libglew-dev \
-        libatlas-base-dev
+        libatlas-base-dev \
+        libgtest-dev
 
 安装cmake
-```
+```shell
 wget https://cmake.org/files/v3.21/cmake-3.21.0-linux-x86_64.tar.gz
 tar -xf cmake-3.21.0-linux-x86_64.tar.gz
 cp -r cmake-3.21.0-linux-x86_64 /usr/share/
@@ -33,21 +34,21 @@ ln -sf /usr/share/cmake-3.21.0-linux-x86_64/bin/cmake /usr/bin/cmake
 ```
 
 安装 [XRPRimer](https://github.com/openxrlab/xrprimer)
-```
+```shell
     git clone git@github.com:openxrlab/xrsfm.git
     cd Pangolin && cmake -B build && cmake --build build -j4 
     sudo make install
 ```
 
 安装 [Pangolin](https://github.com/stevenlovegrove/Pangolin)
-```
+```shell
     git clone git@github.com:openxrlab/xrsfm.git
     cd Pangolin && cmake -B build && cmake --build build -j4 
     sudo make install
 ```
 
 编译 XRSfM
-```
+```shell
     git clone git@github.com:openxrlab/xrsfm.git
     cd xrsfm && cmake -B build && cmake --build build -j4
 ```
