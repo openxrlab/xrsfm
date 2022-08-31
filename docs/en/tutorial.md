@@ -81,11 +81,10 @@ However, since XRSfM does not support camera self-calibration currently, users n
 
 
 ### Data preparation
-除了上述的图像数据和相机内参外，还需要准备图像的检索结果，这部分功能目前被封装在xrloc中，详细参见URL
 In addition to the above image data and camera intrisic parameters, 
 it is recommend to prepare the image retrieval results. . 
 This image retrieval function is supported in [XRLocalization](https://github.com/openxrlab/xrlocalization/tree/main/docs/en/tutorials/generate_image_pairs.md).
-
+Users can also directly download [test data](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj) to run the program.
 
 Before running the reconstruction, you should ensure that there are the following data:
 the input images (images_path),

@@ -5,8 +5,23 @@
 English | [简体中文](README_CN.md)
 
 XRSfM is an open-source SfM codebase. It is a part of the [OpenXRLab](https://openxrlab.com/) project.
-The software is licensed under the xxxx license. 
-If you use the efficient matching method for your research, please cite:
+A detailed introduction can be found in [introduction.md](docs/en/introduction.md).
+
+## Citation
+
+
+If you find this project useful in your research, please consider cite:
+```bitex
+@misc{xrmocap,
+    title={OpenXRLab Structure-from-Motion Toolbox and Benchmark},
+    author={XRSfM Contributors},
+    howpublished = {\url{https://github.com/openxrlab/xrsfm}},
+    year={2022}
+}
+
+```
+
+If you use the covisibility-based matching method for your research, please cite:
 
 ```bibtex
 @inproceedings{ye2020efficient,
@@ -21,7 +36,8 @@ If you use the efficient matching method for your research, please cite:
 
 1.Build the library manually as described in [installation.md](docs/en/installation.md).
 
-2.Download the provided test data or prepare data with your own images.
+2.Download the provided [test data](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj)
+ or prepare data with your own images.
 
 3.Run the following script to automatically reconstruction:
 ```
@@ -30,7 +46,7 @@ python3 ./scripts/auto_reconstruction.py --data_path ${your_data_path}$.
 
 ## Build your own ARDemo
 
-In addition to the reconstruction function, we have built a complete process to facilitate users to build location-based ardemo. For details, please refer to [ARDemo] ().
+In addition to the reconstruction function, we have built a complete process to facilitate users to build location-based ardemo. For details, please refer to [ARDemo](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#).
 
 ## License
 
