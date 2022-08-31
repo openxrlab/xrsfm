@@ -26,7 +26,7 @@
         libgtest-dev
 ```
 
-安装cmake
+如果cmake版本小于3.16，按照以下步骤更新
 ```shell
 wget https://cmake.org/files/v3.21/cmake-3.21.0-linux-x86_64.tar.gz
 tar -xf cmake-3.21.0-linux-x86_64.tar.gz

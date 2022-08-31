@@ -26,7 +26,7 @@ Dependencies from the default Ubuntu repositories:
         libgtest-dev
 ```
 
-Install cmake
+Update if the version of cmake < 3.16
 ```shell
 wget https://cmake.org/files/v3.21/cmake-3.21.0-linux-x86_64.tar.gz
 tar -xf cmake-3.21.0-linux-x86_64.tar.gz
