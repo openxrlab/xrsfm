@@ -13,7 +13,7 @@
 + Pangolin
 
 来自默认Ubuntu存储库的依赖项:
-
+```shell
     sudo apt-get install \
         wget \
         git \
@@ -24,6 +24,7 @@
         libglew-dev \
         libatlas-base-dev \
         libgtest-dev
+```
 
 安装cmake
 ```shell
@@ -35,22 +36,23 @@ ln -sf /usr/share/cmake-3.21.0-linux-x86_64/bin/cmake /usr/bin/cmake
 
 安装 [XRPRimer](https://github.com/openxrlab/xrprimer)
 ```shell
-    git clone git@github.com:openxrlab/xrsfm.git
-    cd Pangolin && cmake -B build && cmake --build build -j4 
-    sudo make install
+git clone git@github.com:openxrlab/xrprimer.git
+cd xrprimer
+cmake -S . -Bbuild -DBUILD_EXTERNAL=ON -DCMAKE_BUILD_TYPE=Release 
+cmake --build build --target install -j4
 ```
 
 安装 [Pangolin](https://github.com/stevenlovegrove/Pangolin)
 ```shell
-    git clone git@github.com:openxrlab/xrsfm.git
-    cd Pangolin && cmake -B build && cmake --build build -j4 
-    sudo make install
+git clone git@github.com:stevenlovegrove/Pangolin.git
+cd Pangolin && cmake -B build && cmake --build build -j4 
+sudo make install
 ```
 
 编译 XRSfM
 ```shell
-    git clone git@github.com:openxrlab/xrsfm.git
-    cd xrsfm && cmake -B build && cmake --build build -j4
+git clone git@github.com:openxrlab/xrsfm.git
+cd xrsfm && cmake -B build && cmake --build build -j4
 ```
  
 ### 通过Docker镜像运行
@@ -58,7 +60,6 @@ ln -sf /usr/share/cmake-3.21.0-linux-x86_64/bin/cmake /usr/bin/cmake
 We provide a [Dockerfile](../../Dockerfile) to build an image. Ensure that you are using [docker version](https://docs.docker.com/engine/install/) >=19.03 and `"default-runtime": "nvidia"` in daemon.json.
 
 ```shell
-# build an image with CUDA 7.5+
 docker build -t xrsfm .
 ```
 
@@ -66,3 +67,4 @@ Run it with
 
 ```shell
 docker run --gpus all --network=host -it xrsfm
+```
