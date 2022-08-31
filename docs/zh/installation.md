@@ -46,6 +46,7 @@ cmake --build build --target install -j4
 ```shell
 git clone git@github.com:stevenlovegrove/Pangolin.git
 cd Pangolin && cmake -B build && cmake --build build -j4 
+cd build
 sudo make install
 ```
 
