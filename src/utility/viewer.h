@@ -2,8 +2,8 @@
 // Created by SENSETIME\yezhichao1 on 2020/10/18.
 //
 
-#ifndef ECIM_VIEWER_H
-#define ECIM_VIEWER_H
+
+#pragma once
 
 #include <pangolin/pangolin.h>
 
@@ -35,4 +35,3 @@ class ViewerThread {
     std::thread worker_thread;
 };
 } // namespace xrsfm
-#endif // ECIM_VIEWER_H

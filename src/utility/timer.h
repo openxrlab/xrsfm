@@ -2,8 +2,6 @@
 // Created by SENSETIME\yezhichao1 on 2020/4/22.
 //
 #pragma once
-#ifndef WARG_TIMER_H
-#define WARG_TIMER_H
 
 #include <chrono>
 #include <string>
@@ -77,4 +75,3 @@ struct TimerArray {
     }
 };
 } // namespace xrsfm
-#endif // WARG_TIMER_H

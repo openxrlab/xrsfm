@@ -2,8 +2,7 @@
 // Created by SENSETIME\yezhichao1 on 2020/10/18.
 //
 
-#ifndef ECIM_VIEW_H
-#define ECIM_VIEW_H
+#pragma once
 
 #include <opencv2/opencv.hpp>
 
@@ -34,5 +33,4 @@ void DrawCameras(const std::vector<Pose> &cameras, const std::vector<Eigen::Vect
 
 void DrawPoints(const std::vector<Eigen::Vector3d> &points);
 
-} // namespace xrsfm
-#endif // ECIM_VIEW_H
+} // namespace xrsfm 

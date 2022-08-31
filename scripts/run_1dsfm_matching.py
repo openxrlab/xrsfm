@@ -28,5 +28,4 @@ if __name__ == "__main__":
         images_path = image_dir_path+seq_name+'/images/'
         retrival_path = retrival_dir_path+seq_name+'/retrival_50.txt'
         output_path = output_dir_path+seq_name+'/'
-        # os.system(exe+' '+images_path+' '+retrival_path+' ecim '+output_path)
-        os.system(exe+' '+images_path+' '+retrival_path+' ecim '+output_path+' > '+output_path+'log_mat.txt')
+        os.system(exe+' '+images_path+' '+retrival_path+' covisibility '+output_path+' > '+output_path+'log_mat.txt')

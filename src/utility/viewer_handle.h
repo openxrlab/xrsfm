@@ -2,8 +2,7 @@
 // Created by yzc on 19-5-14.
 //
 
-#ifndef WSFM_MHANDLER_H
-#define WSFM_MHANDLER_H
+#pragma once
 
 #include <pangolin/handler/handler.h>
 
@@ -24,5 +23,4 @@ struct MyHandler3D : Handler3D {
     std::atomic<bool> init_viewpoint;
 };
 } // namespace pangolin
-
-#endif // WSFM_MHANDLER_H
+ 

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(ecim)
+project(xrsfm)
 
 option(CUDA_ENABLED "Whether to enable CUDA, if available" ON)
 set(CUDA_ARCHS "Auto" CACHE STRING "List of CUDA architectures for which to \
@@ -100,7 +100,7 @@ if (CUDA_ENABLED)
 endif ()
 
 
-add_library(ecim
+add_library(xrsfm
         src/base/map.cc
 
         src/feature/sift_extractor.cc 
@@ -136,11 +136,12 @@ add_library(ecim
         src/utility/viewer_handler.cc
         src/utility/viewer.cc
         src/utility/io_ecim.cc
- 
         )
 
 
-target_include_directories(ecim
+message(STATUS ${OpenCV_LIBS})
+
+target_include_directories(xrsfm
         PUBLIC
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/src
@@ -150,7 +151,7 @@ target_include_directories(ecim
         ${EIGEN3_INCLUDE_DIRS} 
         )
 
-target_link_libraries(ecim
+target_link_libraries(xrsfm
         stdc++fs  
         XRPrimer::xrprimer
         ${OpenCV_LIBS}
@@ -160,32 +161,24 @@ target_link_libraries(ecim
         )
  
 add_executable(run_matching src/run_matching.cc)
-target_link_libraries(run_matching ecim)
+target_link_libraries(run_matching xrsfm)
 
 add_executable(run_reconstruction src/run_reconstruction.cc)
-target_link_libraries(run_reconstruction ecim)
+target_link_libraries(run_reconstruction xrsfm)
         
 add_executable(run_triangulation src/run_triangulation.cc)
-target_link_libraries(run_triangulation ecim) 
+target_link_libraries(run_triangulation xrsfm) 
 
 add_executable(unpack_collect_data src/unpack_collect_data.cc)
-target_link_libraries(unpack_collect_data ecim)
+target_link_libraries(unpack_collect_data xrsfm)
 
 add_executable(estimate_scale src/estimate_scale.cc)
-target_link_libraries(estimate_scale ecim apriltag)
+target_link_libraries(estimate_scale xrsfm apriltag)
 
 add_executable(rec_1dsfm src/rec_1dsfm.cc)
-target_link_libraries(rec_1dsfm ecim)
+target_link_libraries(rec_1dsfm xrsfm)
 
 add_executable(rec_kitti src/rec_kitti.cc)
-target_link_libraries(rec_kitti ecim)
+target_link_libraries(rec_kitti xrsfm)
 
-# add_executable(test_f src/test/feature_test.cc)
-# target_link_libraries(test_f ecim)
-
-# add_executable(test_g src/test/geometry_test.cc)
-# target_link_libraries(test_g ecim) 
-
-# add_executable(test_r src/test/reconstruction_test.cc)
-# target_link_libraries(test_r ecim apriltag) 
  

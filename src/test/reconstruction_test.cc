@@ -2,12 +2,9 @@
 #include <regex>
 #include <unordered_set>
 
-#include "feature/feature_processing.h"
-#include "base/map.h"
-#include "utility/io_ecim.hpp"
-#include "utility/timer.h"
 #include "3rdparty/json/json.hpp"
 #include "base/map.h"
+#include "feature/feature_processing.h"
 #include "mapper/incremental_mapper.h"
 #include "utility/io_ecim.hpp"
 #include "utility/io_feature.hpp"
