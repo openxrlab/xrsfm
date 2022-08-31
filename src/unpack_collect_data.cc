@@ -24,14 +24,14 @@ int main(int argc, char* argv[]) {
     std::cout << "Wait a sec...\n";
     while (inFile.read(reinterpret_cast<char*>(&timestamp), sizeof(timestamp))) {
         outFile << std::to_string(timestamp);
-        outFile << ",simple_radio";
+        outFile << " simple_radio";
         float matrix;
         inFile.read(reinterpret_cast<char*>(buffer.data()), sizeof(matrix) * 4);
         for (auto i : buffer) {
-            outFile << ",";
+            outFile << " ";
             outFile << std::to_string(i);
         }
-        outFile << ",0\n";
+        outFile << " 0\n";
         uint32_t width, height;
         inFile.read(reinterpret_cast<char*>(&width), sizeof(width));
         inFile.read(reinterpret_cast<char*>(&height), sizeof(height));

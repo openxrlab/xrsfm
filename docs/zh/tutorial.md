@@ -24,7 +24,7 @@ XRSfM的尺度估计功能依赖于场景中预先放置的已知尺度的人工
 
 "retrival_path" 指向检索文件的路径。
 检索文件是一个文本文件存储着图像检索的结果。
-目前图像检索功能被封装在XRLocation, 具体的生成方式可以参考（url）。
+目前图像检索功能被封装在XRLocalization, 具体的生成方式可以参考[链接](https://github.com/openxrlab/xrlocalization/tree/main/docs/en/tutorials/generate_image_pairs.md)。
 你也可以通过其他检索方法生成该文件，具体的文件格式可以参考[introduction.md](./introduction.md)。
 
 "matching_type" 指定了匹配策略。
@@ -71,7 +71,7 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrival")和基�
 ## 运行你自己的数据
 
 ### 数据采集
-我们推荐使用采集工具拍摄图像，它会同时获取一个准确的相机内参。
+我们推荐使用[采集工具](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#data-capturer-on-your-phone)拍摄图像，它会同时获取一个准确的相机内参。
 用户也可以使用其他来源的图像，但鉴于当前版本不支持相机自标定，用户需要给出相机内参，这可以由标定得到。
 
 ### 数据准备

@@ -45,9 +45,6 @@ void PreProcess(const std::string bin_path, const std::string feature_path, cons
     // set cameras & image name
     std::vector<Camera> cameras;
     ReadCamerasBinary(bin_path + "cameras.bin", cameras);
-    // Camera seq(0, 1000, 1000, 640, 360, 0.0);
-    // Camera seq =  Camera(0, 1450,1450, 960, 720, 0.0);
-    // cameras.emplace_back(seq);
     for (auto& frame : frames) {
         frame.camera_id = 0;
     }

@@ -4,7 +4,7 @@
 功能: 从图像中提取特征并进行特征匹配
 
 ## run_reconstruction
-输入: matching results, camera intrinsic parameters,initial frame \
+输入: matching results, camera intrinsic parameters \
 功能: 为顺序图像集重建场景
 
 ## estimate_scale
@@ -12,13 +12,13 @@
 功能: 估计重建结果的真实尺度
 
 ## unpack_collect_data
-输入：IOS录制的二进制文件 \
+输入：RGBCaptureTool录制的二进制文件 \
 功能：解析录制的二进制文件，生成图片数据和相机内参
 
 # Data Format
 
 ## ios camera file
-ios录制的相机内参文件
+RGBCaptureTool录制的相机内参文件
 image_name model_name fx fy cx cy distortion_param
 
 ## cameras file

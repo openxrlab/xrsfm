@@ -3,45 +3,75 @@
 ---------------------
 
 We provide some scripts to help users can run benchmark easily.
-The supported datasets include the sequential dataset KITTI(url) and the unordered dataset 1DSfM(url)
+The supported datasets include the sequential dataset [KITTI](http://www.cvlibs.net/datasets/kitti/index.php) and the unordered dataset [1DSfM](https://www.cs.cornell.edu/projects/1dsfm/).
 
 
-## Run KITTI
+## Evaluation on the KITTI dataset
 
 ### Data preparation
 
-The KITTI dataset can be download in (url).
-As a necessary input, the image retrieval results can be downloaded from the url.
+The KITTI dataset can be download in [link](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_gray.zip).
+As a necessary input, the image retrieval results can be downloaded from  [link](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/KITTI.zip?versionId=CAEQQBiBgMCu.KallxgiIGM4MTk2MmJmNDU1YTQzYjBhYTJjZmIyYzQ3YzM2ODIx).
+
+### Run matching stage
+
+Run the following python script to process the matching stage
+```
+python3 ./scripts/run_kitti_matching.py --data_path ${dataset_path}$ --retrival_dir_path ${retrival_dir_path}$  --output_dir_path ${output_dir_path}$
+```
+
+### Run reconstruction stage
+
+
+Run the following python script to process the reconstruction stage
+```
+python3 ./scripts/run_kitti_reconstruction.py --data_path ${dataset_path}$ --bin_dir_path ${bin_dir_path}$
+```
+
+### Run example
+
+Download the data set and the retrieval data, unzip them and place them into '/path'
+```
+/path
+-dataset
+--sequences
+---00
+...
+---10
+-KITTI
+--00
+...
+---10
+```
+
+Run the following scripts:
+```
+python3 ./scripts/run_kitti_matching.py --data_path /path/dataset/sequences/ --retrival_dir_path /path/KITTI/ --output_dir_path /path/KITTI/
+python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/sequences/ --bin_dir_path /path/KITTI/
+```
+
+
+
+## Evaluation was performed on the 1DSfM dataset
+
+### Data preparation
+
+The 1DSfM dataset can be download from [project web page](https://www.cs.cornell.edu/projects/1dsfm/).
+The image retrieval results and camera intrinsic parameters can be downloaded from the [link](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/1DSfM.zip?versionId=CAEQQBiBgIDF.KallxgiIDcyNDJmNTM4OWJhNzRlYzdhNDhkZmNjMjQ0YWU0ODA3).
 
 ### Run matching
 
+Run the following python script to process the matching stage
 ```
-python3 ./scripts/run_kitti_matching.py --data_path dataset_path --retrival_dir_path download_path --output_dir_path output_path
+python3 ./scripts/run_1dsfm_matching.py --data_path ${dataset_path}$ --retrival_dir_path ${retrival_dir_path}$ --output_dir_path ${output_dir_path}$
 ```
 
 ### Run reconstruction
 
+
+Run the following python script to process the reconstruction stage
 ```
-python3 ./scripts/run_kitti_reconstruction.py --data_path dataset_path --bin_dir_path download_path
-```
-
-## Run 1DSfM
-
-### Data preparation
-
-The 1DSfM dataset can be download in (url).
-The image retrieval results and camera intrinsic parameters can be downloaded from the url.
-
-### Run matching
-
-```
-python3 ./scripts/run_1dsfm_matching.py --data_path dataset_path --retrival_dir_path download_path --output_dir_path output_path
-```
-
-### Run reconstruction
-
-```
-python3 ./scripts/run_1dsfm_reconstruction.py --data_path dataset_path --bin_dir_path download_path
+python3 ./scripts/run_1dsfm_reconstruction.py --data_path ${dataset_path}$ --bin_dir_path ${bin_dir_path}$
 ```
 
 ### Results 
@@ -79,6 +109,6 @@ python3 ./scripts/run_1dsfm_reconstruction.py --data_path dataset_path --bin_dir
 |Roman Forum	    |1580|	327 |
 |Tower of London    |641 |	118 |
 |Trafalgar	        |7468|	2076|
-|Union Square 	    |1034|	    |
+|Union Square 	    |1034|  721 |
 |Vienna Cathedral   |969 |	117 |
 |Yorkminster	    |997 |	211 |

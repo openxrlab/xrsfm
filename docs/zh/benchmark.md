@@ -123,6 +123,6 @@ python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/ --bin_d
 |Roman Forum	    |1580|	327 |
 |Tower of London    |641 |	118 |
 |Trafalgar	        |7468|	2076|
-|Union Square 	    |1034|	    |
+|Union Square 	    |1034|	721 |
 |Vienna Cathedral   |969 |	117 |
 |Yorkminster	    |997 |	211 |

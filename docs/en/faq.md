@@ -1,12 +1,21 @@
-数据采集中需要注意的问题
+## the problem in data capture
 
-避免弱纹理，例如纯色的墙壁和缺乏纹理的桌子，弱纹理场景会使得图像间缺乏关联，可以通过布置场景或保证相机获取足够大的视野避免这种情况。
-避免图像过度曝光，与弱纹理相似，过度曝光的图像和高光也难以进行图像匹配，需要在采集过程中避免这种情况。
-避免重复纹理，重复的场景结构容易造成错误的图像关联，并导致错误的重建结果。
-避免缺乏运动，采集过程中需要保持相机的移动，在原地进行拍摄会导致没有足够的运动来估计场景结构。
+Avoid weak textures, such as pure color walls and tables without textures. Weak texture scenes will make the images lack of features, which can be avoided by arranging the scene.
+
+Avoid overexposure of images. Similar to weak textures, overexposure and highlights also make images difficult to match, which needs to be avoided in scene capture.
+
+Avoid similar scenes. Similar scenes can easily lead to wrong image correlation and wrong reconstruction results.
+
+Avoid lack of motion. It is necessary to keep the camera moving during the acquisition process. Lack of motion may lead to failure of scene depth estimation.
 
 
-匹配阶段需要注意的问题
 
-对于大型数据集，确保有足够的内存和硬盘空间存储特征提取和匹配结果。
-1W张图像可能需要20GB左右的内存和硬盘空间。
+## the problem in matching stage 
+
+For large data sets, ensure that there is enough memory and space to store the feature extraction and matching results.
+The matching of 1W images may require about 20GB of memory and hard disk space.
+
+## the problem in scale estimation 
+
+The side length of apriltag (in A4 paper) should be 0.113 M. 
+if markers of other sizes are used, this parameter should be changed in [scale estimation](../../src/estimate_scale).
