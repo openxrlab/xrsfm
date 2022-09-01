@@ -12,14 +12,14 @@ A detailed introduction can be found in [introduction.md](docs/en/introduction.m
 
 
 If you find this project useful in your research, please consider cite:
-```bitex
+
+```bibtex
 @misc{xrmocap,
     title={OpenXRLab Structure-from-Motion Toolbox and Benchmark},
     author={XRSfM Contributors},
     howpublished = {\url{https://github.com/openxrlab/xrsfm}},
     year={2022}
 }
-
 ```
 
 If you use the covisibility-based matching method for your research, please cite:

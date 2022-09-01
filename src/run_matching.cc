@@ -90,23 +90,13 @@ std::tuple<int, int> GetInitId(const int num_image, std::vector<FramePair>& fram
                   return a.second > b.second;
               });
     const int init_id1 = connect_number_vec[0].first;
-    // for (auto& fp : frame_pairs) {
-    //     if (fp.id1 == init_id1 || fp.id2 == init_id1) {
-    //         std::cout << "infp: " << fp.id1 << " " << fp.id2 << " " << fp.matches.size() << " "
-    //                   << fp.inlier_num << std::endl;
-    //     }
-    // // }
-    // std::cout << "init_id1: " << connect_number_vec[0].first << " number: " << connect_number_vec[0].second
-    //           << std::endl;
     int init_id2 = -1;
     for (auto& [id, number] : connect_number_vec) {
         if (id2cor_num_vec[init_id1].count(id) != 0 && id2cor_num_vec[init_id1][id] >= 100) {
             init_id2 = id;
-            // std::cout << id << " " << number << std::endl;
             break;
         }
     }
-    // std::cout << id2cor_num_vec[init_id1][init_id2] << std::endl;
     return std::tuple<int, int>(init_id1, init_id2);
 }
 

@@ -9,8 +9,6 @@ Requirements
 + GCC 7.5+
 + CMake 3.16+
 + CUDA 7.5+
-+ XRPrimer
-+ Pangolin
 
 Dependencies from the default Ubuntu repositories:
 ```shell
@@ -23,7 +21,9 @@ Dependencies from the default Ubuntu repositories:
         python3-pip \
         libglew-dev \
         libatlas-base-dev \
-        libgtest-dev
+        libgtest-dev \
+        libgflags-dev \
+        libgoogle-glog-dev
 ```
 
 Update if the version of cmake < 3.16

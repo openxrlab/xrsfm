@@ -9,8 +9,6 @@
 + GCC 7.5+
 + CMake 3.16+
 + CUDA 7.5+
-+ XRPrimer
-+ Pangolin
 
 来自默认Ubuntu存储库的依赖项:
 ```shell
@@ -23,7 +21,9 @@
         python3-pip \
         libglew-dev \
         libatlas-base-dev \
-        libgtest-dev
+        libgtest-dev \
+        libgflags-dev \
+        libgoogle-glog-dev
 ```
 
 如果cmake版本小于3.16，按照以下步骤更新
