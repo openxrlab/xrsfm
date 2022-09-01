@@ -1,0 +1,6 @@
+{
+	"image_dir_path": "/path/images/",
+	"retrival_path": "/path/retrival.txt",
+	"matching_type": "sequential",
+	"output_path": "/output_path/"
+}

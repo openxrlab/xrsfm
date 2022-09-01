@@ -1,0 +1,5 @@
+{
+	"bin_path": "/matching_output_path/", 
+	"camera_path": "/path/camera.txt",
+	"output_path": "/output_path/"
+}
