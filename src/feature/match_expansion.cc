@@ -374,7 +374,7 @@ void GetCandidateSimilarity(const int init_num, const std::vector<int> &can_reg,
 }
 
 void GetMayreg(const std::vector<int> &connect_frames, const std::vector<int> &reg_frames,
-               const std::vector<std::map<int, int>> &frame2retrivalpairs,
+               const std::vector<std::map<int, int>> &frame2retrievalpairs,
                std::vector<int> &may_reg);
 
 void MatchExpansionSolver::Run(const Map &map, std::vector<std::pair<int, int>> &image_pairs) {
@@ -483,7 +483,7 @@ void MatchExpansionSolver::GetConnectedFrames(const Map &map, std::vector<int> &
 }
 
 void MatchExpansionSolver::PrintRetrievalMap() {
-    std::cout << "retrivalframepairs_map";
+    std::cout << "retrievalframepairs_map";
     for (size_t i = 0; i < id2rank_vec.size(); i++) {
         for (const auto &item : id2rank_vec[i]) {
             std::cout << i << " - " << item.first << ":" << item.second << "\n";
@@ -583,9 +583,9 @@ void MatchExpansionSolver::tri_points(int image_id1, int image_id2, Corresponden
 }
 
 void GetMayreg(const std::vector<int> &connect_frames, const std::vector<int> &reg_frames,
-               const std::vector<std::map<int, int>> &frame2retrivalpairs,
+               const std::vector<std::map<int, int>> &frame2retrievalpairs,
                std::vector<int> &may_reg) {
-    size_t num_frame = frame2retrivalpairs.size();
+    size_t num_frame = frame2retrievalpairs.size();
     std::vector<bool> mask_reg(num_frame, false), mask_con(num_frame, false);
     for (const int &id : reg_frames) {
         mask_reg[id] = true;
@@ -597,7 +597,7 @@ void GetMayreg(const std::vector<int> &connect_frames, const std::vector<int> &r
     for (size_t id = 0; id < num_frame; ++id) {
         if (mask_con[id]) continue;
         int count1 = 0, count2 = 0, count3 = 0;
-        for (auto &[id2, rank] : frame2retrivalpairs[id]) {
+        for (auto &[id2, rank] : frame2retrievalpairs[id]) {
             if (mask_reg[id2]) {
                 if (rank <= 5) { // 5
                     count1++;
@@ -618,9 +618,9 @@ void GetMayreg(const std::vector<int> &connect_frames, const std::vector<int> &r
 void MatchExpansionSolver::GetCandidateCovisibility(
     const Map &map, const std::vector<int> &registered_frames,
     const std::vector<int> &connected_frames,
-    const std::vector<std::map<int, int>> &retrival_rank_vec,
+    const std::vector<std::map<int, int>> &retrieval_rank_vec,
     std::vector<std::set<int>> &matched_ids, std::vector<FramePair> &frame_pairs) {
-    const size_t num_frame = retrival_rank_vec.size();
+    const size_t num_frame = retrieval_rank_vec.size();
     std::vector<bool> mask_registered(num_frame, false), mask_connected(num_frame, false);
     for (const int &id : registered_frames) {
         mask_registered[id] = true;
@@ -643,7 +643,7 @@ void MatchExpansionSolver::GetCandidateCovisibility(
     const auto &id2pair_id = m_matchmap.id2pair_id;
     std::vector<std::vector<bool>> visit(num_frame, std::vector<bool>(num_frame, false));
     for (size_t id1 = 0; id1 < num_frame; ++id1) {
-        for (const auto &[id2, rank] : retrival_rank_vec[id1]) {
+        for (const auto &[id2, rank] : retrieval_rank_vec[id1]) {
             // skip self_match & visited & matched & shared enough matches
             if (id1 == id2) continue;
             if (visit[id1][id2]) continue;

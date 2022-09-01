@@ -23,6 +23,11 @@ if __name__ == "__main__":
     data_path = args.data_path 
     bin_dir_path = args.bin_dir_path
     
+    if not data_path.endswith('/'):
+        data_path = data_path+'/'
+    if not bin_dir_path.endswith('/'):
+        bin_dir_path = bin_dir_path+'/'
+
     for seq_name in seq_name_list:
         init_id1 = 0
         if seq_name == '01':

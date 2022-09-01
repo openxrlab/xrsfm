@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
     const std::string dir_path = "/data1/XRSFM/2022-07-06T14-39-35/";
     const std::string image_dir_path = dir_path + "images/";
     const std::string camera_path = dir_path + "camera.txt";
-    const std::string retrival_path = dir_path + "results/pairs-sfm.txt";
+    const std::string retrieval_path = dir_path + "results/pairs-sfm.txt";
     const std::string output_path = dir_path + "ut/";
     const std::string output_path1 = dir_path + "ut1/";
 
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
 
     // // 3.image matching
     // std::map<int, std::vector<int>> id2rank;
-    // LoadRetrievalRank(retrival_path, name2id, id2rank);
+    // LoadRetrievalRank(retrieval_path, name2id, id2rank);
     // MatchingSeq(frames, fp_path, id2rank);
     // std::cout << "Match Features Done.\n";
 

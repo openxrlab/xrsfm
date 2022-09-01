@@ -21,15 +21,15 @@ Output:feature extraction result, feature matching result
 Run matching stage with the following command line
 
 ```
-./bin/run_matching images_path retrival_path matching_type output_path
+./bin/run_matching images_path retrieval_path matching_type output_path
 ```
 
-"retrival_path" indicates the path of the retrieval file, which stores the results of image retrieval.
+"retrieval_path" indicates the path of the retrieval file, which stores the results of image retrieval.
 Currently, the image retrieval function is supported in [XRLocalization](https://github.com/openxrlab/xrlocalization/tree/main/docs/en/tutorials/generate_image_pairs.md).
 You can also generate the file through other retrieval methods. For specific file format, please refer to [introduction.md](./introduction.md).
 
 "matching_type" indicates the matching strategy.
-Currently, XRSfM supports sequential matching("sequential"), retrieval-based matching("retrival"), covisibility-based matching("covisibility").
+Currently, XRSfM supports sequential matching("sequential"), retrieval-based matching("retrieval"), covisibility-based matching("covisibility").
 The covisibility-based matching is a implementation of "Efficient Covisibility-Based Image Matching for Large-Scale SfM".
 
 
@@ -96,7 +96,7 @@ Two folders are required to store the reconstruction results(results_path and re
  
 Run the following command line to reconstruct
 ```
-./bin/run_matching ${images_path}$ ${retrival_path}$ sequential ${results_path}$
+./bin/run_matching ${images_path}$ ${retrieval_path}$ sequential ${results_path}$
 ./bin/run_reconstruction ${results_path}$ ${camera_path}$ ${results_path}$
 ./bin/estimate_scale ${images_path}$ ${results_path}$ ${refined_results_path}$
 ```
@@ -110,7 +110,7 @@ workspace
 ...
 --imagen.png
 -camera.txt
--retrival.txt
+-retrieval.txt
 ```
 Then run the following command line to reconstruct
 ```

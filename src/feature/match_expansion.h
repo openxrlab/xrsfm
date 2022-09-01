@@ -126,14 +126,14 @@ class MatchExpansionSolver {
 
     void GetCandidateCovisibility(const Map &map, const std::vector<int> &can_build,
                                   const std::vector<int> &setcc,
-                                  const std::vector<std::map<int, int>> &cor_retrival,
+                                  const std::vector<std::map<int, int>> &cor_retrieval,
                                   std::vector<std::set<int>> &pair_list,
                                   std::vector<FramePair> &frame_pairs);
 
     std::map<int, std::vector<int>> GetCovisibilityInfo(int frame_id);
 
     size_t m_initial_frame1, m_initial_frame2;
-    std::vector<std::map<int, int>> id2rank_vec; // retrivalframepairs_map[frame_i][frame_j] = the
+    std::vector<std::map<int, int>> id2rank_vec; // retrievalframepairs_map[frame_i][frame_j] = the
                                                  // rank of frame_j in candidates of frame_i
     MatchMap m_matchmap;
 
