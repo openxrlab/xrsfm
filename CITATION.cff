@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - name: "XRSfM Contributors"
+title: "XRSfM: OpenXRLab Structure-from-Motion Toolbox and Benchmark"
+date-released: 2022-09-01
+url: "https://github.com/openxrlab/xrsfm"
+license: Apache-2.0
