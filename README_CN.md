@@ -40,8 +40,9 @@ XRSfM 是一个开源的运动恢复结构代码仓库，它是[OpenXRLab](https
 
 3.运行以下脚本进行重建:
 ```
-python3 ./scripts/auto_reconstruction.py --data_path ${your_data_path}$.
+python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$ 
 ```
+更多细节请查看[tutorial.md](docs/zh/tutorial.md)
 
 ## Build ARDemo
 
