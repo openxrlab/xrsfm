@@ -45,9 +45,10 @@ If you use the covisibility-based matching method for your research, please cite
 python3 ./scripts/auto_reconstruction.py --data_path ${your_data_path}$.
 ```
 
-## Build your own ARDemo
+## Build ARDemo
 
-In addition to the reconstruction function, we have built a complete process to facilitate users to build location-based ardemo. For details, please refer to [ARDemo](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#).
+In addition to the reconstruction function, OpenXRLab project also provides localization function.
+Users can build a simple cloud-end combined ARDemo. For more information, please refer to [ARDemo](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#).
 
 ## License
 

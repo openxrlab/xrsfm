@@ -3,26 +3,25 @@
 
 ## Introduction
 
-[English](README.md) | [简体中文]
+[English](README.md) | [简体中文] 
 
-XRSfM is an open-source SfM codebase. It is a part of the [OpenXRLab](https://openxrlab.com/) project.
-A detailed introduction can be found in [introduction.md](docs/en/introduction.md).
+XRSfM 是一个开源的运动恢复结构代码仓库，它是[OpenXRLab](https://openxrlab.com/)项目的一部分.
+关于XRSfM更详细的介绍放在[introduction.md](docs/en/introduction.md).
 
 ## Citation
 
+如果你的研究过程中使用了该仓库，请考虑引用:
 
-If you find this project useful in your research, please consider cite:
-```bitex
+```bibtex
 @misc{xrmocap,
     title={OpenXRLab Structure-from-Motion Toolbox and Benchmark},
     author={XRSfM Contributors},
     howpublished = {\url{https://github.com/openxrlab/xrsfm}},
     year={2022}
 }
-
 ```
 
-If you use the covisibility-based matching method for your research, please cite:
+如果你的研究过程中使用了该仓库中的基于共视的匹配方法，请考虑引用:
 
 ```bibtex
 @inproceedings{ye2020efficient,
@@ -35,29 +34,28 @@ If you use the covisibility-based matching method for your research, please cite
 
 ## Getting Started
 
-1.Build the library manually as described in [installation.md](docs/en/installation.md).
+1.参考[installation.md](docs/zh/installation.md)进行安装编译.
 
-2.Download the provided [test data](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj)
- or prepare data with your own images.
+2.下载提供的[测试数据](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj) 或者按照相同格式准备你自己的数据.
 
-3.Run the following script to automatically reconstruction:
+3.运行以下脚本进行重建:
 ```
 python3 ./scripts/auto_reconstruction.py --data_path ${your_data_path}$.
 ```
 
-## Build your own ARDemo
+## Build ARDemo
 
-In addition to the reconstruction function, we have built a complete process to facilitate users to build location-based ardemo. For details, please refer to [ARDemo](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#).
+除了重建功能, OpenXRLab 项目还提供了定位功能。
+你可以构建自己的端云定位ARDemo，更多的信息请查看[ARDemo](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#).
 
 ## License
 
-This project is released under the [Apache 2.0 license](LICENSE).
+本项目遵从[Apache 2.0 license](LICENSE).
 
 ## Acknowledgement
 
-XRSfM is an open source project that is contributed by researchers and engineers from both the academia and the industry.
-We appreciate all the contributors who implement their methods or add new features, as well as users who give valuable feedbacks.
-
+XRSfM是一个开源项目，由学术界和行业的研究人员和工程师共同参与。
+我们感谢所有实现其方法或添加新功能的贡献者，以及提供宝贵反馈的用户。
 
 ## Projects in OpenXRLab
 
