@@ -114,17 +114,18 @@ class FundamentalMatrixSevenPointEstimator {
     // The minimum number of samples needed to estimate a model.
     static const int kMinNumSamples = 7;
 
-    // Estimate either 1 or 3 possible fundamental matrix solutions from a set of
-    // corresponding points.
+    // Estimate either 1 or 3 possible fundamental matrix solutions from a set
+    // of corresponding points.
     //
     // The number of corresponding points must be exactly 7.
     //
     // @param points1  First set of corresponding points.
     // @param points2  Second set of corresponding points
     //
-    // @return         Up to 4 solutions as a vector of 3x3 fundamental matrices.
-    static std::vector<M_t> Estimate(const std::vector<X_t>& points1,
-                                     const std::vector<Y_t>& points2);
+    // @return         Up to 4 solutions as a vector of 3x3 fundamental
+    // matrices.
+    static std::vector<M_t> Estimate(const std::vector<X_t> &points1,
+                                     const std::vector<Y_t> &points2);
 
     // Calculate the residuals of a set of corresponding points and a given
     // fundamental matrix.
@@ -135,9 +136,9 @@ class FundamentalMatrixSevenPointEstimator {
     // @param points2    Second set of corresponding points as Nx2 matrix.
     // @param F          3x3 fundamental matrix.
     // @param residuals  Output vector of residuals.
-    static void Residuals(const std::vector<X_t>& points1,
-                          const std::vector<Y_t>& points2, const M_t& F,
-                          std::vector<double>* residuals);
+    static void Residuals(const std::vector<X_t> &points1,
+                          const std::vector<Y_t> &points2, const M_t &F,
+                          std::vector<double> *residuals);
 };
 
 // Fundamental matrix estimator from corresponding point pairs.
@@ -162,8 +163,8 @@ class FundamentalMatrixEightPointEstimator {
     // @param points2  Second set of corresponding points
     //
     // @return         Single solution as a vector of 3x3 fundamental matrices.
-    static std::vector<M_t> Estimate(const std::vector<X_t>& points1,
-                                     const std::vector<Y_t>& points2);
+    static std::vector<M_t> Estimate(const std::vector<X_t> &points1,
+                                     const std::vector<Y_t> &points2);
 
     // Calculate the residuals of a set of corresponding points and a given
     // fundamental matrix.
@@ -174,9 +175,9 @@ class FundamentalMatrixEightPointEstimator {
     // @param points2    Second set of corresponding points as Nx2 matrix.
     // @param F          3x3 fundamental matrix.
     // @param residuals  Output vector of residuals.
-    static void Residuals(const std::vector<X_t>& points1,
-                          const std::vector<Y_t>& points2, const M_t& F,
-                          std::vector<double>* residuals);
+    static void Residuals(const std::vector<X_t> &points1,
+                          const std::vector<Y_t> &points2, const M_t &F,
+                          std::vector<double> *residuals);
 };
 
 // Calculate the residuals of a set of corresponding points and a given
@@ -188,10 +189,10 @@ class FundamentalMatrixEightPointEstimator {
 // @param points2     Second set of corresponding points as Nx2 matrix.
 // @param E           3x3 fundamental or essential matrix.
 // @param residuals   Output vector of residuals.
-void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d>& points1,
-                                const std::vector<Eigen::Vector2d>& points2,
-                                const Eigen::Matrix3d& E,
-                                std::vector<double>* residuals);
+void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d> &points1,
+                                const std::vector<Eigen::Vector2d> &points2,
+                                const Eigen::Matrix3d &E,
+                                std::vector<double> *residuals);
 
 // Center and normalize image points.
 //
@@ -208,9 +209,9 @@ void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d>& points1,
 // @param points          Image coordinates.
 // @param normed_points   Transformed image coordinates.
 // @param matrix          3x3 transformation matrix.
-void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d>& points,
-                                   std::vector<Eigen::Vector2d>* normed_points,
-                                   Eigen::Matrix3d* matrix);
+void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d> &points,
+                                   std::vector<Eigen::Vector2d> *normed_points,
+                                   Eigen::Matrix3d *matrix);
 
 } // namespace colmap
 

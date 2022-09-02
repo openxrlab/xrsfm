@@ -4,31 +4,29 @@
 extern "C" {
 #endif
 
-
 #include "apriltag.h"
 #include "common/matd.h"
 
 typedef struct {
-    apriltag_detection_t* det;
+    apriltag_detection_t *det;
     double tagsize; // In meters.
-    double fx; // In pixels.
-    double fy; // In pixels.
-    double cx; // In pixels.
-    double cy; // In pixels.
+    double fx;      // In pixels.
+    double fy;      // In pixels.
+    double cx;      // In pixels.
+    double cy;      // In pixels.
 } apriltag_detection_info_t;
 
 typedef struct {
-    matd_t* R;
-    matd_t* t;
+    matd_t *R;
+    matd_t *t;
 } apriltag_pose_t;
 
 /**
  * Estimate pose of the tag using the homography method described in [1].
  * @outparam pose
  */
-void estimate_pose_for_tag_homography(
-        apriltag_detection_info_t* info,
-        apriltag_pose_t* pose);
+void estimate_pose_for_tag_homography(apriltag_detection_info_t *info,
+                                      apriltag_pose_t *pose);
 
 /**
  * Estimate pose of the tag. This returns one or two possible poses for the
@@ -52,24 +50,23 @@ void estimate_pose_for_tag_homography(
  *
  * @outparam err1, pose1, err2, pose2
  */
-void estimate_tag_pose_orthogonal_iteration(
-        apriltag_detection_info_t* info,
-        double* err1,
-        apriltag_pose_t* pose1,
-        double* err2,
-        apriltag_pose_t* pose2,
-        int nIters);
+void estimate_tag_pose_orthogonal_iteration(apriltag_detection_info_t *info,
+                                            double *err1,
+                                            apriltag_pose_t *pose1,
+                                            double *err2,
+                                            apriltag_pose_t *pose2, int nIters);
 
 /**
  * Estimate tag pose.
- * This method is an easier to use interface to estimate_tag_pose_orthogonal_iteration.
+ * This method is an easier to use interface to
+ * estimate_tag_pose_orthogonal_iteration.
  *
- * @outparam pose 
+ * @outparam pose
  * @return Object-space error of returned pose.
  */
-double estimate_tag_pose(apriltag_detection_info_t* info, apriltag_pose_t* pose);
+double estimate_tag_pose(apriltag_detection_info_t *info,
+                         apriltag_pose_t *pose);
 
 #ifdef __cplusplus
 }
 #endif
-

@@ -34,7 +34,6 @@ either expressed or implied, of the Regents of The University of Michigan.
 extern "C" {
 #endif
 
-
 /////////////////////////////////////
 // IMPORTANT NOTE ON BYTE ORDER
 //
@@ -45,7 +44,9 @@ extern "C" {
 
 // Create or load an image. returns NULL on failure
 image_u8x4_t *image_u8x4_create(unsigned int width, unsigned int height);
-image_u8x4_t *image_u8x4_create_alignment(unsigned int width, unsigned int height, unsigned int alignment);
+image_u8x4_t *image_u8x4_create_alignment(unsigned int width,
+                                          unsigned int height,
+                                          unsigned int alignment);
 image_u8x4_t *image_u8x4_create_from_pnm(const char *path);
 
 image_u8x4_t *image_u8x4_copy(const image_u8x4_t *in);
@@ -58,7 +59,7 @@ int image_u8x4_write_pnm(const image_u8x4_t *im, const char *path);
 
 image_u8x4_t *image_u8x4_create_from_pam(const char *path);
 
-    void image_u8x4_write_pam(const image_u8x4_t *im, const char *path);
+void image_u8x4_write_pam(const image_u8x4_t *im, const char *path);
 
 #ifdef __cplusplus
 }

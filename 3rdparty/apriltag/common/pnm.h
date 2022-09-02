@@ -35,13 +35,12 @@ extern "C" {
 
 #define PNM_FORMAT_BINARY 4
 #define PNM_FORMAT_GRAY 5
-#define PNM_FORMAT_RGB  6
+#define PNM_FORMAT_RGB 6
 
 // supports ppm, pnm, pgm
 
 typedef struct pnm pnm_t;
-struct pnm
-{
+struct pnm {
     int width, height;
     int format;
     int max; // 1 = binary, 255 = one byte, 65535 = two bytes

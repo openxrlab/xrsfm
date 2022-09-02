@@ -37,7 +37,8 @@ void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames) {
         frame.id = read_data2<uint32_t>(file);
         Eigen::Vector4d q_vec;
         read_data(file, q_vec);
-        frame.Tcw.q = Eigen::Quaterniond(q_vec[0], q_vec[1], q_vec[2], q_vec[3]);
+        frame.Tcw.q =
+            Eigen::Quaterniond(q_vec[0], q_vec[1], q_vec[2], q_vec[3]);
         read_data(file, frame.Tcw.t);
         frame.camera_id = read_data2<uint32_t>(file);
         read_name(file, frame.name);
@@ -88,7 +89,8 @@ void ReadColMapDataBinary(const std::string &output_path, Map &map) {
     ReadPoints3DBinary(output_path + "points3D.bin", map.track_map_);
 }
 
-void ReadImagesBinaryForTriangulation(const std::string &path, std::map<int, Frame> &frames) {
+void ReadImagesBinaryForTriangulation(const std::string &path,
+                                      std::map<int, Frame> &frames) {
     std::ifstream file(path, std::ios::binary);
     CHECK(file.is_open()) << path;
     const uint64_t num_frame = read_data2<uint64_t>(file);
@@ -112,11 +114,13 @@ void ReadImagesBinaryForTriangulation(const std::string &path, std::map<int, Fra
             read_data_vec(file, desc.data(), 256);
         }
         frames[frame.id] = frame;
-        // std::cout<<frame.id<<" "<<frame.name<<" "<<frame.points.size()<<std::endl;
+        // std::cout<<frame.id<<" "<<frame.name<<"
+        // "<<frame.points.size()<<std::endl;
     }
 }
 
-void ReadFramePairBinaryForTriangulation(const std::string &path, std::vector<FramePair> &frame_pairs) {
+void ReadFramePairBinaryForTriangulation(const std::string &path,
+                                         std::vector<FramePair> &frame_pairs) {
     std::ifstream file(path, std::ios::binary);
     CHECK(file.is_open()) << path;
     const uint64_t num_pair = read_data2<uint64_t>(file, num_pair);
@@ -137,7 +141,8 @@ void ReadFramePairBinaryForTriangulation(const std::string &path, std::vector<Fr
     }
 }
 
-void WriteCamerasBinary(const std::string &path, const std::vector<Camera> &cameras) {
+void WriteCamerasBinary(const std::string &path,
+                        const std::vector<Camera> &cameras) {
     std::ofstream file(path, std::ios::trunc | std::ios::binary);
     CHECK(file.is_open()) << path;
     uint64_t num_camera = cameras.size();
@@ -145,7 +150,8 @@ void WriteCamerasBinary(const std::string &path, const std::vector<Camera> &came
     for (const auto &camera : cameras) {
         int camera_model = 2;
         uint64_t w = 2 * camera.cx(), h = 2 * camera.cy();
-        std::array<double, 4> param = {camera.fx(), camera.cx(), camera.cy(), camera.distort_params[0]};
+        std::array<double, 4> param = {camera.fx(), camera.cx(), camera.cy(),
+                                       camera.distort_params[0]};
         write_data(file, camera.id);
         write_data(file, camera_model);
         write_data(file, w);
@@ -154,22 +160,26 @@ void WriteCamerasBinary(const std::string &path, const std::vector<Camera> &came
     }
 }
 
-void WriteImagesBinary(const std::string &path, const std::vector<Frame> &frames) {
+void WriteImagesBinary(const std::string &path,
+                       const std::vector<Frame> &frames) {
     std::ofstream file(path, std::ios::trunc | std::ios::binary);
     CHECK(file.is_open()) << path;
     uint64_t num_frame = 0;
     for (const auto &frame : frames) {
-        if (!frame.registered) continue;
+        if (!frame.registered)
+            continue;
         num_frame++;
     }
     write_data(file, num_frame);
 
     for (const auto &frame : frames) {
-        if (!frame.registered) continue;
+        if (!frame.registered)
+            continue;
         const uint32_t id = frame.id;
         const uint64_t num_p2d = frame.points.size();
         write_data(file, id);
-        Eigen::Vector4d q_vec(frame.Tcw.q.w(), frame.Tcw.q.x(), frame.Tcw.q.y(), frame.Tcw.q.z());
+        Eigen::Vector4d q_vec(frame.Tcw.q.w(), frame.Tcw.q.x(), frame.Tcw.q.y(),
+                              frame.Tcw.q.z());
         write_data(file, q_vec); // todo
         write_data(file, frame.Tcw.t);
         write_data(file, frame.camera_id);
@@ -185,20 +195,23 @@ void WriteImagesBinary(const std::string &path, const std::vector<Frame> &frames
     }
 }
 
-void WritePoints3DBinary(const std::string &path, const std::vector<Track> tracks) {
+void WritePoints3DBinary(const std::string &path,
+                         const std::vector<Track> tracks) {
     std::ofstream file(path, std::ios::trunc | std::ios::binary);
     CHECK(file.is_open()) << path;
 
     uint64_t num_track = 0;
     for (const auto &track : tracks) {
-        if (track.outlier) continue;
+        if (track.outlier)
+            continue;
         num_track++;
     }
     write_data(file, num_track);
 
     for (uint64_t i = 0, tracks_size = tracks.size(); i < tracks_size; ++i) {
         const auto &track = tracks[i];
-        if (track.outlier) continue;
+        if (track.outlier)
+            continue;
         write_data(file, i);
         write_data(file, track.point3d_);
         std::array<uint8_t, 3> color = {0, 0, 0};
@@ -219,18 +232,21 @@ void WriteColMapDataBinary(const std::string &output_path, const Map &map) {
     WritePoints3DBinary(output_path + "points3D.bin", map.tracks_);
 }
 
-void WriteImagesBinary2(const std::string &path, const std::map<int, Frame> &frames) {
+void WriteImagesBinary2(const std::string &path,
+                        const std::map<int, Frame> &frames) {
     std::ofstream file(path, std::ios::trunc | std::ios::binary);
     CHECK(file.is_open()) << path;
     const uint64_t num_frame = frames.size();
     write_data(file, num_frame);
 
     for (const auto &[frame_id, frame] : frames) {
-        if (!frame.registered) continue;
+        if (!frame.registered)
+            continue;
         const uint32_t id = frame_id;
         const uint64_t num_p2d = frame.points.size();
         write_data(file, id);
-        Eigen::Vector4d q_vec(frame.Tcw.q.w(), frame.Tcw.q.x(), frame.Tcw.q.y(), frame.Tcw.q.z());
+        Eigen::Vector4d q_vec(frame.Tcw.q.w(), frame.Tcw.q.x(), frame.Tcw.q.y(),
+                              frame.Tcw.q.z());
         write_data(file, q_vec); // todo
         write_data(file, frame.Tcw.t);
         write_data(file, frame.camera_id);
@@ -247,14 +263,16 @@ void WriteImagesBinary2(const std::string &path, const std::map<int, Frame> &fra
     }
 }
 
-void WritePoints3DBinary2(const std::string &path, const std::map<int, Track> tracks) {
+void WritePoints3DBinary2(const std::string &path,
+                          const std::map<int, Track> tracks) {
     std::ofstream file(path, std::ios::trunc | std::ios::binary);
     CHECK(file.is_open()) << path;
     const uint64_t num_track = tracks.size();
     write_data(file, num_track);
 
     for (const auto &[id, track] : tracks) {
-        if (track.outlier) continue;
+        if (track.outlier)
+            continue;
         const uint64_t track_id = id;
         write_data(file, track_id);
         write_data(file, track.point3d_);

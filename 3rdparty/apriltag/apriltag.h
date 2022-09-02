@@ -42,8 +42,7 @@ extern "C" {
 
 #define APRILTAG_TASKS_PER_THREAD_TARGET 10
 
-struct quad
-{
+struct quad {
     float p[4][2]; // corners
 
     bool reversed_border;
@@ -58,8 +57,7 @@ struct quad
 // april.tag.TagFamilyGenerator and can be converted to C using
 // april.tag.TagToC.
 typedef struct apriltag_family apriltag_family_t;
-struct apriltag_family
-{
+struct apriltag_family {
     // How many codes are there in this tag family?
     uint32_t ncodes;
 
@@ -87,9 +85,7 @@ struct apriltag_family
     void *impl;
 };
 
-
-struct apriltag_quad_thresh_params
-{
+struct apriltag_quad_thresh_params {
     // reject quads containing too few pixels
     int min_cluster_pixels;
 
@@ -124,8 +120,7 @@ struct apriltag_quad_thresh_params
 // are set to reasonable values, but can be overridden by accessing
 // these fields.
 typedef struct apriltag_detector apriltag_detector_t;
-struct apriltag_detector
-{
+struct apriltag_detector {
     ///////////////////////////////////////////////////////////////
     // User-configurable parameters.
 
@@ -193,8 +188,7 @@ struct apriltag_detector
 // Represents the detection of a tag. These are returned to the user
 // and must be individually destroyed by the user.
 typedef struct apriltag_detection apriltag_detection_t;
-struct apriltag_detection
-{
+struct apriltag_detection {
     // a pointer for convenience. not freed by apriltag_detection_destroy.
     apriltag_family_t *family;
 
@@ -235,20 +229,24 @@ apriltag_detector_t *apriltag_detector_create();
 
 // add a family to the apriltag detector. caller still "owns" the family.
 // a single instance should only be provided to one apriltag detector instance.
-void apriltag_detector_add_family_bits(apriltag_detector_t *td, apriltag_family_t *fam, int bits_corrected);
+void apriltag_detector_add_family_bits(apriltag_detector_t *td,
+                                       apriltag_family_t *fam,
+                                       int bits_corrected);
 
 // Tunable, but really, 2 is a good choice. Values of >=3
 // consume prohibitively large amounts of memory, and otherwise
 // you want the largest value possible.
-static inline void apriltag_detector_add_family(apriltag_detector_t *td, apriltag_family_t *fam)
-{
+static inline void apriltag_detector_add_family(apriltag_detector_t *td,
+                                                apriltag_family_t *fam) {
     apriltag_detector_add_family_bits(td, fam, 2);
 }
 
 // does not deallocate the family.
-void apriltag_detector_remove_family(apriltag_detector_t *td, apriltag_family_t *fam);
+void apriltag_detector_remove_family(apriltag_detector_t *td,
+                                     apriltag_family_t *fam);
 
-// unregister all families, but does not deallocate the underlying tag family objects.
+// unregister all families, but does not deallocate the underlying tag family
+// objects.
 void apriltag_detector_clear_families(apriltag_detector_t *td);
 
 // Destroy the april tag detector (but not the underlying
@@ -259,7 +257,8 @@ void apriltag_detector_destroy(apriltag_detector_t *td);
 // apriltag_detection_t*. You can use apriltag_detections_destroy to
 // free the array and the detections it contains, or call
 // _detection_destroy and zarray_destroy yourself.
-zarray_t *apriltag_detector_detect(apriltag_detector_t *td, image_u8_t *im_orig);
+zarray_t *apriltag_detector_detect(apriltag_detector_t *td,
+                                   image_u8_t *im_orig);
 
 // Call this method on each of the tags returned by apriltag_detector_detect
 void apriltag_detection_destroy(apriltag_detection_t *det);

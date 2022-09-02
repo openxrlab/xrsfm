@@ -95,7 +95,7 @@ python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/ --bin_d
 
 ### 基于NetVLAD50的匹配结果
 |  | 注册帧数 | 匹配耗时 |
-|:------:|:-------:|:--------:| 
+|:------:|:-------:|:--------:|
 |Alamo	            |862|	1405 |
 |Ellis Island	    |351|	988  |
 |Gendarmenmarkt	    |1020|	596  |
@@ -113,7 +113,7 @@ python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/ --bin_d
 
 ### 基于共视性的匹配结果
 |  | 注册帧数 | 匹配耗时 |
-|:------:|:-------:|:--------:| 
+|:------:|:-------:|:--------:|
 |Alamo	            |787 |	120 |
 |Ellis Island	    |339 |	97  |
 |Gendarmenmarkt	    |970 |	222 |

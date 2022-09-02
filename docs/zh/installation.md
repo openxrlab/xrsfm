@@ -2,7 +2,7 @@
 
 # 安装
 
-## 从源码安装 (Linux) 
+## 从源码安装 (Linux)
 
 版本要求
 + C++17
@@ -38,14 +38,14 @@ ln -sf /usr/share/cmake-3.21.0-linux-x86_64/bin/cmake /usr/bin/cmake
 ```shell
 git clone git@github.com:openxrlab/xrprimer.git
 cd xrprimer
-cmake -S . -Bbuild -DBUILD_EXTERNAL=ON -DCMAKE_BUILD_TYPE=Release 
+cmake -S . -Bbuild -DBUILD_EXTERNAL=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build --target install -j4
 ```
 
 安装 [Pangolin](https://github.com/stevenlovegrove/Pangolin)
 ```shell
 git clone git@github.com:stevenlovegrove/Pangolin.git
-cd Pangolin && cmake -B build && cmake --build build -j4 
+cd Pangolin && cmake -B build && cmake --build build -j4
 cd build
 sudo make install
 ```
@@ -55,7 +55,7 @@ sudo make install
 git clone git@github.com:openxrlab/xrsfm.git
 cd xrsfm && cmake -B build && cmake --build build -j4
 ```
- 
+
 ### 通过Docker镜像运行
 
 We provide a [Dockerfile](../../Dockerfile) to build an image. Ensure that you are using [docker version](https://docs.docker.com/engine/install/) >=19.03 and `"default-runtime": "nvidia"` in daemon.json.

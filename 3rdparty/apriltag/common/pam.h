@@ -32,13 +32,12 @@ either expressed or implied, of the Regents of The University of Michigan.
 enum { PAM_GRAYSCALE_ALPHA = 5000, PAM_RGB_ALPHA, PAM_RGB, PAM_GRAYSCALE };
 
 typedef struct pam pam_t;
-struct pam
-{
+struct pam {
     int type; // one of PAM_*
 
     int width, height; // note, stride always width.
-    int depth; // bytes per pixel
-    int maxval; // maximum value per channel, e.g. 255 for 8bpp
+    int depth;         // bytes per pixel
+    int maxval;        // maximum value per channel, e.g. 255 for 8bpp
 
     int datalen; // in bytes
     uint8_t *data;

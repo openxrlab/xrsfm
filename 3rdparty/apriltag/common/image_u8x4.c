@@ -38,43 +38,45 @@ either expressed or implied, of the Regents of The University of Michigan.
 // for 16byte-wide RGBA processing).
 #define DEFAULT_ALIGNMENT_U8X4 64
 
-image_u8x4_t *image_u8x4_create(unsigned int width, unsigned int height)
-{
+image_u8x4_t *image_u8x4_create(unsigned int width, unsigned int height) {
     return image_u8x4_create_alignment(width, height, DEFAULT_ALIGNMENT_U8X4);
 }
 
-image_u8x4_t *image_u8x4_create_alignment(unsigned int width, unsigned int height, unsigned int alignment)
-{
-    int stride = 4*width;
+image_u8x4_t *image_u8x4_create_alignment(unsigned int width,
+                                          unsigned int height,
+                                          unsigned int alignment) {
+    int stride = 4 * width;
 
     if ((stride % alignment) != 0)
         stride += alignment - (stride % alignment);
 
-    uint8_t *buf = calloc(height*stride, sizeof(uint8_t));
+    uint8_t *buf = calloc(height * stride, sizeof(uint8_t));
 
     // const initializer
-    image_u8x4_t tmp = { .width = width, .height = height, .stride = stride, .buf = buf };
+    image_u8x4_t tmp = {
+        .width = width, .height = height, .stride = stride, .buf = buf};
 
     image_u8x4_t *im = calloc(1, sizeof(image_u8x4_t));
     memcpy(im, &tmp, sizeof(image_u8x4_t));
     return im;
 }
 
-image_u8x4_t *image_u8x4_copy(const image_u8x4_t *in)
-{
-    uint8_t *buf = malloc(in->height*in->stride*sizeof(uint8_t));
-    memcpy(buf, in->buf, in->height*in->stride*sizeof(uint8_t));
+image_u8x4_t *image_u8x4_copy(const image_u8x4_t *in) {
+    uint8_t *buf = malloc(in->height * in->stride * sizeof(uint8_t));
+    memcpy(buf, in->buf, in->height * in->stride * sizeof(uint8_t));
 
     // const initializer
-    image_u8x4_t tmp = { .width = in->width, .height = in->height, .stride = in->stride, .buf = buf };
+    image_u8x4_t tmp = {.width = in->width,
+                        .height = in->height,
+                        .stride = in->stride,
+                        .buf = buf};
 
     image_u8x4_t *copy = calloc(1, sizeof(image_u8x4_t));
     memcpy(copy, &tmp, sizeof(image_u8x4_t));
     return copy;
 }
 
-void image_u8x4_destroy(image_u8x4_t *im)
-{
+void image_u8x4_destroy(image_u8x4_t *im) {
     if (!im)
         return;
 
@@ -83,8 +85,7 @@ void image_u8x4_destroy(image_u8x4_t *im)
 }
 
 ////////////////////////////////////////////////////////////
-image_u8x4_t *image_u8x4_create_from_pam(const char *inpath)
-{
+image_u8x4_t *image_u8x4_create_from_pam(const char *inpath) {
     pam_t *pam = pam_create_from_file(inpath);
     if (!pam)
         return NULL;
@@ -94,20 +95,27 @@ image_u8x4_t *image_u8x4_create_from_pam(const char *inpath)
     for (int y = 0; y < pam->height; y++) {
         if (pam->depth == 1) {
             for (int x = 0; x < pam->width; x++) {
-                im->buf[y*im->stride + 4*x + 0] = pam->data[pam->width*y + x + 0];
-                im->buf[y*im->stride + 4*x + 1] = pam->data[pam->width*y + x + 0];
-                im->buf[y*im->stride + 4*x + 2] = pam->data[pam->width*y + x + 0];
-                im->buf[y*im->stride + 4*x + 3] = 255;
+                im->buf[y * im->stride + 4 * x + 0] =
+                    pam->data[pam->width * y + x + 0];
+                im->buf[y * im->stride + 4 * x + 1] =
+                    pam->data[pam->width * y + x + 0];
+                im->buf[y * im->stride + 4 * x + 2] =
+                    pam->data[pam->width * y + x + 0];
+                im->buf[y * im->stride + 4 * x + 3] = 255;
             }
         } else if (pam->depth == 3) {
             for (int x = 0; x < pam->width; x++) {
-                im->buf[y*im->stride + 4*x + 0] = pam->data[3*pam->width*y + 3*x + 0];
-                im->buf[y*im->stride + 4*x + 1] = pam->data[3*pam->width*y + 3*x + 1];
-                im->buf[y*im->stride + 4*x + 2] = pam->data[3*pam->width*y + 3*x + 2];
-                im->buf[y*im->stride + 4*x + 3] = 255;
+                im->buf[y * im->stride + 4 * x + 0] =
+                    pam->data[3 * pam->width * y + 3 * x + 0];
+                im->buf[y * im->stride + 4 * x + 1] =
+                    pam->data[3 * pam->width * y + 3 * x + 1];
+                im->buf[y * im->stride + 4 * x + 2] =
+                    pam->data[3 * pam->width * y + 3 * x + 2];
+                im->buf[y * im->stride + 4 * x + 3] = 255;
             }
         } else if (pam->depth == 4) {
-            memcpy(&im->buf[y*im->stride], &pam->data[4*pam->width*y], 4*pam->width);
+            memcpy(&im->buf[y * im->stride], &pam->data[4 * pam->width * y],
+                   4 * pam->width);
         } else {
             assert(0); // not implemented
         }
@@ -120,8 +128,7 @@ image_u8x4_t *image_u8x4_create_from_pam(const char *inpath)
 // PNM file i/o
 
 // Create an RGBA image from PNM
-image_u8x4_t *image_u8x4_create_from_pnm(const char *path)
-{
+image_u8x4_t *image_u8x4_create_from_pnm(const char *path) {
     pnm_t *pnmp = pnm_create_from_file(path);
     if (pnmp == NULL)
         return NULL;
@@ -130,56 +137,55 @@ image_u8x4_t *image_u8x4_create_from_pnm(const char *path)
     image_u8x4_t *imp = NULL;
 
     switch (pnm.format) {
-        case PNM_FORMAT_GRAY: {
-            imp = image_u8x4_create(pnm.width, pnm.height);
+    case PNM_FORMAT_GRAY: {
+        imp = image_u8x4_create(pnm.width, pnm.height);
 
-            // copy struct by value for common subexpression elimination
-            const image_u8x4_t im = *imp;
+        // copy struct by value for common subexpression elimination
+        const image_u8x4_t im = *imp;
 
-            for (int y = 0; y < im.height; y++) {
-                for (int x = 0; x < im.width; x++) {
-                    uint8_t gray = pnm.buf[y*pnm.width + x];
-                    im.buf[y*im.stride + 4*x + 0] = gray;
-                    im.buf[y*im.stride + 4*x + 1] = gray;
-                    im.buf[y*im.stride + 4*x + 2] = gray;
-                    im.buf[y*im.stride + 4*x + 3] = 0xff;
-                }
+        for (int y = 0; y < im.height; y++) {
+            for (int x = 0; x < im.width; x++) {
+                uint8_t gray = pnm.buf[y * pnm.width + x];
+                im.buf[y * im.stride + 4 * x + 0] = gray;
+                im.buf[y * im.stride + 4 * x + 1] = gray;
+                im.buf[y * im.stride + 4 * x + 2] = gray;
+                im.buf[y * im.stride + 4 * x + 3] = 0xff;
             }
-
-            break;
         }
 
-        case PNM_FORMAT_RGB: {
-            imp = image_u8x4_create(pnm.width, pnm.height);
+        break;
+    }
 
-            // copy struct by value for common subexpression elimination
-            const image_u8x4_t im = *imp;
+    case PNM_FORMAT_RGB: {
+        imp = image_u8x4_create(pnm.width, pnm.height);
 
-            // Gray conversion for RGB is gray = (r + g + g + b)/4
-            for (int y = 0; y < im.height; y++) {
-                for (int x = 0; x < im.width; x++) {
+        // copy struct by value for common subexpression elimination
+        const image_u8x4_t im = *imp;
 
-                    uint8_t r = pnm.buf[y*pnm.width*3 + 3*x + 0];
-                    uint8_t g = pnm.buf[y*pnm.width*3 + 3*x + 1];
-                    uint8_t b = pnm.buf[y*pnm.width*3 + 3*x + 2];
+        // Gray conversion for RGB is gray = (r + g + g + b)/4
+        for (int y = 0; y < im.height; y++) {
+            for (int x = 0; x < im.width; x++) {
 
-                    im.buf[y*im.stride + 4*x + 0] = r;
-                    im.buf[y*im.stride + 4*x + 1] = g;
-                    im.buf[y*im.stride + 4*x + 2] = b;
-                    im.buf[y*im.stride + 4*x + 3] = 0xff;
-                }
+                uint8_t r = pnm.buf[y * pnm.width * 3 + 3 * x + 0];
+                uint8_t g = pnm.buf[y * pnm.width * 3 + 3 * x + 1];
+                uint8_t b = pnm.buf[y * pnm.width * 3 + 3 * x + 2];
+
+                im.buf[y * im.stride + 4 * x + 0] = r;
+                im.buf[y * im.stride + 4 * x + 1] = g;
+                im.buf[y * im.stride + 4 * x + 2] = b;
+                im.buf[y * im.stride + 4 * x + 3] = 0xff;
             }
-
-            break;
         }
+
+        break;
+    }
     }
 
     pnm_destroy(pnmp);
     return imp;
 }
 
-int image_u8x4_write_pnm(const image_u8x4_t *imp, const char *path)
-{
+int image_u8x4_write_pnm(const image_u8x4_t *imp, const char *path) {
     // copy struct by value to ensure common subexpression elimination occurs
     const image_u8x4_t im = *imp;
 
@@ -194,12 +200,12 @@ int image_u8x4_write_pnm(const image_u8x4_t *imp, const char *path)
     // Only outputs to RGB
     fprintf(f, "P6\n%d %d\n255\n", im.width, im.height);
 
-    for (int y = im.height-1; y >= 0; y--) {
+    for (int y = im.height - 1; y >= 0; y--) {
         for (int x = 0; x < im.width; x++) {
 
-            uint8_t r = im.buf[y*im.stride + 4*x + 0];
-            uint8_t g = im.buf[y*im.stride + 4*x + 1];
-            uint8_t b = im.buf[y*im.stride + 4*x + 2];
+            uint8_t r = im.buf[y * im.stride + 4 * x + 0];
+            uint8_t g = im.buf[y * im.stride + 4 * x + 1];
+            uint8_t b = im.buf[y * im.stride + 4 * x + 2];
 
             fwrite(&r, 1, 1, f);
             fwrite(&g, 1, 1, f);
@@ -207,15 +213,14 @@ int image_u8x4_write_pnm(const image_u8x4_t *imp, const char *path)
         }
     }
 
-  finish:
+finish:
     if (f != NULL)
         fclose(f);
 
     return res;
 }
 
-void image_u8x4_write_pam(const image_u8x4_t *im, const char *path)
-{
+void image_u8x4_write_pam(const image_u8x4_t *im, const char *path) {
     FILE *f = fopen(path, "w");
     fprintf(f, "P7\n");
     fprintf(f, "WIDTH %d\n", im->width);
@@ -226,8 +231,7 @@ void image_u8x4_write_pam(const image_u8x4_t *im, const char *path)
     fprintf(f, "ENDHDR\n");
 
     for (int y = 0; y < im->height; y++)
-        fwrite(&im->buf[y*im->stride], 1, 4*im->width, f);
+        fwrite(&im->buf[y * im->stride], 1, 4 * im->width, f);
 
     fclose(f);
-
 }

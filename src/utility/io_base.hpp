@@ -26,7 +26,8 @@ inline T read_data2(std::ifstream &file, bool log = false) {
 }
 
 template <typename T>
-inline void read_data_vec(std::ifstream &file, T *data, int num, bool log = false) {
+inline void read_data_vec(std::ifstream &file, T *data, int num,
+                          bool log = false) {
     file.read(reinterpret_cast<char *>(data), num * sizeof(T));
     //  if (log) {
     //      for (int i = 0; i < num; ++i)
@@ -43,7 +44,8 @@ inline void write_data(std::ofstream &file, T &data, bool log = false) {
 }
 
 template <typename T>
-inline void write_data_vec(std::ofstream &file, T *data, int num, bool log = false) {
+inline void write_data_vec(std::ofstream &file, T *data, int num,
+                           bool log = false) {
     file.write((char *)(data), num * sizeof(T));
     //  if (log) {
     //      for (int i = 0; i < num; ++i)
@@ -53,7 +55,8 @@ inline void write_data_vec(std::ofstream &file, T *data, int num, bool log = fal
 }
 
 template <typename T>
-inline void write_data_txt(std::ofstream &file, T &data, bool b_newline = false) {
+inline void write_data_txt(std::ofstream &file, T &data,
+                           bool b_newline = false) {
     file << data << " ";
     if (b_newline) {
         file << std::endl;
@@ -62,7 +65,8 @@ inline void write_data_txt(std::ofstream &file, T &data, bool b_newline = false)
 
 template <typename T>
 inline void write_data_vec_txt(std::ofstream &file, T *data, int num) {
-    for (int i = 0; i < num; ++i) file << data[i] << " ";
+    for (int i = 0; i < num; ++i)
+        file << data[i] << " ";
     file << std::endl;
 }
 

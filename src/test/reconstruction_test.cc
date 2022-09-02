@@ -14,14 +14,17 @@
 
 using namespace xrsfm;
 
-void MatchingSeq(std::vector<Frame>& frames, const std::string& fp_path, std::map<int, std::vector<int>>& id2rank) {
+void MatchingSeq(std::vector<Frame> &frames, const std::string &fp_path,
+                 std::map<int, std::vector<int>> &id2rank) {
     std::set<std::pair<int, int>> set_pairs;
     for (int i = 0, num = frames.size(); i < num; ++i) {
-        for (int k = 0; k < 20 && i + k < num; ++k) set_pairs.insert(std::pair<int, int>(i, i + k));
+        for (int k = 0; k < 20 && i + k < num; ++k)
+            set_pairs.insert(std::pair<int, int>(i, i + k));
     }
-    for (auto& [id1, vec] : id2rank) {
-        if (id1 % 5 != 0) continue;
-        for (auto& id2 : vec) {
+    for (auto &[id1, vec] : id2rank) {
+        if (id1 % 5 != 0)
+            continue;
+        for (auto &id2 : vec) {
             set_pairs.insert(std::pair<int, int>(id1, id2));
         }
     }
@@ -33,7 +36,8 @@ void MatchingSeq(std::vector<Frame>& frames, const std::string& fp_path, std::ma
     SaveFramePairs(fp_path, frame_pairs);
 }
 
-void PreProcess(const std::string dir_path, const std::string images_path, const std::string camera_path, Map& map) {
+void PreProcess(const std::string dir_path, const std::string images_path,
+                const std::string camera_path, Map &map) {
     std::vector<Frame> frames;
     std::vector<FramePair> frame_pairs;
     std::vector<std::string> image_names;
@@ -45,23 +49,24 @@ void PreProcess(const std::string dir_path, const std::string images_path, const
     std::vector<Camera> cameras;
     // TODO: ReadCamera
     // Camera seq(0, 1000, 1000, 640, 360, 0.0);
-    // Camera seq =  Camera(0, 886.420017084725,881.278105028345, 479.5, 269.5, -0.004);
+    // Camera seq =  Camera(0, 886.420017084725,881.278105028345, 479.5, 269.5,
+    // -0.004);
     Camera seq = ReadCameraIOSRecord(camera_path);
     seq.log();
     cameras.emplace_back(seq);
-    for (auto& frame : frames) {
+    for (auto &frame : frames) {
         frame.camera_id = 0;
         frame.name = image_names.at(frame.id);
     }
 
     // set points for reconstruction
-    for (auto& frame : frames) {
+    for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
         frame.points_normalized.clear();
         frame.track_ids_.assign(num_points, -1);
-        for (const auto& kpt : frame.keypoints_) {
-            const auto& pt = kpt.pt;
+        for (const auto &kpt : frame.keypoints_) {
+            const auto &pt = kpt.pt;
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
             ImageToNormalized(cameras[0], ept, eptn);
             frame.points.emplace_back(ept);
@@ -76,7 +81,7 @@ void PreProcess(const std::string dir_path, const std::string images_path, const
     map.Init();
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     const std::string dir_path = "/data1/XRSFM/2022-07-06T14-39-35/";
     const std::string image_dir_path = dir_path + "images/";

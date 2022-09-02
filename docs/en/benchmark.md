@@ -74,7 +74,7 @@ Run the following python script to process the reconstruction stage
 python3 ./scripts/run_1dsfm_reconstruction.py --data_path ${dataset_path}$ --bin_dir_path ${bin_dir_path}$
 ```
 
-### Results 
+### Results
 
 
 |  | Registered Frames | Matching Time |

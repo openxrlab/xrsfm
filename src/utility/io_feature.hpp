@@ -24,7 +24,8 @@ inline nlohmann::json LoadJSON(const std::string config_path) {
     return config_json;
 }
 
-inline void LoadImageNames(const std::string &dir_path, std::vector<std::string> &image_names) {
+inline void LoadImageNames(const std::string &dir_path,
+                           std::vector<std::string> &image_names) {
     namespace fs = std::experimental::filesystem;
     for (const auto &entry : fs::directory_iterator(dir_path)) {
         const std::string filename = entry.path().filename();
@@ -33,7 +34,8 @@ inline void LoadImageNames(const std::string &dir_path, std::vector<std::string>
     std::sort(image_names.begin(), image_names.end());
 }
 
-inline void ReadFeatures(const std::string &file_name, std::vector<Frame> &frames, bool init_frames = false) {
+inline void ReadFeatures(const std::string &file_name,
+                         std::vector<Frame> &frames, bool init_frames = false) {
     std::ifstream file(file_name, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Error: can not open " << file_name << "\n";
@@ -70,7 +72,9 @@ inline void ReadFeatures(const std::string &file_name, std::vector<Frame> &frame
     }
 }
 
-inline void SaveFeatures(const std::string &file_name, const std::vector<Frame> &frames, bool with_descs = false) {
+inline void SaveFeatures(const std::string &file_name,
+                         const std::vector<Frame> &frames,
+                         bool with_descs = false) {
     std::ofstream file(file_name, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Error: can not open " << file_name << "\n";
@@ -89,13 +93,15 @@ inline void SaveFeatures(const std::string &file_name, const std::vector<Frame> 
             write_data(file, frame.keypoints_[i].size);
             write_data(file, frame.keypoints_[i].angle);
         }
-        if (with_descs) write_data_vec(file, frame.uint_descs_.data(), num_points * 128);
+        if (with_descs)
+            write_data_vec(file, frame.uint_descs_.data(), num_points * 128);
     }
 }
 
-inline void ReadFramePairs(const std::string &file_name, std::vector<FramePair> &frame_pairs) {
+inline void ReadFramePairs(const std::string &file_name,
+                           std::vector<FramePair> &frame_pairs) {
     std::ifstream file(file_name, std::ios::in | std::ios::binary);
-    CHECK(file.is_open())<<file_name;
+    CHECK(file.is_open()) << file_name;
     size_t num_framepairs = read_data2<size_t>(file);
     frame_pairs.resize(num_framepairs);
     for (auto &frame_pair : frame_pairs) {
@@ -131,7 +137,8 @@ inline void SaveFramePairs(const std::string &file_name,
     file.close();
 }
 
-inline void LoadImageSize(const std::string &file_name, std::vector<ImageSize> &image_size) {
+inline void LoadImageSize(const std::string &file_name,
+                          std::vector<ImageSize> &image_size) {
     std::ifstream file(file_name, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Error: can not open " << file_name << "\n";
@@ -146,7 +153,8 @@ inline void LoadImageSize(const std::string &file_name, std::vector<ImageSize> &
     }
 }
 
-inline void SaveImageSize(const std::string &file_name, const std::vector<ImageSize> &image_size) {
+inline void SaveImageSize(const std::string &file_name,
+                          const std::vector<ImageSize> &image_size) {
     std::ofstream file(file_name, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Error: can not open " << file_name << "\n";
@@ -164,12 +172,14 @@ inline bool LoadRetrievalRank(const std::string &file_path,
                               const std::map<std::string, int> &name_map,
                               std::map<int, std::vector<int>> &id2rank) {
     std::ifstream infile(file_path.c_str());
-    if (!infile.is_open()) return false;
+    if (!infile.is_open())
+        return false;
 
     std::string line;
     std::set<std::string> missing_image_names;
     while (getline(infile, line)) {
-        if (line == "") continue;
+        if (line == "")
+            continue;
         std::istringstream s1(line);
         std::string image_name1, image_name2;
         s1 >> image_name1 >> image_name2;

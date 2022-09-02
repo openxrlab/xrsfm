@@ -11,7 +11,7 @@
 
 using namespace xrsfm;
 
-void PreProcess(const std::string bin_path, Map& map) {
+void PreProcess(const std::string bin_path, Map &map) {
     std::vector<Frame> frames;
     std::vector<Camera> cameras;
     std::vector<FramePair> frame_pairs;
@@ -24,18 +24,18 @@ void PreProcess(const std::string bin_path, Map& map) {
     assert(cameras.size() == frames.size());
 
     for (int i = 0; i < frames.size(); ++i) {
-        auto& frame = frames.at(i);
+        auto &frame = frames.at(i);
         frame.id = i;
         // frame.name = image_names.at(i);
         frame.camera_id = name2cid.at(frame.name);
-        const auto& camera = cameras.at(frame.camera_id);
+        const auto &camera = cameras.at(frame.camera_id);
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
         frame.points_normalized.clear();
         frame.uint_descs_.resize(0, 0);
         frame.track_ids_.assign(num_points, -1);
-        for (const auto& kpt : frame.keypoints_) {
-            const auto& pt = kpt.pt;
+        for (const auto &kpt : frame.keypoints_) {
+            const auto &pt = kpt.pt;
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
             ImageToNormalized(camera, ept, eptn);
             frame.points.emplace_back(ept);
@@ -45,9 +45,10 @@ void PreProcess(const std::string bin_path, Map& map) {
 
     for (int i = 0; i < cameras.size(); ++i) {
         std::cout << i << " " << cameras.size() << std::endl;
-        auto& camera = cameras[i];
+        auto &camera = cameras[i];
         // camera.log();
-        // if distortion parameters of the camera are not estimated, the camera parameters is invalid.
+        // if distortion parameters of the camera are not estimated, the camera
+        // parameters is invalid.
         if (camera.distort_params[0] == 0) {
             camera.set_invalid();
         }
@@ -58,10 +59,11 @@ void PreProcess(const std::string bin_path, Map& map) {
     map.frame_pairs_ = frame_pairs;
     map.RemoveRedundancyPoints();
     map.Init();
-    printf("Num Frames: %d Num Pairs %d\n", map.frames_.size(), map.frame_pairs_.size());
+    printf("Num Frames: %d Num Pairs %d\n", map.frames_.size(),
+           map.frame_pairs_.size());
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
     std::string bin_dir_path, output_path;

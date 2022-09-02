@@ -14,10 +14,11 @@
 
 namespace xrsfm {
 constexpr int width = 1024, height = 768, focal = 500;
-const cv::Scalar cv_green(0, 255, 0), cv_gray(80, 80, 80), cv_blue(255, 0, 0), cv_yellow(0, 255, 255),
-    cv_red(0, 0, 255), cv_brown(40, 140, 140);
+const cv::Scalar cv_green(0, 255, 0), cv_gray(80, 80, 80), cv_blue(255, 0, 0),
+    cv_yellow(0, 255, 255), cv_red(0, 0, 255), cv_brown(40, 140, 140);
 
-void DrawMatchesColmap(const std::string dir_path, const FramePair &fp, const Map &map) {
+void DrawMatchesColmap(const std::string dir_path, const FramePair &fp,
+                       const Map &map) {
     auto &f1 = map.frames_[fp.id1];
     auto &f2 = map.frames_[fp.id2];
     cv::Mat image1 = cv::imread(dir_path + f1.name);
@@ -26,21 +27,25 @@ void DrawMatchesColmap(const std::string dir_path, const FramePair &fp, const Ma
     cv::waitKey();
 }
 
-void DrawFrameMatches(const Map &map, const std::vector<cv::Mat> &images, int id) {
+void DrawFrameMatches(const Map &map, const std::vector<cv::Mat> &images,
+                      int id) {
     for (auto &t_frame_pair : map.frame_pairs_) {
         if (t_frame_pair.id1 == id || t_frame_pair.id2 == id) {
             int id1 = t_frame_pair.id1;
             int id2 = t_frame_pair.id2;
             printf("Find Pair: %d %d %d\n", id1, id2, t_frame_pair.inlier_num);
-            DrawFeatureMatches(images[id1], images[id2], map.frames_[id1].points, map.frames_[id2].points,
+            DrawFeatureMatches(images[id1], images[id2],
+                               map.frames_[id1].points, map.frames_[id2].points,
                                t_frame_pair.matches, t_frame_pair.inlier_mask);
-            DrawFeatureMatches1(images[id1], map.frames_[id1].points, map.frames_[id2].points, t_frame_pair.matches,
+            DrawFeatureMatches1(images[id1], map.frames_[id1].points,
+                                map.frames_[id2].points, t_frame_pair.matches,
                                 t_frame_pair.inlier_mask);
         }
     }
 }
 
-void DrawFeature(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoints) {
+void DrawFeature(const cv::Mat &image,
+                 const std::vector<cv::KeyPoint> &keypoints) {
     for (const auto &kpt : keypoints) {
         cv::circle(image, kpt.pt, 1, cv::Scalar(0, 255, 0), -1);
     }
@@ -48,8 +53,10 @@ void DrawFeature(const cv::Mat &image, const std::vector<cv::KeyPoint> &keypoint
     cv::waitKey(0);
 }
 
-void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2, const std::vector<cv::KeyPoint> &kpts1,
-                        const std::vector<cv::KeyPoint> &kpts2, const std::vector<Match> &matches,
+void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2,
+                        const std::vector<cv::KeyPoint> &kpts1,
+                        const std::vector<cv::KeyPoint> &kpts2,
+                        const std::vector<Match> &matches,
                         const std::vector<char> mask) {
     int rows = img1.rows > img2.rows ? img1.rows : img2.rows;
     cv::Mat img(rows, img1.cols + img2.cols, img1.type(), cv::Scalar(0, 0, 0));
@@ -63,15 +70,19 @@ void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2, const std::vec
         // std::cout<<match.id1<<" "<<match.id2<<std::endl;
         color = mask.empty() || mask[i] ? cv_green : cv_red;
         // if (!mask.empty() && !mask[i])
-        line(img, kpts1[match.id1].pt, kpts2[match.id2].pt + cv::Point2f(img1.cols, 0), color, 1);
+        line(img, kpts1[match.id1].pt,
+             kpts2[match.id2].pt + cv::Point2f(img1.cols, 0), color, 1);
     }
     constexpr double scale = 1.0;
-    resize(img, img, cv::Size(int(img.cols * scale), int(img.rows * scale))); /**/
+    resize(img, img,
+           cv::Size(int(img.cols * scale), int(img.rows * scale))); /**/
     imshow("0", img);
 }
 
-void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2, const std::vector<vector2> &kpts1,
-                        const std::vector<vector2> &kpts2, const std::vector<Match> &matches,
+void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2,
+                        const std::vector<vector2> &kpts1,
+                        const std::vector<vector2> &kpts2,
+                        const std::vector<Match> &matches,
                         const std::vector<char> mask) {
     std::vector<cv::KeyPoint> kpts1_;
     for (auto &pt : kpts1) {
@@ -89,8 +100,10 @@ void DrawFeatureMatches(const cv::Mat &img1, const cv::Mat &img2, const std::vec
 }
 
 void DrawFeatureFlow(const cv::Mat &img1, const std::vector<vector2> &pts1,
-                     const std::vector<vector2> &pts2, const std::vector<Match> &matches,
-                     const std::vector<int> &states, const std::string window_name) {
+                     const std::vector<vector2> &pts2,
+                     const std::vector<Match> &matches,
+                     const std::vector<int> &states,
+                     const std::string window_name) {
     std::vector<cv::KeyPoint> kpts1;
     for (auto &pt : pts1) {
         kpts1.emplace_back(cv::KeyPoint(pt.x(), pt.y(), -1));
@@ -125,8 +138,10 @@ void DrawFeatureFlow(const cv::Mat &img1, const std::vector<vector2> &pts1,
     imshow(window_name, img);
 }
 
-void DrawFeatureMatches1(const cv::Mat &img1, const std::vector<cv::KeyPoint> &kpts1,
-                         const std::vector<cv::KeyPoint> &kpts2, const std::vector<Match> &matches,
+void DrawFeatureMatches1(const cv::Mat &img1,
+                         const std::vector<cv::KeyPoint> &kpts1,
+                         const std::vector<cv::KeyPoint> &kpts2,
+                         const std::vector<Match> &matches,
                          const std::vector<char> mask) {
     cv::Mat img = img1.clone();
     cv::Scalar color;
@@ -145,7 +160,8 @@ void DrawFeatureMatches1(const cv::Mat &img1, const std::vector<cv::KeyPoint> &k
 }
 
 void DrawFeatureMatches1(const cv::Mat &img1, const std::vector<vector2> &kpts1,
-                         const std::vector<vector2> &kpts2, const std::vector<Match> &matches,
+                         const std::vector<vector2> &kpts2,
+                         const std::vector<Match> &matches,
                          const std::vector<char> mask) {
     std::vector<cv::KeyPoint> kpts1_;
     for (auto &pt : kpts1) {
@@ -162,7 +178,8 @@ void DrawFeatureMatches1(const cv::Mat &img1, const std::vector<vector2> &kpts1,
     DrawFeatureMatches1(img1, kpts1_, kpts2_, matches, mask);
 }
 
-void DrawCameras(const std::vector<Pose> &cameras, const std::vector<vector3> colors, double camera_size) {
+void DrawCameras(const std::vector<Pose> &cameras,
+                 const std::vector<vector3> colors, double camera_size) {
     const float w = camera_size;
     const float h = w * 0.5f;
     const float z = w * 0.6f;
@@ -173,8 +190,8 @@ void DrawCameras(const std::vector<Pose> &cameras, const std::vector<vector3> co
         const Eigen::Matrix3d R = camera.q.toRotationMatrix();
         const vector3 t = camera.t;
         Eigen::Matrix4d Tcw;
-        Tcw << R(0, 0), R(0, 1), R(0, 2), t(0), R(1, 0), R(1, 1), R(1, 2), t(1), R(2, 0), R(2, 1), R(2, 2), t(2), 0, 0, 0,
-            1;
+        Tcw << R(0, 0), R(0, 1), R(0, 2), t(0), R(1, 0), R(1, 1), R(1, 2), t(1),
+            R(2, 0), R(2, 1), R(2, 2), t(2), 0, 0, 0, 1;
         Eigen::Matrix4d Twc = Tcw.inverse();
         glMultMatrixd(Twc.data());
         glColor3d(colors[i](0), colors[i](1), colors[i](2));
@@ -225,7 +242,8 @@ void DrawPoints(const std::vector<vector3> &points) {
     glEnd();
 }
 
-void DrawPoints(const std::vector<vector3> &points, const std::vector<vector3> colors) {
+void DrawPoints(const std::vector<vector3> &points,
+                const std::vector<vector3> colors) {
     glPointSize(1.0f);
     glBegin(GL_POINTS);
     for (int i = 0; i < points.size(); ++i) {

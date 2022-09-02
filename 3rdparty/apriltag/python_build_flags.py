@@ -1,6 +1,5 @@
 from __future__ import print_function
 import sysconfig
-import re
 import numpy as np
 conf = sysconfig.get_config_vars()
 
@@ -21,7 +20,8 @@ print('LINKER', end=';')
 print(conf.get('BLDSHARED', '').split()[0], end=';')
 
 print('LDFLAGS', end=';')
-print(' '.join(conf.get('BLDSHARED', '').split()[1:]) + ' ' + conf.get('BLDLIBRARY', '') + ' ' + conf.get('LDFLAGS', ''), end=';')
+print(' '.join(conf.get('BLDSHARED', '').split()[1:]) + ' '
+      + conf.get('BLDLIBRARY', '') + ' ' + conf.get('LDFLAGS', ''), end=';')
 
 print('EXT_SUFFIX', end=';')
 ext_suffix = '.so'
@@ -31,4 +31,3 @@ elif 'MULTIARCH' in conf:
     ext_suffix = '.' + conf['MULTIARCH'] + '.so'
 
 print(ext_suffix, end=';')
-

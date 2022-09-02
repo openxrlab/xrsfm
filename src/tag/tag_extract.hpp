@@ -30,9 +30,11 @@ extern "C" {
 
 namespace xrsfm {
 
-std::map<std::string, std::map<int, std::vector<vector2>>> tag_extract(std::string image_dir) {
+std::map<std::string, std::map<int, std::vector<vector2>>>
+tag_extract(std::string image_dir) {
     std::vector<std::string> image_vec;
-    for (const auto &fe : std::experimental::filesystem::directory_iterator(image_dir)) {
+    for (const auto &fe :
+         std::experimental::filesystem::directory_iterator(image_dir)) {
         image_vec.emplace_back(fe.path().filename());
     }
     std::sort(image_vec.begin(), image_vec.end());
@@ -55,7 +57,8 @@ std::map<std::string, std::map<int, std::vector<vector2>>> tag_extract(std::stri
 
         zarray_t *detections = apriltag_detector_detect(td, &im);
         const int num_detect = zarray_size(detections);
-        if (num_detect == 0) continue;
+        if (num_detect == 0)
+            continue;
 
         auto &tag_info = tag_info_vec[image_name];
         for (int i = 0; i < num_detect; i++) {
@@ -76,7 +79,9 @@ std::map<std::string, std::map<int, std::vector<vector2>>> tag_extract(std::stri
     return tag_info_vec;
 }
 
-std::map<std::string, std::map<int, std::vector<vector2>>> tag_extract(const std::string &image_dir, const std::vector<std::string> &image_vec) {
+std::map<std::string, std::map<int, std::vector<vector2>>>
+tag_extract(const std::string &image_dir,
+            const std::vector<std::string> &image_vec) {
     std::map<std::string, std::map<int, std::vector<vector2>>> tag_info_vec;
     apriltag_detector_t *td = apriltag_detector_create();
     apriltag_family_t *tf = tag36h11_create();
@@ -94,7 +99,8 @@ std::map<std::string, std::map<int, std::vector<vector2>>> tag_extract(const std
 
         zarray_t *detections = apriltag_detector_detect(td, &im);
         const int num_detect = zarray_size(detections);
-        if (num_detect == 0) continue;
+        if (num_detect == 0)
+            continue;
 
         auto &tag_info = tag_info_vec[image_name];
         for (int i = 0; i < num_detect; i++) {
@@ -125,16 +131,19 @@ std::vector<vector3> get_tag(double tag_length) {
     return pt_tag;
 }
 
-void tag_refine(std::string image_dir, std::string map_dir, const double tag_length, std::string output_path) {
-    //load map
+void tag_refine(std::string image_dir, std::string map_dir,
+                const double tag_length, std::string output_path) {
+    // load map
     Map map;
     ReadColMapDataBinary(map_dir, map);
     const Camera &cam_seq = map.cameras_[0];
     for (auto &[id, frame] : map.frame_map_) {
-        if (!frame.registered) continue;
+        if (!frame.registered)
+            continue;
         frame.points_normalized.resize(frame.points.size());
         for (size_t j = 0; j < frame.points.size(); j++) {
-            ImageToNormalized(cam_seq, frame.points[j], frame.points_normalized[j]);
+            ImageToNormalized(cam_seq, frame.points[j],
+                              frame.points_normalized[j]);
         }
     }
     std::map<std::string, int> name2id;
@@ -144,7 +153,8 @@ void tag_refine(std::string image_dir, std::string map_dir, const double tag_len
 
     // get tag info
     auto tag_info_vec = tag_extract(image_dir);
-    std::map<int, std::map<int, std::vector<vector2>>> tag_obs, tag_obs_normalized;
+    std::map<int, std::map<int, std::vector<vector2>>> tag_obs,
+        tag_obs_normalized;
     for (auto &[name, tag_info] : tag_info_vec) {
         const int frame_id = name2id[name];
         for (auto &[tag_id, pts] : tag_info) {
@@ -152,9 +162,11 @@ void tag_refine(std::string image_dir, std::string map_dir, const double tag_len
         }
     }
     for (auto &[tag_id, frame_obs] : tag_obs) {
-        // too few measurment to triangulte
-        if (frame_obs.size() < 4) continue;
-        std::cout << "tag id:" << tag_id << " observer number: " << frame_obs.size() << std::endl;
+        // too few measurement to triangulte
+        if (frame_obs.size() < 4)
+            continue;
+        std::cout << "tag id:" << tag_id
+                  << " observer number: " << frame_obs.size() << std::endl;
         for (auto &[frame_id, pts] : frame_obs) {
             std::vector<vector2> pts_normlized(4);
             for (int i = 0; i < 4; ++i) {
@@ -193,8 +205,11 @@ void tag_refine(std::string image_dir, std::string map_dir, const double tag_len
         for (auto &[frame_id, pts_n] : frame_obs) {
             auto &Tcw = map.frame_map_[frame_id].Tcw;
             for (int i = 0; i < 4; ++i) {
-                ceres::CostFunction *cost_function = new ProjectionCost(pts_n[i]);
-                problem.AddResidualBlock(cost_function, nullptr, Tcw.q.coeffs().data(), Tcw.t.data(), pt_world[i].data());
+                ceres::CostFunction *cost_function =
+                    new ProjectionCost(pts_n[i]);
+                problem.AddResidualBlock(cost_function, nullptr,
+                                         Tcw.q.coeffs().data(), Tcw.t.data(),
+                                         pt_world[i].data());
             }
             problem.SetParameterBlockConstant(Tcw.q.coeffs().data());
             problem.SetParameterBlockConstant(Tcw.t.data());
@@ -203,8 +218,9 @@ void tag_refine(std::string image_dir, std::string map_dir, const double tag_len
         auto &T_w_tag = tag_vec[tag_id];
         for (int i = 0; i < 4; ++i) {
             ceres::CostFunction *cost_function = new TagCost(pt_tag[i], 1.0);
-            problem.AddResidualBlock(cost_function, nullptr, T_w_tag.q.coeffs().data(), T_w_tag.t.data(), &scale,
-                                     pt_world[i].data());
+            problem.AddResidualBlock(
+                cost_function, nullptr, T_w_tag.q.coeffs().data(),
+                T_w_tag.t.data(), &scale, pt_world[i].data());
             problem.SetParameterBlockConstant(pt_world[i].data());
         }
         problem.SetParameterization(T_w_tag.q.coeffs().data(), new QuatParam);
@@ -220,14 +236,19 @@ void tag_refine(std::string image_dir, std::string map_dir, const double tag_len
 
     // refine map
     for (auto &[id, frame] : map.frame_map_) {
-        if (!frame.registered) continue;
+        if (!frame.registered)
+            continue;
         for (int i = 0; i < frame.track_ids_.size(); ++i) {
-            if (frame.track_ids_[i] == -1) continue;
+            if (frame.track_ids_[i] == -1)
+                continue;
             Track &track = map.track_map_[frame.track_ids_[i]];
-            if (track.outlier) continue;
-            ceres::CostFunction *cost_function = new ProjectionCost(frame.points_normalized[i]);
-            problem.AddResidualBlock(cost_function, nullptr, frame.Tcw.q.coeffs().data(), frame.Tcw.t.data(),
-                                     track.point3d_.data());
+            if (track.outlier)
+                continue;
+            ceres::CostFunction *cost_function =
+                new ProjectionCost(frame.points_normalized[i]);
+            problem.AddResidualBlock(cost_function, nullptr,
+                                     frame.Tcw.q.coeffs().data(),
+                                     frame.Tcw.t.data(), track.point3d_.data());
         }
         problem.SetParameterization(frame.Tcw.q.coeffs().data(), new QuatParam);
         problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());

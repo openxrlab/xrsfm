@@ -35,29 +35,29 @@ either expressed or implied, of the Regents of The University of Michigan.
 // force a rehash when our capacity is less than this many times the size
 #define ZHASH_FACTOR_CRITICAL 2
 
-// When resizing, how much bigger do we want to be? (should be greater than _CRITICAL)
+// When resizing, how much bigger do we want to be? (should be greater than
+// _CRITICAL)
 #define ZHASH_FACTOR_REALLOC 4
 
-struct zhash
-{
+struct zhash {
     size_t keysz, valuesz;
-    int    entrysz; // valid byte (1) + keysz + values
+    int entrysz; // valid byte (1) + keysz + values
 
-    uint32_t(*hash)(const void *a);
+    uint32_t (*hash)(const void *a);
 
     // returns 1 if equal
-    int(*equals)(const void *a, const void *b);
+    int (*equals)(const void *a, const void *b);
 
     int size; // # of items in hash table
 
     char *entries; // each entry of size entrysz;
-    int  nentries; // how many entries are allocated? Never 0.
+    int nentries;  // how many entries are allocated? Never 0.
 };
 
 zhash_t *zhash_create_capacity(size_t keysz, size_t valuesz,
-                               uint32_t(*hash)(const void *a), int(*equals)(const void *a, const void*b),
-                               int capacity)
-{
+                               uint32_t (*hash)(const void *a),
+                               int (*equals)(const void *a, const void *b),
+                               int capacity) {
     assert(hash != NULL);
     assert(equals != NULL);
 
@@ -74,7 +74,7 @@ zhash_t *zhash_create_capacity(size_t keysz, size_t valuesz,
             nentries *= 2;
     }
 
-    zhash_t *zh = (zhash_t*) calloc(1, sizeof(zhash_t));
+    zhash_t *zh = (zhash_t *)calloc(1, sizeof(zhash_t));
     zh->keysz = keysz;
     zh->valuesz = valuesz;
     zh->hash = hash;
@@ -90,13 +90,12 @@ zhash_t *zhash_create_capacity(size_t keysz, size_t valuesz,
 }
 
 zhash_t *zhash_create(size_t keysz, size_t valuesz,
-                      uint32_t(*hash)(const void *a), int(*equals)(const void *a, const void *b))
-{
+                      uint32_t (*hash)(const void *a),
+                      int (*equals)(const void *a, const void *b)) {
     return zhash_create_capacity(keysz, valuesz, hash, equals, 8);
 }
 
-void zhash_destroy(zhash_t *zh)
-{
+void zhash_destroy(zhash_t *zh) {
     if (zh == NULL)
         return;
 
@@ -104,26 +103,22 @@ void zhash_destroy(zhash_t *zh)
     free(zh);
 }
 
-int zhash_size(const zhash_t *zh)
-{
-    return zh->size;
-}
+int zhash_size(const zhash_t *zh) { return zh->size; }
 
-void zhash_clear(zhash_t *zh)
-{
+void zhash_clear(zhash_t *zh) {
     memset(zh->entries, 0, zh->nentries * zh->entrysz);
     zh->size = 0;
 }
 
-int zhash_get_volatile(const zhash_t *zh, const void *key, void *out_value)
-{
+int zhash_get_volatile(const zhash_t *zh, const void *key, void *out_value) {
     uint32_t code = zh->hash(key);
     uint32_t entry_idx = code & (zh->nentries - 1);
 
     while (zh->entries[entry_idx * zh->entrysz]) {
         void *this_key = &zh->entries[entry_idx * zh->entrysz + 1];
         if (zh->equals(key, this_key)) {
-            *((void**) out_value) = &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz];
+            *((void **)out_value) =
+                &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz];
             return 1;
         }
 
@@ -133,8 +128,7 @@ int zhash_get_volatile(const zhash_t *zh, const void *key, void *out_value)
     return 0;
 }
 
-int zhash_get(const zhash_t *zh, const void *key, void *out_value)
-{
+int zhash_get(const zhash_t *zh, const void *key, void *out_value) {
     void *tmp;
     if (zhash_get_volatile(zh, key, &tmp)) {
         memcpy(out_value, tmp, zh->valuesz);
@@ -144,14 +138,15 @@ int zhash_get(const zhash_t *zh, const void *key, void *out_value)
     return 0;
 }
 
-int zhash_put(zhash_t *zh, const void *key, const void *value, void *oldkey, void *oldvalue)
-{
+int zhash_put(zhash_t *zh, const void *key, const void *value, void *oldkey,
+              void *oldvalue) {
     uint32_t code = zh->hash(key);
     uint32_t entry_idx = code & (zh->nentries - 1);
 
     while (zh->entries[entry_idx * zh->entrysz]) {
         void *this_key = &zh->entries[entry_idx * zh->entrysz + 1];
-        void *this_value = &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz];
+        void *this_value =
+            &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz];
 
         if (zh->equals(key, this_key)) {
             // replace
@@ -171,19 +166,20 @@ int zhash_put(zhash_t *zh, const void *key, const void *value, void *oldkey, voi
     // add the entry
     zh->entries[entry_idx * zh->entrysz] = 1;
     memcpy(&zh->entries[entry_idx * zh->entrysz + 1], key, zh->keysz);
-    memcpy(&zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz], value, zh->valuesz);
+    memcpy(&zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz], value,
+           zh->valuesz);
     zh->size++;
 
     if (zh->nentries < ZHASH_FACTOR_CRITICAL * zh->size) {
-        zhash_t *newhash = zhash_create_capacity(zh->keysz, zh->valuesz,
-                                                 zh->hash, zh->equals,
-                                                 zh->size);
+        zhash_t *newhash = zhash_create_capacity(
+            zh->keysz, zh->valuesz, zh->hash, zh->equals, zh->size);
 
         for (int idx = 0; idx < zh->nentries; idx++) {
 
             if (zh->entries[idx * zh->entrysz]) {
                 void *this_key = &zh->entries[idx * zh->entrysz + 1];
-                void *this_value = &zh->entries[idx * zh->entrysz + 1 + zh->keysz];
+                void *this_value =
+                    &zh->entries[idx * zh->entrysz + 1 + zh->keysz];
                 if (zhash_put(newhash, this_key, this_value, NULL, NULL))
                     assert(0); // shouldn't already be present.
             }
@@ -200,14 +196,14 @@ int zhash_put(zhash_t *zh, const void *key, const void *value, void *oldkey, voi
     return 0;
 }
 
-int zhash_remove(zhash_t *zh, const void *key, void *old_key, void *old_value)
-{
+int zhash_remove(zhash_t *zh, const void *key, void *old_key, void *old_value) {
     uint32_t code = zh->hash(key);
     uint32_t entry_idx = code & (zh->nentries - 1);
 
     while (zh->entries[entry_idx * zh->entrysz]) {
         void *this_key = &zh->entries[entry_idx * zh->entrysz + 1];
-        void *this_value = &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz];
+        void *this_value =
+            &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz];
 
         if (zh->equals(key, this_key)) {
             if (old_key)
@@ -225,12 +221,13 @@ int zhash_remove(zhash_t *zh, const void *key, void *old_key, void *old_value)
 
                 if (zh->entries[entry_idx * zh->entrysz]) {
                     // completely remove this entry
-                    char *tmp = malloc(sizeof(char)*zh->entrysz);
-                    memcpy(tmp, &zh->entries[entry_idx * zh->entrysz], zh->entrysz);
+                    char *tmp = malloc(sizeof(char) * zh->entrysz);
+                    memcpy(tmp, &zh->entries[entry_idx * zh->entrysz],
+                           zh->entrysz);
                     zh->entries[entry_idx * zh->entrysz] = 0;
                     zh->size--;
                     // reinsert it
-                    if (zhash_put(zh, &tmp[1], &tmp[1+zh->keysz], NULL, NULL))
+                    if (zhash_put(zh, &tmp[1], &tmp[1 + zh->keysz], NULL, NULL))
                         assert(0);
                     free(tmp);
                 } else {
@@ -246,16 +243,15 @@ int zhash_remove(zhash_t *zh, const void *key, void *old_key, void *old_value)
     return 0;
 }
 
-zhash_t *zhash_copy(const zhash_t *zh)
-{
-    zhash_t *newhash = zhash_create_capacity(zh->keysz, zh->valuesz,
-                                             zh->hash, zh->equals,
-                                             zh->size);
+zhash_t *zhash_copy(const zhash_t *zh) {
+    zhash_t *newhash = zhash_create_capacity(zh->keysz, zh->valuesz, zh->hash,
+                                             zh->equals, zh->size);
 
     for (int entry_idx = 0; entry_idx < zh->nentries; entry_idx++) {
         if (zh->entries[entry_idx * zh->entrysz]) {
             void *this_key = &zh->entries[entry_idx * zh->entrysz + 1];
-            void *this_value = &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz];
+            void *this_value =
+                &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz];
             if (zhash_put(newhash, this_key, this_value, NULL, NULL))
                 assert(0); // shouldn't already be present.
         }
@@ -264,28 +260,25 @@ zhash_t *zhash_copy(const zhash_t *zh)
     return newhash;
 }
 
-int zhash_contains(const zhash_t *zh, const void *key)
-{
+int zhash_contains(const zhash_t *zh, const void *key) {
     void *tmp;
     return zhash_get_volatile(zh, key, &tmp);
 }
 
-void zhash_iterator_init(zhash_t *zh, zhash_iterator_t *zit)
-{
+void zhash_iterator_init(zhash_t *zh, zhash_iterator_t *zit) {
     zit->zh = zh;
     zit->czh = zh;
     zit->last_entry = -1;
 }
 
-void zhash_iterator_init_const(const zhash_t *zh, zhash_iterator_t *zit)
-{
+void zhash_iterator_init_const(const zhash_t *zh, zhash_iterator_t *zit) {
     zit->zh = NULL;
     zit->czh = zh;
     zit->last_entry = -1;
 }
 
-int zhash_iterator_next_volatile(zhash_iterator_t *zit, void *outkey, void *outvalue)
-{
+int zhash_iterator_next_volatile(zhash_iterator_t *zit, void *outkey,
+                                 void *outvalue) {
     const zhash_t *zh = zit->czh;
 
     while (1) {
@@ -296,20 +289,20 @@ int zhash_iterator_next_volatile(zhash_iterator_t *zit, void *outkey, void *outv
 
         if (zh->entries[zit->last_entry * zh->entrysz]) {
             void *this_key = &zh->entries[zit->last_entry * zh->entrysz + 1];
-            void *this_value = &zh->entries[zit->last_entry * zh->entrysz + 1 + zh->keysz];
+            void *this_value =
+                &zh->entries[zit->last_entry * zh->entrysz + 1 + zh->keysz];
 
             if (outkey != NULL)
-                *((void**) outkey) = this_key;
+                *((void **)outkey) = this_key;
             if (outvalue != NULL)
-                *((void**) outvalue) = this_value;
+                *((void **)outvalue) = this_value;
 
             return 1;
         }
     }
 }
 
-int zhash_iterator_next(zhash_iterator_t *zit, void *outkey, void *outvalue)
-{
+int zhash_iterator_next(zhash_iterator_t *zit, void *outkey, void *outvalue) {
     const zhash_t *zh = zit->czh;
 
     void *outkeyp, *outvaluep;
@@ -325,8 +318,7 @@ int zhash_iterator_next(zhash_iterator_t *zit, void *outkey, void *outvalue)
     return 1;
 }
 
-void zhash_iterator_remove(zhash_iterator_t *zit)
-{
+void zhash_iterator_remove(zhash_iterator_t *zit) {
     assert(zit->zh); // can't call _remove on a iterator with const zhash
     zhash_t *zh = zit->zh;
 
@@ -335,15 +327,15 @@ void zhash_iterator_remove(zhash_iterator_t *zit)
 
     // re-insert following entries
     int entry_idx = (zit->last_entry + 1) & (zh->nentries - 1);
-    while (zh->entries[entry_idx *zh->entrysz]) {
+    while (zh->entries[entry_idx * zh->entrysz]) {
         // completely remove this entry
-        char *tmp = malloc(sizeof(char)*zh->entrysz);
+        char *tmp = malloc(sizeof(char) * zh->entrysz);
         memcpy(tmp, &zh->entries[entry_idx * zh->entrysz], zh->entrysz);
         zh->entries[entry_idx * zh->entrysz] = 0;
         zh->size--;
 
         // reinsert it
-        if (zhash_put(zh, &tmp[1], &tmp[1+zh->keysz], NULL, NULL))
+        if (zhash_put(zh, &tmp[1], &tmp[1 + zh->keysz], NULL, NULL))
             assert(0);
         free(tmp);
 
@@ -353,8 +345,7 @@ void zhash_iterator_remove(zhash_iterator_t *zit)
     zit->last_entry--;
 }
 
-void zhash_map_keys(zhash_t *zh, void (*f)())
-{
+void zhash_map_keys(zhash_t *zh, void (*f)()) {
     assert(zh != NULL);
     if (f == NULL)
         return;
@@ -364,13 +355,12 @@ void zhash_map_keys(zhash_t *zh, void (*f)())
 
     void *key, *value;
 
-    while(zhash_iterator_next_volatile(&itr, &key, &value)) {
+    while (zhash_iterator_next_volatile(&itr, &key, &value)) {
         f(key);
     }
 }
 
-void zhash_vmap_keys(zhash_t * zh, void (*f)())
-{
+void zhash_vmap_keys(zhash_t *zh, void (*f)()) {
     assert(zh != NULL);
     if (f == NULL)
         return;
@@ -380,14 +370,13 @@ void zhash_vmap_keys(zhash_t * zh, void (*f)())
 
     void *key, *value;
 
-    while(zhash_iterator_next_volatile(&itr, &key, &value)) {
-        void *p = *(void**) key;
+    while (zhash_iterator_next_volatile(&itr, &key, &value)) {
+        void *p = *(void **)key;
         f(p);
     }
 }
 
-void zhash_map_values(zhash_t * zh, void (*f)())
-{
+void zhash_map_values(zhash_t *zh, void (*f)()) {
     assert(zh != NULL);
     if (f == NULL)
         return;
@@ -396,13 +385,12 @@ void zhash_map_values(zhash_t * zh, void (*f)())
     zhash_iterator_init(zh, &itr);
 
     void *key, *value;
-    while(zhash_iterator_next_volatile(&itr, &key, &value)) {
+    while (zhash_iterator_next_volatile(&itr, &key, &value)) {
         f(value);
     }
 }
 
-void zhash_vmap_values(zhash_t * zh, void (*f)())
-{
+void zhash_vmap_values(zhash_t *zh, void (*f)()) {
     assert(zh != NULL);
     if (f == NULL)
         return;
@@ -411,14 +399,13 @@ void zhash_vmap_values(zhash_t * zh, void (*f)())
     zhash_iterator_init(zh, &itr);
 
     void *key, *value;
-    while(zhash_iterator_next_volatile(&itr, &key, &value)) {
-        void *p = *(void**) value;
+    while (zhash_iterator_next_volatile(&itr, &key, &value)) {
+        void *p = *(void **)value;
         f(p);
     }
 }
 
-zarray_t *zhash_keys(const zhash_t *zh)
-{
+zarray_t *zhash_keys(const zhash_t *zh) {
     assert(zh != NULL);
 
     zarray_t *za = zarray_create(zh->keysz);
@@ -427,15 +414,14 @@ zarray_t *zhash_keys(const zhash_t *zh)
     zhash_iterator_init_const(zh, &itr);
 
     void *key, *value;
-    while(zhash_iterator_next_volatile(&itr, &key, &value)) {
+    while (zhash_iterator_next_volatile(&itr, &key, &value)) {
         zarray_add(za, key);
     }
 
     return za;
 }
 
-zarray_t *zhash_values(const zhash_t *zh)
-{
+zarray_t *zhash_values(const zhash_t *zh) {
     assert(zh != NULL);
 
     zarray_t *za = zarray_create(zh->valuesz);
@@ -444,65 +430,57 @@ zarray_t *zhash_values(const zhash_t *zh)
     zhash_iterator_init_const(zh, &itr);
 
     void *key, *value;
-    while(zhash_iterator_next_volatile(&itr, &key, &value)) {
+    while (zhash_iterator_next_volatile(&itr, &key, &value)) {
         zarray_add(za, value);
     }
 
     return za;
 }
 
-
-uint32_t zhash_uint32_hash(const void *_a)
-{
+uint32_t zhash_uint32_hash(const void *_a) {
     assert(_a != NULL);
 
-    uint32_t a = *((uint32_t*) _a);
+    uint32_t a = *((uint32_t *)_a);
     return a;
 }
 
-int zhash_uint32_equals(const void *_a, const void *_b)
-{
+int zhash_uint32_equals(const void *_a, const void *_b) {
     assert(_a != NULL);
     assert(_b != NULL);
 
-    uint32_t a = *((uint32_t*) _a);
-    uint32_t b = *((uint32_t*) _b);
+    uint32_t a = *((uint32_t *)_a);
+    uint32_t b = *((uint32_t *)_b);
 
-    return a==b;
+    return a == b;
 }
 
-uint32_t zhash_uint64_hash(const void *_a)
-{
+uint32_t zhash_uint64_hash(const void *_a) {
     assert(_a != NULL);
 
-    uint64_t a = *((uint64_t*) _a);
-    return (uint32_t) (a ^ (a >> 32));
+    uint64_t a = *((uint64_t *)_a);
+    return (uint32_t)(a ^ (a >> 32));
 }
 
-int zhash_uint64_equals(const void *_a, const void *_b)
-{
+int zhash_uint64_equals(const void *_a, const void *_b) {
     assert(_a != NULL);
     assert(_b != NULL);
 
-    uint64_t a = *((uint64_t*) _a);
-    uint64_t b = *((uint64_t*) _b);
+    uint64_t a = *((uint64_t *)_a);
+    uint64_t b = *((uint64_t *)_b);
 
-    return a==b;
+    return a == b;
 }
 
-
-union uintpointer
-{
+union uintpointer {
     const void *p;
     uint32_t i;
 };
 
-uint32_t zhash_ptr_hash(const void *a)
-{
+uint32_t zhash_ptr_hash(const void *a) {
     assert(a != NULL);
 
     union uintpointer ip;
-    ip.p = * (void**)a;
+    ip.p = *(void **)a;
 
     // compute a hash from the lower 32 bits of the pointer (on LE systems)
     uint32_t hash = ip.i;
@@ -511,39 +489,35 @@ uint32_t zhash_ptr_hash(const void *a)
     return hash;
 }
 
-
-int zhash_ptr_equals(const void *a, const void *b)
-{
+int zhash_ptr_equals(const void *a, const void *b) {
     assert(a != NULL);
     assert(b != NULL);
 
-    const void * ptra = * (void**)a;
-    const void * ptrb = * (void**)b;
-    return  ptra == ptrb;
+    const void *ptra = *(void **)a;
+    const void *ptrb = *(void **)b;
+    return ptra == ptrb;
 }
 
-
-int zhash_str_equals(const void *_a, const void *_b)
-{
+int zhash_str_equals(const void *_a, const void *_b) {
     assert(_a != NULL);
     assert(_b != NULL);
 
-    char *a = * (char**)_a;
-    char *b = * (char**)_b;
+    char *a = *(char **)_a;
+    char *b = *(char **)_b;
 
     return !strcmp(a, b);
 }
 
-uint32_t zhash_str_hash(const void *_a)
-{
+uint32_t zhash_str_hash(const void *_a) {
     assert(_a != NULL);
 
-    char *a = * (char**)_a;
+    char *a = *(char **)_a;
 
     uint32_t hash = 0;
     while (*a != 0) {
         // optimization of hash x FNV_prime
-        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) +
+                (hash << 24);
         hash ^= *a;
         a++;
     }
@@ -551,13 +525,13 @@ uint32_t zhash_str_hash(const void *_a)
     return hash;
 }
 
-
-void zhash_debug(zhash_t *zh)
-{
+void zhash_debug(zhash_t *zh) {
     for (int entry_idx = 0; entry_idx < zh->nentries; entry_idx++) {
         char *k, *v;
-        memcpy(&k, &zh->entries[entry_idx * zh->entrysz + 1], sizeof(char*));
-        memcpy(&v, &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz], sizeof(char*));
-        printf("%d: %d, %s => %s\n", entry_idx, zh->entries[entry_idx * zh->entrysz], k, v);
+        memcpy(&k, &zh->entries[entry_idx * zh->entrysz + 1], sizeof(char *));
+        memcpy(&v, &zh->entries[entry_idx * zh->entrysz + 1 + zh->keysz],
+               sizeof(char *));
+        printf("%d: %d, %s => %s\n", entry_idx,
+               zh->entries[entry_idx * zh->entrysz], k, v);
     }
 }

@@ -20,9 +20,11 @@ inline size_t NChooseK(const size_t n, const size_t k) {
 }
 
 bool triangulate_point_checked(const std::vector<xrsfm::matrix<3, 4>> &Ps,
-                               const std::vector<xrsfm::vector<2>> &points, xrsfm::vector<3> &p);
+                               const std::vector<xrsfm::vector<2>> &points,
+                               xrsfm::vector<3> &p);
 
-double CalculateTriangulationAngle(const Eigen::Vector3d &center1, const Eigen::Vector3d &center2,
+double CalculateTriangulationAngle(const Eigen::Vector3d &center1,
+                                   const Eigen::Vector3d &center2,
                                    const Eigen::Vector3d &point3D);
 } // namespace xrsfm
 

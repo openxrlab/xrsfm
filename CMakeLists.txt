@@ -10,7 +10,7 @@ generate code, e.g., Auto, All, Maxwell, Pascal, ...")
 ################################################################################
 # Find packages
 ################################################################################
- 
+
 set(XRPrimer_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../xrprimer/install/lib/cmake")
 find_package(XRPrimer REQUIRED)
 
@@ -36,7 +36,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++14 -msse4 -fopenmp -fpermissive
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3 -g")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -O0 -g -ggdb")
 set(CMAKE_BUILD_TYPE "Release")
- 
+
 if (OPENGL_ENABLED)
     add_definitions("-DOPENGL_ENABLED")
     message(STATUS "Enabling OpenGL support")
@@ -103,7 +103,7 @@ endif ()
 add_library(xrsfm
         src/base/map.cc
 
-        src/feature/sift_extractor.cc 
+        src/feature/sift_extractor.cc
         src/feature/feature_extraction.cc
         src/feature/feature_processing.cc
         src/feature/match_expansion.cc
@@ -148,26 +148,26 @@ target_include_directories(xrsfm
         ${CMAKE_SOURCE_DIR}/src/geometry/colmap
         ${CMAKE_SOURCE_DIR}/3rdparty/SiftGPU
         ${CMAKE_SOURCE_DIR}/3rdparty/apriltag
-        ${EIGEN3_INCLUDE_DIRS} 
+        ${EIGEN3_INCLUDE_DIRS}
         )
 
 target_link_libraries(xrsfm
-        stdc++fs  
+        stdc++fs
         XRPrimer::xrprimer
         ${OpenCV_LIBS}
         ${GTEST_LIBRARIES}
         ${Pangolin_LIBRARIES}
         sift_gpu
         )
- 
+
 add_executable(run_matching src/run_matching.cc)
 target_link_libraries(run_matching xrsfm)
 
 add_executable(run_reconstruction src/run_reconstruction.cc)
 target_link_libraries(run_reconstruction xrsfm)
-        
+
 add_executable(run_triangulation src/run_triangulation.cc)
-target_link_libraries(run_triangulation xrsfm) 
+target_link_libraries(run_triangulation xrsfm)
 
 add_executable(unpack_collect_data src/unpack_collect_data.cc)
 target_link_libraries(unpack_collect_data xrsfm)
@@ -180,5 +180,3 @@ target_link_libraries(rec_1dsfm xrsfm)
 
 add_executable(rec_kitti src/rec_kitti.cc)
 target_link_libraries(rec_kitti xrsfm)
-
- 

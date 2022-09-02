@@ -72,7 +72,8 @@ std::unique_ptr<SiftGPU> SiftExtractor::create_siftgpu() {
     } else {
         // Maximum number of orientations.
         sift_gpu_args.emplace_back("-mo");
-        sift_gpu_args.emplace_back(std::to_string(options.max_num_orientations));
+        sift_gpu_args.emplace_back(
+            std::to_string(options.max_num_orientations));
     }
     std::vector<const char *> sift_gpu_args_cstr;
     sift_gpu_args_cstr.reserve(sift_gpu_args.size());
@@ -95,17 +96,21 @@ SiftExtractor::SiftExtractor(int nfeatures) {
 
 SiftExtractor::~SiftExtractor() = default;
 
-Eigen::MatrixXf L1RootNormalizeFeatureDescriptors(const Eigen::MatrixXf &descriptors) {
-    Eigen::MatrixXf descriptors_normalized(descriptors.rows(), descriptors.cols());
+Eigen::MatrixXf
+L1RootNormalizeFeatureDescriptors(const Eigen::MatrixXf &descriptors) {
+    Eigen::MatrixXf descriptors_normalized(descriptors.rows(),
+                                           descriptors.cols());
     for (Eigen::MatrixXf::Index r = 0; r < descriptors.rows(); ++r) {
         const float norm = descriptors.row(r).lpNorm<1>();
         descriptors_normalized.row(r) = descriptors.row(r) / norm;
-        descriptors_normalized.row(r) = descriptors_normalized.row(r).array().sqrt();
+        descriptors_normalized.row(r) =
+            descriptors_normalized.row(r).array().sqrt();
     }
     return descriptors_normalized;
 }
 
-void SiftExtractor::ExtractFLOAT(const cv::Mat &_image, std::vector<cv::KeyPoint> &keypoints,
+void SiftExtractor::ExtractFLOAT(const cv::Mat &_image,
+                                 std::vector<cv::KeyPoint> &keypoints,
                                  FeatureDescriptors &descriptors) {
     cv::Mat image;
     if (_image.type() != CV_8UC1) {
@@ -117,8 +122,8 @@ void SiftExtractor::ExtractFLOAT(const cv::Mat &_image, std::vector<cv::KeyPoint
     SiftGPU *sift_gpu = sift_gpu1.get();
 
     constexpr int kSuccessCode = 1;
-    const int code =
-        sift_gpu->RunSIFT(image.cols, image.rows, image.data, GL_LUMINANCE, GL_UNSIGNED_BYTE);
+    const int code = sift_gpu->RunSIFT(image.cols, image.rows, image.data,
+                                       GL_LUMINANCE, GL_UNSIGNED_BYTE);
 
     if (code != kSuccessCode) {
         printf("fail to extract\n");
@@ -132,7 +137,8 @@ void SiftExtractor::ExtractFLOAT(const cv::Mat &_image, std::vector<cv::KeyPoint
     sift_gpu->GetFeatureVector(keypoints_data.data(), descriptors.data());
 
     for (size_t i = 0; i < num_features; ++i) {
-        keypoints[i] = cv::KeyPoint(keypoints_data[i].x, keypoints_data[i].y, 0);
+        keypoints[i] =
+            cv::KeyPoint(keypoints_data[i].x, keypoints_data[i].y, 0);
         keypoints[i].size = keypoints_data[i].s;
         keypoints[i].angle = keypoints_data[i].o;
     }
@@ -143,7 +149,8 @@ void SiftExtractor::ExtractFLOAT(const cv::Mat &_image, std::vector<cv::KeyPoint
     //    descriptors = descriptors.rowwise().normalized();
 }
 
-void SiftExtractor::ExtractUINT8(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoints,
+void SiftExtractor::ExtractUINT8(const cv::Mat &image,
+                                 std::vector<cv::KeyPoint> &keypoints,
                                  UINT8Descriptors &descriptors) {
     FeatureDescriptors float_desc;
     ExtractFLOAT(image, keypoints, float_desc);

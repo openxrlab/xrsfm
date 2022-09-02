@@ -59,12 +59,12 @@ class TriangulationEstimator {
 
     struct PointData {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        PointData() {
-        }
-        PointData(const Eigen::Vector2d& point_, const Eigen::Vector2d& point_N_) :
-            point(point_), point_normalized(point_N_) {
-        }
-        // Image observation in pixels. Only needs to be set for REPROJECTION_ERROR.
+        PointData() {}
+        PointData(const Eigen::Vector2d &point_,
+                  const Eigen::Vector2d &point_N_)
+            : point(point_), point_normalized(point_N_) {}
+        // Image observation in pixels. Only needs to be set for
+        // REPROJECTION_ERROR.
         Eigen::Vector2d point;
         // Normalized image observation. Must always be set.
         Eigen::Vector2d point_normalized;
@@ -72,18 +72,16 @@ class TriangulationEstimator {
 
     struct PoseData {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        PoseData() :
-            camera(nullptr) {
-        }
-        PoseData(const Eigen::Matrix3x4d& proj_matrix_, const Eigen::Vector3d& pose_, const Camera* camera_) :
-            proj_matrix(proj_matrix_), proj_center(pose_), camera(camera_) {
-        }
+        PoseData() : camera(nullptr) {}
+        PoseData(const Eigen::Matrix3x4d &proj_matrix_,
+                 const Eigen::Vector3d &pose_, const Camera *camera_)
+            : proj_matrix(proj_matrix_), proj_center(pose_), camera(camera_) {}
         // The projection matrix for the image of the observation.
         Eigen::Matrix3x4d proj_matrix;
         // The projection center for the image of the observation.
         Eigen::Vector3d proj_center;
         // The camera for the image of the observation.
-        const Camera* camera;
+        const Camera *camera;
     };
 
     typedef PointData X_t;
@@ -102,8 +100,10 @@ class TriangulationEstimator {
     // @param point_data        Image measurement.
     // @param point_data        Camera poses.
     //
-    // @return                  Triangulated point if successful, otherwise none.
-    std::vector<M_t> Estimate(const std::vector<X_t>& point_data, const std::vector<Y_t>& pose_data) const;
+    // @return                  Triangulated point if successful, otherwise
+    // none.
+    std::vector<M_t> Estimate(const std::vector<X_t> &point_data,
+                              const std::vector<Y_t> &pose_data) const;
 
     // Calculate residuals in terms of squared reprojection or angular error.
     //
@@ -112,8 +112,9 @@ class TriangulationEstimator {
     // @param xyz               3D point.
     //
     // @return                  Residual for each observation.
-    void Residuals(const std::vector<X_t>& point_data, const std::vector<Y_t>& pose_data, const M_t& xyz,
-                   std::vector<double>* residuals) const;
+    void Residuals(const std::vector<X_t> &point_data,
+                   const std::vector<Y_t> &pose_data, const M_t &xyz,
+                   std::vector<double> *residuals) const;
 
   private:
     ResidualType residual_type_ = ResidualType::REPROJECTION_ERROR;
@@ -125,7 +126,8 @@ struct EstimateTriangulationOptions {
     double min_tri_angle = 0.0;
 
     // The employed residual type.
-    TriangulationEstimator::ResidualType residual_type = TriangulationEstimator::ResidualType::ANGULAR_ERROR;
+    TriangulationEstimator::ResidualType residual_type =
+        TriangulationEstimator::ResidualType::ANGULAR_ERROR;
 
     // RANSAC options for TriangulationEstimator.
     RANSACOptions ransac_options;
@@ -139,10 +141,11 @@ struct EstimateTriangulationOptions {
 // Robustly estimate 3D point from observations in multiple views using RANSAC
 // and a subsequent non-linear refinement using all inliers. Returns true
 // if the estimated number of inliers has more than two views.
-bool EstimateTriangulation(const EstimateTriangulationOptions& options,
-                           const std::vector<TriangulationEstimator::PointData>& point_data,
-                           const std::vector<TriangulationEstimator::PoseData>& pose_data,
-                           std::vector<char>* inlier_mask, Eigen::Vector3d* xyz);
+bool EstimateTriangulation(
+    const EstimateTriangulationOptions &options,
+    const std::vector<TriangulationEstimator::PointData> &point_data,
+    const std::vector<TriangulationEstimator::PoseData> &pose_data,
+    std::vector<char> *inlier_mask, Eigen::Vector3d *xyz);
 
 } // namespace colmap
 

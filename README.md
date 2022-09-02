@@ -42,7 +42,7 @@ If you use the covisibility-based matching method for your research, please cite
 
 3.Run the following script to automatically reconstruction:
 ```
-python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$ 
+python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$
 ```
 Refer to [tutorial.md](docs/en/tutorial.md) for more details.
 

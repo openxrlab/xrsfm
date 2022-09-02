@@ -37,9 +37,8 @@
 
 namespace colmap {
 
-RandomSampler::RandomSampler(const size_t num_samples) :
-    num_samples_(num_samples) {
-}
+RandomSampler::RandomSampler(const size_t num_samples)
+    : num_samples_(num_samples) {}
 
 void RandomSampler::Initialize(const size_t total_num_samples) {
     CHECK_LE(num_samples_, total_num_samples);

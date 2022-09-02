@@ -47,7 +47,7 @@ namespace colmap {
 
 std::vector<FundamentalMatrixSevenPointEstimator::M_t>
 FundamentalMatrixSevenPointEstimator::Estimate(
-    const std::vector<X_t>& points1, const std::vector<Y_t>& points2) {
+    const std::vector<X_t> &points1, const std::vector<Y_t> &points2) {
     assert(points1.size() == 7);
     assert(points2.size() == 7);
 
@@ -91,8 +91,20 @@ FundamentalMatrixSevenPointEstimator::Estimate(
 
     Eigen::Vector4d coeffs;
     coeffs(0) = f1(0) * t0 - f1(1) * t1 + f1(2) * t2;
-    coeffs(1) = f2(0) * t0 - f2(1) * t1 + f2(2) * t2 - f2(3) * (f1(1) * f1(8) - f1(2) * f1(7)) + f2(4) * (f1(0) * f1(8) - f1(2) * f1(6)) - f2(5) * (f1(0) * f1(7) - f1(1) * f1(6)) + f2(6) * (f1(1) * f1(5) - f1(2) * f1(4)) - f2(7) * (f1(0) * f1(5) - f1(2) * f1(3)) + f2(8) * (f1(0) * f1(4) - f1(1) * f1(3));
-    coeffs(2) = f1(0) * t3 - f1(1) * t4 + f1(2) * t5 - f1(3) * (f2(1) * f2(8) - f2(2) * f2(7)) + f1(4) * (f2(0) * f2(8) - f2(2) * f2(6)) - f1(5) * (f2(0) * f2(7) - f2(1) * f2(6)) + f1(6) * (f2(1) * f2(5) - f2(2) * f2(4)) - f1(7) * (f2(0) * f2(5) - f2(2) * f2(3)) + f1(8) * (f2(0) * f2(4) - f2(1) * f2(3));
+    coeffs(1) = f2(0) * t0 - f2(1) * t1 + f2(2) * t2 -
+                f2(3) * (f1(1) * f1(8) - f1(2) * f1(7)) +
+                f2(4) * (f1(0) * f1(8) - f1(2) * f1(6)) -
+                f2(5) * (f1(0) * f1(7) - f1(1) * f1(6)) +
+                f2(6) * (f1(1) * f1(5) - f1(2) * f1(4)) -
+                f2(7) * (f1(0) * f1(5) - f1(2) * f1(3)) +
+                f2(8) * (f1(0) * f1(4) - f1(1) * f1(3));
+    coeffs(2) = f1(0) * t3 - f1(1) * t4 + f1(2) * t5 -
+                f1(3) * (f2(1) * f2(8) - f2(2) * f2(7)) +
+                f1(4) * (f2(0) * f2(8) - f2(2) * f2(6)) -
+                f1(5) * (f2(0) * f2(7) - f2(1) * f2(6)) +
+                f1(6) * (f2(1) * f2(5) - f2(2) * f2(4)) -
+                f1(7) * (f2(0) * f2(5) - f2(2) * f2(3)) +
+                f1(8) * (f2(0) * f2(4) - f2(1) * f2(3));
     coeffs(3) = f2(0) * t3 - f2(1) * t4 + f2(2) * t5;
 
     Eigen::VectorXd roots_real;
@@ -131,14 +143,14 @@ FundamentalMatrixSevenPointEstimator::Estimate(
 }
 
 void FundamentalMatrixSevenPointEstimator::Residuals(
-    const std::vector<X_t>& points1, const std::vector<Y_t>& points2,
-    const M_t& F, std::vector<double>* residuals) {
+    const std::vector<X_t> &points1, const std::vector<Y_t> &points2,
+    const M_t &F, std::vector<double> *residuals) {
     ComputeSquaredSampsonError(points1, points2, F, residuals);
 }
 
 std::vector<FundamentalMatrixEightPointEstimator::M_t>
 FundamentalMatrixEightPointEstimator::Estimate(
-    const std::vector<X_t>& points1, const std::vector<Y_t>& points2) {
+    const std::vector<X_t> &points1, const std::vector<Y_t> &points2) {
     assert(points1.size() == points2.size());
 
     // Center and normalize image points for better numerical stability.
@@ -146,8 +158,10 @@ FundamentalMatrixEightPointEstimator::Estimate(
     std::vector<Y_t> normed_points2;
     Eigen::Matrix3d points1_norm_matrix;
     Eigen::Matrix3d points2_norm_matrix;
-    CenterAndNormalizeImagePoints(points1, &normed_points1, &points1_norm_matrix);
-    CenterAndNormalizeImagePoints(points2, &normed_points2, &points2_norm_matrix);
+    CenterAndNormalizeImagePoints(points1, &normed_points1,
+                                  &points1_norm_matrix);
+    CenterAndNormalizeImagePoints(points2, &normed_points2,
+                                  &points2_norm_matrix);
 
     // Setup homogeneous linear equation as x2' * F * x1 = 0.
     Eigen::Matrix<double, Eigen::Dynamic, 9> cmatrix(points1.size(), 9);
@@ -171,22 +185,25 @@ FundamentalMatrixEightPointEstimator::Estimate(
         ematrix_t.transpose(), Eigen::ComputeFullU | Eigen::ComputeFullV);
     Eigen::Vector3d singular_values = fmatrix_svd.singularValues();
     singular_values(2) = 0.0;
-    const Eigen::Matrix3d F = fmatrix_svd.matrixU() * singular_values.asDiagonal() * fmatrix_svd.matrixV().transpose();
+    const Eigen::Matrix3d F = fmatrix_svd.matrixU() *
+                              singular_values.asDiagonal() *
+                              fmatrix_svd.matrixV().transpose();
 
-    const std::vector<M_t> models = {points2_norm_matrix.transpose() * F * points1_norm_matrix};
+    const std::vector<M_t> models = {points2_norm_matrix.transpose() * F *
+                                     points1_norm_matrix};
     return models;
 }
 
 void FundamentalMatrixEightPointEstimator::Residuals(
-    const std::vector<X_t>& points1, const std::vector<Y_t>& points2,
-    const M_t& E, std::vector<double>* residuals) {
+    const std::vector<X_t> &points1, const std::vector<Y_t> &points2,
+    const M_t &E, std::vector<double> *residuals) {
     ComputeSquaredSampsonError(points1, points2, E, residuals);
 }
 
-void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d>& points1,
-                                const std::vector<Eigen::Vector2d>& points2,
-                                const Eigen::Matrix3d& E,
-                                std::vector<double>* residuals) {
+void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d> &points1,
+                                const std::vector<Eigen::Vector2d> &points2,
+                                const Eigen::Matrix3d &E,
+                                std::vector<double> *residuals) {
     assert(points1.size() == points2.size());
 
     residuals->resize(points1.size());
@@ -224,13 +241,14 @@ void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d>& points1,
 
         // Sampson distance
         (*residuals)[i] =
-            x2tEx1 * x2tEx1 / (Ex1_0 * Ex1_0 + Ex1_1 * Ex1_1 + Etx2_0 * Etx2_0 + Etx2_1 * Etx2_1);
+            x2tEx1 * x2tEx1 /
+            (Ex1_0 * Ex1_0 + Ex1_1 * Ex1_1 + Etx2_0 * Etx2_0 + Etx2_1 * Etx2_1);
     }
 }
 
-void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d>& points,
-                                   std::vector<Eigen::Vector2d>* normed_points,
-                                   Eigen::Matrix3d* matrix) {
+void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d> &points,
+                                   std::vector<Eigen::Vector2d> *normed_points,
+                                   Eigen::Matrix3d *matrix) {
     // Calculate centroid
     Eigen::Vector2d centroid(0, 0);
     for (const auto point : points) {

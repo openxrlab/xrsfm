@@ -27,8 +27,8 @@ class MatchMap {
 
     void PatchInit(const Map &map);
 
-    void AddTrack(int frame_id1, int frame_id2, const Match &match, const size_t num_keypoint1,
-                  const size_t num_keypoints2);
+    void AddTrack(int frame_id1, int frame_id2, const Match &match,
+                  const size_t num_keypoint1, const size_t num_keypoints2);
 
     void MakeTrack(const Map &map);
 
@@ -41,10 +41,11 @@ class MatchMap {
     int GetMatcheNum(int frame_id1, int frame_id2);
 
     // map::
-    static void LoadRetrievalRank(const std::string &filename,
-                                  const std::map<std::string, int> &name_map,
-                                  std::map<int, std::vector<int>> &retrieval_rank_of_frames,
-                                  bool skip_matches = true);
+    static void
+    LoadRetrievalRank(const std::string &filename,
+                      const std::map<std::string, int> &name_map,
+                      std::map<int, std::vector<int>> &retrieval_rank_of_frames,
+                      bool skip_matches = true);
 
     static void LoadMatch(const Map &map, std::vector<FramePair> &frame_pairs);
 
@@ -95,9 +96,10 @@ class MatchMap {
 
 class MatchExpansionSolver {
   public:
-    void SetUp(const Map &map, const std::map<int, std::vector<int>> &retrieval_rank_of_frames,
-               const std::vector<ImageSize> &images, const size_t &initial_frame1,
-               const size_t &initial_frame2);
+    void SetUp(const Map &map,
+               const std::map<int, std::vector<int>> &retrieval_rank_of_frames,
+               const std::vector<ImageSize> &images,
+               const size_t &initial_frame1, const size_t &initial_frame2);
 
     void Run(const Map &map, std::vector<std::pair<int, int>> &image_pairs);
 
@@ -117,24 +119,29 @@ class MatchExpansionSolver {
 
     int GetInitFramePairId(const std::vector<std::map<int, int>> &id_pair);
 
-    void GetPotentialRegisteredFrames(const Map &map, int num, std::vector<int> &set);
+    void GetPotentialRegisteredFrames(const Map &map, int num,
+                                      std::vector<int> &set);
 
-    void SimulationSfM(const Map &map, int num, std::vector<std::vector<bool>> &tri);
+    void SimulationSfM(const Map &map, int num,
+                       std::vector<std::vector<bool>> &tri);
 
-    void tri_points(int image_id1, int image_id2, CorrespondenceGraph &corr_graph,
+    void tri_points(int image_id1, int image_id2,
+                    CorrespondenceGraph &corr_graph,
                     std::vector<std::vector<bool>> &tri);
 
-    void GetCandidateCovisibility(const Map &map, const std::vector<int> &can_build,
-                                  const std::vector<int> &setcc,
-                                  const std::vector<std::map<int, int>> &cor_retrieval,
-                                  std::vector<std::set<int>> &pair_list,
-                                  std::vector<FramePair> &frame_pairs);
+    void GetCandidateCovisibility(
+        const Map &map, const std::vector<int> &can_build,
+        const std::vector<int> &setcc,
+        const std::vector<std::map<int, int>> &cor_retrieval,
+        std::vector<std::set<int>> &pair_list,
+        std::vector<FramePair> &frame_pairs);
 
     std::map<int, std::vector<int>> GetCovisibilityInfo(int frame_id);
 
     size_t m_initial_frame1, m_initial_frame2;
-    std::vector<std::map<int, int>> id2rank_vec; // retrievalframepairs_map[frame_i][frame_j] = the
-                                                 // rank of frame_j in candidates of frame_i
+    std::vector<std::map<int, int>>
+        id2rank_vec; // retrievalframepairs_map[frame_i][frame_j] = the
+                     // rank of frame_j in candidates of frame_i
     MatchMap m_matchmap;
 
     const bool verbose = false;

@@ -1,5 +1,5 @@
- 
-# 教程 
+
+# 教程
 
 ## 运动恢复结构
 
@@ -37,7 +37,7 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrieval")和基
 
 输出:重建结果
 
-通过下列命令行运行重建阶段 
+通过下列命令行运行重建阶段
 ```
 ./bin/run_reconstruction bin_path camera_path output_path init_id1 init_id2
 ```
@@ -57,7 +57,7 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrieval")和基
 输出:恢复尺度的重建结果
 
 
-通过下列命令行运行重建阶段 
+通过下列命令行运行重建阶段
 ```
 ./bin/estimate_scale images_dir map_dir
 ```
@@ -105,4 +105,4 @@ workspace
 然后通过以下脚本达到相同的效果。
 ```
 python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$ --estimate_scale
-``` 
+```

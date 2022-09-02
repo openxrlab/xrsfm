@@ -34,29 +34,20 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include "common/math_util.h"
 
 #ifdef _WIN32
-static inline long int random(void)
-{
-        return rand();
-}
+static inline long int random(void) { return rand(); }
 #endif
 
-double g2d_distance(const double a[2], const double b[2])
-{
-    return sqrtf(sq(a[0]-b[0]) + sq(a[1]-b[1]));
+double g2d_distance(const double a[2], const double b[2]) {
+    return sqrtf(sq(a[0] - b[0]) + sq(a[1] - b[1]));
 }
 
-zarray_t *g2d_polygon_create_empty()
-{
+zarray_t *g2d_polygon_create_empty() {
     return zarray_create(sizeof(double[2]));
 }
 
-void g2d_polygon_add(zarray_t *poly, double v[2])
-{
-    zarray_add(poly, v);
-}
+void g2d_polygon_add(zarray_t *poly, double v[2]) { zarray_add(poly, v); }
 
-zarray_t *g2d_polygon_create_data(double v[][2], int sz)
-{
+zarray_t *g2d_polygon_create_data(double v[][2], int sz) {
     zarray_t *points = g2d_polygon_create_empty();
 
     for (int i = 0; i < sz; i++)
@@ -65,11 +56,10 @@ zarray_t *g2d_polygon_create_data(double v[][2], int sz)
     return points;
 }
 
-zarray_t *g2d_polygon_create_zeros(int sz)
-{
+zarray_t *g2d_polygon_create_zeros(int sz) {
     zarray_t *points = zarray_create(sizeof(double[2]));
 
-    double z[2] = { 0, 0 };
+    double z[2] = {0, 0};
 
     for (int i = 0; i < sz; i++)
         zarray_add(points, z);
@@ -77,8 +67,7 @@ zarray_t *g2d_polygon_create_zeros(int sz)
     return points;
 }
 
-void g2d_polygon_make_ccw(zarray_t *poly)
-{
+void g2d_polygon_make_ccw(zarray_t *poly) {
     // Step one: we want the points in counter-clockwise order.
     // If the points are in clockwise order, we'll reverse them.
     double total_theta = 0;
@@ -91,12 +80,12 @@ void g2d_polygon_make_ccw(zarray_t *poly)
     for (int i = 0; i <= sz; i++) {
         double p0[2], p1[2];
         zarray_get(poly, i % sz, &p0);
-        zarray_get(poly, (i+1) % sz, &p1);
+        zarray_get(poly, (i + 1) % sz, &p1);
 
-        double this_theta = atan2(p1[1]-p0[1], p1[0]-p0[0]);
+        double this_theta = atan2(p1[1] - p0[1], p1[0] - p0[0]);
 
         if (i > 0) {
-            double dtheta = mod2pi(this_theta-last_theta);
+            double dtheta = mod2pi(this_theta - last_theta);
             total_theta += dtheta;
         }
 
@@ -111,15 +100,14 @@ void g2d_polygon_make_ccw(zarray_t *poly)
             double a[2], b[2];
 
             zarray_get(poly, i, a);
-            zarray_get(poly, sz-1-i, b);
+            zarray_get(poly, sz - 1 - i, b);
             zarray_set(poly, i, b, NULL);
-            zarray_set(poly, sz-1-i, a, NULL);
+            zarray_set(poly, sz - 1 - i, a, NULL);
         }
     }
 }
 
-int g2d_polygon_contains_point_ref(const zarray_t *poly, double q[2])
-{
+int g2d_polygon_contains_point_ref(const zarray_t *poly, double q[2]) {
     // use winding. If the point is inside the polygon, we'll wrap
     // around it (accumulating 6.28 radians). If we're outside the
     // polygon, we'll accumulate zero.
@@ -134,7 +122,7 @@ int g2d_polygon_contains_point_ref(const zarray_t *poly, double q[2])
 
         zarray_get(poly, i % psz, &p);
 
-        double this_theta = atan2(q[1]-p[1], q[0]-p[0]);
+        double this_theta = atan2(q[1] - p[1], q[0] - p[0]);
 
         if (i != 0)
             acc_theta += mod2pi(this_theta - last_theta);
@@ -189,8 +177,7 @@ zarray_t *g2d_convex_hull2(const zarray_t *points)
 
 // creates and returns a zarray(double[2]). The resulting polygon is
 // CCW and implicitly closed. Unnecessary colinear points are omitted.
-zarray_t *g2d_convex_hull(const zarray_t *points)
-{
+zarray_t *g2d_convex_hull(const zarray_t *points) {
     zarray_t *hull = zarray_create(sizeof(double[2]));
 
     // gift-wrap algorithm.
@@ -227,7 +214,7 @@ zarray_t *g2d_convex_hull(const zarray_t *points)
 
         double *q = NULL;
         double n0 = 0, n1 = 0; // the normal to the line (p, q) (not
-                       // necessarily unit length).
+                               // necessarily unit length).
 
         // Search for the point q for which the line (p,q) is most "to
         // the right of" the other points. (i.e., every time we find a
@@ -247,9 +234,10 @@ zarray_t *g2d_convex_hull(const zarray_t *points)
                 n0 = q[1] - p[1];
                 n1 = -q[0] + p[0];
             } else {
-                // we already have a line (p,q). is point thisq RIGHT OF line (p, q)?
+                // we already have a line (p,q). is point thisq RIGHT OF line
+                // (p, q)?
                 double e0 = thisq[0] - p[0], e1 = thisq[1] - p[1];
-                double dot = e0*n0 + e1*n1;
+                double dot = e0 * n0 + e1 * n1;
 
                 if (dot > 0) {
                     // it is. change our line.
@@ -278,13 +266,13 @@ zarray_t *g2d_convex_hull(const zarray_t *points)
             double e0 = o[0] - p[0];
             double e1 = o[1] - p[1];
 
-            if (n0*e0 + n1*e1 == 0)
+            if (n0 * e0 + n1 * e1 == 0)
                 colinear = 1;
         }
 
         // if it is colinear, overwrite the last one.
         if (colinear)
-            zarray_set(hull, zarray_size(hull)-1, q, NULL);
+            zarray_set(hull, zarray_size(hull) - 1, q, NULL);
         else
             zarray_add(hull, q);
 
@@ -295,8 +283,8 @@ zarray_t *g2d_convex_hull(const zarray_t *points)
 }
 
 // Find point p on the boundary of poly that is closest to q.
-void g2d_polygon_closest_boundary_point(const zarray_t *poly, const double q[2], double *p)
-{
+void g2d_polygon_closest_boundary_point(const zarray_t *poly, const double q[2],
+                                        double *p) {
     int psz = zarray_size(poly);
     double min_dist = HUGE_VALF;
 
@@ -304,7 +292,7 @@ void g2d_polygon_closest_boundary_point(const zarray_t *poly, const double q[2],
         double *p0, *p1;
 
         zarray_get_volatile(poly, i, &p0);
-        zarray_get_volatile(poly, (i+1) % psz, &p1);
+        zarray_get_volatile(poly, (i + 1) % psz, &p1);
 
         g2d_line_segment_t seg;
         g2d_line_segment_init_from_points(&seg, p0, p1);
@@ -320,8 +308,7 @@ void g2d_polygon_closest_boundary_point(const zarray_t *poly, const double q[2],
     }
 }
 
-int g2d_polygon_contains_point(const zarray_t *poly, double q[2])
-{
+int g2d_polygon_contains_point(const zarray_t *poly, double q[2]) {
     // use winding. If the point is inside the polygon, we'll wrap
     // around it (accumulating 6.28 radians). If we're outside the
     // polygon, we'll accumulate zero.
@@ -359,42 +346,41 @@ int g2d_polygon_contains_point(const zarray_t *poly, double q[2])
 
             // encourage a jump table by mapping to small positive integers.
             switch (dquadrant) {
-                case -3:
-                case 1:
-                    quad_acc ++;
-                    break;
-                case -1:
-                case 3:
-                    quad_acc --;
-                    break;
-                case 0:
-                    break;
-                case -2:
-                case 2:
-                {
-                    // get the previous point.
-                    double *p0;
-                    zarray_get_volatile(poly, i-1, &p0);
+            case -3:
+            case 1:
+                quad_acc++;
+                break;
+            case -1:
+            case 3:
+                quad_acc--;
+                break;
+            case 0:
+                break;
+            case -2:
+            case 2: {
+                // get the previous point.
+                double *p0;
+                zarray_get_volatile(poly, i - 1, &p0);
 
-                    // Consider the points p0 and p (the points around the
-                    //polygon that we are tracing) and the query point q.
-                    //
-                    // If we've moved diagonally across quadrants, we want
-                    // to measure whether we have rotated +PI radians or
-                    // -PI radians. We can test this by computing the dot
-                    // product of vector (p0-q) with the vector
-                    // perpendicular to vector (p-q)
-                    double nx = p[1] - q[1];
-                    double ny = -p[0] + q[0];
+                // Consider the points p0 and p (the points around the
+                // polygon that we are tracing) and the query point q.
+                //
+                // If we've moved diagonally across quadrants, we want
+                // to measure whether we have rotated +PI radians or
+                // -PI radians. We can test this by computing the dot
+                // product of vector (p0-q) with the vector
+                // perpendicular to vector (p-q)
+                double nx = p[1] - q[1];
+                double ny = -p[0] + q[0];
 
-                    double dot = nx*(p0[0]-q[0]) + ny*(p0[1]-q[1]);
-                    if (dot < 0)
-                        quad_acc -= 2;
-                    else
-                        quad_acc += 2;
+                double dot = nx * (p0[0] - q[0]) + ny * (p0[1] - q[1]);
+                if (dot < 0)
+                    quad_acc -= 2;
+                else
+                    quad_acc += 2;
 
-                    break;
-                }
+                break;
+            }
             }
         }
 
@@ -403,38 +389,37 @@ int g2d_polygon_contains_point(const zarray_t *poly, double q[2])
 
     int v = (quad_acc >= 2) || (quad_acc <= -2);
 
-    #if 0
+#if 0
     if (v != g2d_polygon_contains_point_ref(poly, q)) {
         printf("FAILURE %d %d\n", v, quad_acc);
         exit(-1);
     }
-    #endif
+#endif
 
     return v;
 }
 
-void g2d_line_init_from_points(g2d_line_t *line, const double p0[2], const double p1[2])
-{
+void g2d_line_init_from_points(g2d_line_t *line, const double p0[2],
+                               const double p1[2]) {
     line->p[0] = p0[0];
     line->p[1] = p0[1];
-    line->u[0] = p1[0]-p0[0];
-    line->u[1] = p1[1]-p0[1];
+    line->u[0] = p1[0] - p0[0];
+    line->u[1] = p1[1] - p0[1];
     double mag = sqrtf(sq(line->u[0]) + sq(line->u[1]));
 
     line->u[0] /= mag;
     line->u[1] /= mag;
 }
 
-double g2d_line_get_coordinate(const g2d_line_t *line, const double q[2])
-{
-    return (q[0]-line->p[0])*line->u[0] + (q[1]-line->p[1])*line->u[1];
+double g2d_line_get_coordinate(const g2d_line_t *line, const double q[2]) {
+    return (q[0] - line->p[0]) * line->u[0] + (q[1] - line->p[1]) * line->u[1];
 }
 
 // Compute intersection of two line segments. If they intersect,
 // result is stored in p and 1 is returned. Otherwise, zero is
 // returned. p may be NULL.
-int g2d_line_intersect_line(const g2d_line_t *linea, const g2d_line_t *lineb, double *p)
-{
+int g2d_line_intersect_line(const g2d_line_t *linea, const g2d_line_t *lineb,
+                            double *p) {
     // this implementation is many times faster than the original,
     // mostly due to avoiding a general-purpose LU decomposition in
     // Matrix.inverse().
@@ -443,46 +428,45 @@ int g2d_line_intersect_line(const g2d_line_t *linea, const g2d_line_t *lineb, do
     double b00, b10;
 
     m00 = linea->u[0];
-    m01= -lineb->u[0];
+    m01 = -lineb->u[0];
     m10 = linea->u[1];
-    m11= -lineb->u[1];
+    m11 = -lineb->u[1];
 
     // determinant of m
-    double det = m00*m11-m01*m10;
+    double det = m00 * m11 - m01 * m10;
 
     // parallel lines?
     if (fabs(det) < 0.00000001)
         return 0;
 
     // inverse of m
-    i00 = m11/det;
-    i01 = -m01/det;
+    i00 = m11 / det;
+    i01 = -m01 / det;
 
     b00 = lineb->p[0] - linea->p[0];
     b10 = lineb->p[1] - linea->p[1];
 
     double x00; //, x10;
-    x00 = i00*b00+i01*b10;
+    x00 = i00 * b00 + i01 * b10;
 
     if (p != NULL) {
-        p[0] = linea->u[0]*x00 + linea->p[0];
-        p[1] = linea->u[1]*x00 + linea->p[1];
+        p[0] = linea->u[0] * x00 + linea->p[0];
+        p[1] = linea->u[1] * x00 + linea->p[1];
     }
 
     return 1;
 }
 
-
-void g2d_line_segment_init_from_points(g2d_line_segment_t *seg, const double p0[2], const double p1[2])
-{
+void g2d_line_segment_init_from_points(g2d_line_segment_t *seg,
+                                       const double p0[2], const double p1[2]) {
     g2d_line_init_from_points(&seg->line, p0, p1);
     seg->p1[0] = p1[0];
     seg->p1[1] = p1[1];
 }
 
 // Find the point p on segment seg that is closest to point q.
-void g2d_line_segment_closest_point(const g2d_line_segment_t *seg, const double *q, double *p)
-{
+void g2d_line_segment_closest_point(const g2d_line_segment_t *seg,
+                                    const double *q, double *p) {
     double a = g2d_line_get_coordinate(&seg->line, seg->line.p);
     double b = g2d_line_get_coordinate(&seg->line, seg->p1);
     double c = g2d_line_get_coordinate(&seg->line, q);
@@ -499,8 +483,9 @@ void g2d_line_segment_closest_point(const g2d_line_segment_t *seg, const double 
 // Compute intersection of two line segments. If they intersect,
 // result is stored in p and 1 is returned. Otherwise, zero is
 // returned. p may be NULL.
-int g2d_line_segment_intersect_segment(const g2d_line_segment_t *sega, const g2d_line_segment_t *segb, double *p)
-{
+int g2d_line_segment_intersect_segment(const g2d_line_segment_t *sega,
+                                       const g2d_line_segment_t *segb,
+                                       double *p) {
     double tmp[2];
 
     if (!g2d_line_intersect_line(&sega->line, &segb->line, tmp))
@@ -511,7 +496,7 @@ int g2d_line_segment_intersect_segment(const g2d_line_segment_t *sega, const g2d
     double c = g2d_line_get_coordinate(&sega->line, tmp);
 
     // does intersection lie on the first line?
-    if ((c<a && c<b) || (c>a && c>b))
+    if ((c < a && c < b) || (c > a && c > b))
         return 0;
 
     a = g2d_line_get_coordinate(&segb->line, segb->line.p);
@@ -519,7 +504,7 @@ int g2d_line_segment_intersect_segment(const g2d_line_segment_t *sega, const g2d
     c = g2d_line_get_coordinate(&segb->line, tmp);
 
     // does intersection lie on second line?
-    if ((c<a && c<b) || (c>a && c>b))
+    if ((c < a && c < b) || (c > a && c > b))
         return 0;
 
     if (p != NULL) {
@@ -533,8 +518,8 @@ int g2d_line_segment_intersect_segment(const g2d_line_segment_t *sega, const g2d
 // Compute intersection of a line segment and a line. If they
 // intersect, result is stored in p and 1 is returned. Otherwise, zero
 // is returned. p may be NULL.
-int g2d_line_segment_intersect_line(const g2d_line_segment_t *seg, const g2d_line_t *line, double *p)
-{
+int g2d_line_segment_intersect_line(const g2d_line_segment_t *seg,
+                                    const g2d_line_t *line, double *p) {
     double tmp[2];
 
     if (!g2d_line_intersect_line(&seg->line, line, tmp))
@@ -545,7 +530,7 @@ int g2d_line_segment_intersect_line(const g2d_line_segment_t *seg, const g2d_lin
     double c = g2d_line_get_coordinate(&seg->line, tmp);
 
     // does intersection lie on the first line?
-    if ((c<a && c<b) || (c>a && c>b))
+    if ((c < a && c < b) || (c > a && c > b))
         return 0;
 
     if (p != NULL) {
@@ -557,15 +542,15 @@ int g2d_line_segment_intersect_line(const g2d_line_segment_t *seg, const g2d_lin
 }
 
 // do the edges of polya and polyb collide? (Does NOT test for containment).
-int g2d_polygon_intersects_polygon(const zarray_t *polya, const zarray_t *polyb)
-{
+int g2d_polygon_intersects_polygon(const zarray_t *polya,
+                                   const zarray_t *polyb) {
     // do any of the line segments collide? If so, the answer is no.
 
     // dumb N^2 method.
     for (int ia = 0; ia < zarray_size(polya); ia++) {
         double pa0[2], pa1[2];
         zarray_get(polya, ia, pa0);
-        zarray_get(polya, (ia+1)%zarray_size(polya), pa1);
+        zarray_get(polya, (ia + 1) % zarray_size(polya), pa1);
 
         g2d_line_segment_t sega;
         g2d_line_segment_init_from_points(&sega, pa0, pa1);
@@ -573,7 +558,7 @@ int g2d_polygon_intersects_polygon(const zarray_t *polya, const zarray_t *polyb)
         for (int ib = 0; ib < zarray_size(polyb); ib++) {
             double pb0[2], pb1[2];
             zarray_get(polyb, ib, pb0);
-            zarray_get(polyb, (ib+1)%zarray_size(polyb), pb1);
+            zarray_get(polyb, (ib + 1) % zarray_size(polyb), pb1);
 
             g2d_line_segment_t segb;
             g2d_line_segment_init_from_points(&segb, pb0, pb1);
@@ -587,8 +572,7 @@ int g2d_polygon_intersects_polygon(const zarray_t *polya, const zarray_t *polyb)
 }
 
 // does polya completely contain polyb?
-int g2d_polygon_contains_polygon(const zarray_t *polya, const zarray_t *polyb)
-{
+int g2d_polygon_contains_polygon(const zarray_t *polya, const zarray_t *polyb) {
     // do any of the line segments collide? If so, the answer is no.
     if (g2d_polygon_intersects_polygon(polya, polyb))
         return 0;
@@ -601,9 +585,9 @@ int g2d_polygon_contains_polygon(const zarray_t *polya, const zarray_t *polyb)
     return g2d_polygon_contains_point(polya, p);
 }
 
-// compute a point that is inside the polygon. (It may not be *far* inside though)
-void g2d_polygon_get_interior_point(const zarray_t *poly, double *p)
-{
+// compute a point that is inside the polygon. (It may not be *far* inside
+// though)
+void g2d_polygon_get_interior_point(const zarray_t *poly, double *p) {
     // take the first three points, which form a triangle. Find the middle point
     double a[2], b[2], c[2];
 
@@ -611,12 +595,11 @@ void g2d_polygon_get_interior_point(const zarray_t *poly, double *p)
     zarray_get(poly, 1, b);
     zarray_get(poly, 2, c);
 
-    p[0] = (a[0]+b[0]+c[0])/3;
-    p[1] = (a[1]+b[1]+c[1])/3;
+    p[0] = (a[0] + b[0] + c[0]) / 3;
+    p[1] = (a[1] + b[1] + c[1]) / 3;
 }
 
-int g2d_polygon_overlaps_polygon(const zarray_t *polya, const zarray_t *polyb)
-{
+int g2d_polygon_overlaps_polygon(const zarray_t *polya, const zarray_t *polyb) {
     // do any of the line segments collide? If so, the answer is yes.
     if (g2d_polygon_intersects_polygon(polya, polyb))
         return 1;
@@ -637,10 +620,9 @@ int g2d_polygon_overlaps_polygon(const zarray_t *polya, const zarray_t *polyb)
     return 0;
 }
 
-static int double_sort_up(const void *_a, const void *_b)
-{
-    double a = *((double*) _a);
-    double b = *((double*) _b);
+static int double_sort_up(const void *_a, const void *_b) {
+    double a = *((double *)_a);
+    double b = *((double *)_b);
 
     if (a < b)
         return -1;
@@ -682,14 +664,13 @@ static int double_sort_up(const void *_a, const void *_b)
 */
 
 // returns the number of x intercepts
-int g2d_polygon_rasterize(const zarray_t *poly, double y, double *x)
-{
+int g2d_polygon_rasterize(const zarray_t *poly, double y, double *x) {
     int sz = zarray_size(poly);
 
     g2d_line_t line;
     if (1) {
-        double p0[2] = { 0, y };
-        double p1[2] = { 1, y };
+        double p0[2] = {0, y};
+        double p1[2] = {1, y};
 
         g2d_line_init_from_points(&line, p0, p1);
     }
@@ -700,7 +681,7 @@ int g2d_polygon_rasterize(const zarray_t *poly, double y, double *x)
         g2d_line_segment_t seg;
         double *p0, *p1;
         zarray_get_volatile(poly, i, &p0);
-        zarray_get_volatile(poly, (i+1)%sz, &p1);
+        zarray_get_volatile(poly, (i + 1) % sz, &p1);
 
         g2d_line_segment_init_from_points(&seg, p0, p1);
 

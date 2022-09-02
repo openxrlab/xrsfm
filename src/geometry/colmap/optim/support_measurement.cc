@@ -33,8 +33,9 @@
 
 namespace colmap {
 
-InlierSupportMeasurer::Support InlierSupportMeasurer::Evaluate(const std::vector<double>& residuals,
-                                                               const double max_residual) {
+InlierSupportMeasurer::Support
+InlierSupportMeasurer::Evaluate(const std::vector<double> &residuals,
+                                const double max_residual) {
     Support support;
     support.num_inliers = 0;
     support.residual_sum = 0;
@@ -49,16 +50,19 @@ InlierSupportMeasurer::Support InlierSupportMeasurer::Evaluate(const std::vector
     return support;
 }
 
-bool InlierSupportMeasurer::Compare(const Support& support1, const Support& support2) {
+bool InlierSupportMeasurer::Compare(const Support &support1,
+                                    const Support &support2) {
     if (support1.num_inliers > support2.num_inliers) {
         return true;
     } else {
-        return support1.num_inliers == support2.num_inliers && support1.residual_sum < support2.residual_sum;
+        return support1.num_inliers == support2.num_inliers &&
+               support1.residual_sum < support2.residual_sum;
     }
 }
 
-MEstimatorSupportMeasurer::Support MEstimatorSupportMeasurer::Evaluate(const std::vector<double>& residuals,
-                                                                       const double max_residual) {
+MEstimatorSupportMeasurer::Support
+MEstimatorSupportMeasurer::Evaluate(const std::vector<double> &residuals,
+                                    const double max_residual) {
     Support support;
     support.num_inliers = 0;
     support.score = 0;
@@ -75,7 +79,8 @@ MEstimatorSupportMeasurer::Support MEstimatorSupportMeasurer::Evaluate(const std
     return support;
 }
 
-bool MEstimatorSupportMeasurer::Compare(const Support& support1, const Support& support2) {
+bool MEstimatorSupportMeasurer::Compare(const Support &support1,
+                                        const Support &support2) {
     return support1.score < support2.score;
 }
 } // namespace colmap

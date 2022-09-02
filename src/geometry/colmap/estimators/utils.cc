@@ -35,8 +35,10 @@
 
 namespace colmap {
 
-// void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d>& points,
-//                                    std::vector<Eigen::Vector2d>* normed_points, Eigen::Matrix3d* matrix) {
+// void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d>&
+// points,
+//                                    std::vector<Eigen::Vector2d>*
+//                                    normed_points, Eigen::Matrix3d* matrix) {
 //   // Calculate centroid
 //   Eigen::Vector2d centroid(0, 0);
 //   for (const auto point : points) {
@@ -53,7 +55,8 @@ namespace colmap {
 
 //   // Compose normalization matrix
 //   const double norm_factor = std::sqrt(2.0) / rms_mean_dist;
-//   *matrix << norm_factor, 0, -norm_factor * centroid(0), 0, norm_factor, -norm_factor * centroid(1), 0, 0, 1;
+//   *matrix << norm_factor, 0, -norm_factor * centroid(0), 0, norm_factor,
+//   -norm_factor * centroid(1), 0, 0, 1;
 
 //   // Apply normalization matrix
 //   normed_points->resize(points.size());
@@ -83,7 +86,8 @@ namespace colmap {
 // }
 
 // void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d>& points1,
-//                                 const std::vector<Eigen::Vector2d>& points2, const Eigen::Matrix3d& E,
+//                                 const std::vector<Eigen::Vector2d>& points2,
+//                                 const Eigen::Matrix3d& E,
 //                                 std::vector<double>* residuals) {
 //   CHECK_EQ(points1.size(), points2.size());
 
@@ -121,13 +125,15 @@ namespace colmap {
 //     const double x2tEx1 = x2_0 * Ex1_0 + x2_1 * Ex1_1 + Ex1_2;
 
 //     // Sampson distance
-//     (*residuals)[i] = x2tEx1 * x2tEx1 / (Ex1_0 * Ex1_0 + Ex1_1 * Ex1_1 + Etx2_0 * Etx2_0 + Etx2_1 * Etx2_1);
+//     (*residuals)[i] = x2tEx1 * x2tEx1 / (Ex1_0 * Ex1_0 + Ex1_1 * Ex1_1 +
+//     Etx2_0 * Etx2_0 + Etx2_1 * Etx2_1);
 //   }
 // }
 
-void ComputeSquaredReprojectionError(const std::vector<Eigen::Vector2d>& points2D,
-                                     const std::vector<Eigen::Vector3d>& points3D, const Eigen::Matrix3x4d& proj_matrix,
-                                     std::vector<double>* residuals) {
+void ComputeSquaredReprojectionError(
+    const std::vector<Eigen::Vector2d> &points2D,
+    const std::vector<Eigen::Vector3d> &points3D,
+    const Eigen::Matrix3x4d &proj_matrix, std::vector<double> *residuals) {
     CHECK_EQ(points2D.size(), points3D.size());
 
     residuals->resize(points2D.size());

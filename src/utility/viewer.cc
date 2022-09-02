@@ -12,8 +12,8 @@
 
 namespace xrsfm {
 constexpr int width = 1024, height = 768, focal = 500;
-const vector3 red(1.0, 0, 0), green(0, 1.0, 0), blue(0, 0, 1.0), yellow(1, 1, 0), grey(0.5, 0.5, 0.5),
-    black(0, 0, 0);
+const vector3 red(1.0, 0, 0), green(0, 1.0, 0), blue(0, 0, 1.0),
+    yellow(1, 1, 0), grey(0.5, 0.5, 0.5), black(0, 0, 0);
 
 void ViewerThread::start() {
     worker_running = true;
@@ -39,17 +39,20 @@ void ViewerThread::worker_loop() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // Define Projection and initial ModelView matrix
     pangolin::OpenGlRenderState s_cam(
-        pangolin::ProjectionMatrix(width, height, focal, focal, width / 2, height / 2, 0.1, 1000),
+        pangolin::ProjectionMatrix(width, height, focal, focal, width / 2,
+                                   height / 2, 0.1, 1000),
         pangolin::ModelViewLookAt(0, 0, -10, 0, 0, 0, pangolin::AxisNegY));
 
     // Create Interactive View in window
     pangolin::MyHandler3D handler(s_cam);
-    pangolin::View &d_cam =
-        pangolin::CreateDisplay().SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f / 480.0f).SetHandler(&handler);
+    pangolin::View &d_cam = pangolin::CreateDisplay()
+                                .SetBounds(0.0, 1.0, 0.0, 1.0, -640.0f / 480.0f)
+                                .SetHandler(&handler);
 
     while (!pangolin::ShouldQuit() & worker_running) {
         if (handler.init_viewpoint) {
-            s_cam.SetModelViewMatrix(pangolin::ModelViewLookAt(0, 0, -10, 0, 0, 0, pangolin::AxisNegY));
+            s_cam.SetModelViewMatrix(pangolin::ModelViewLookAt(
+                0, 0, -10, 0, 0, 0, pangolin::AxisNegY));
             handler.init_viewpoint = false;
         }
 
@@ -95,7 +98,8 @@ void ViewerThread::update_map(const Map &map) {
     colors_pt.clear();
 
     for (const auto &frame : map.frames_) {
-        if (!frame.registered) continue;
+        if (!frame.registered)
+            continue;
         cameras.emplace_back(frame.Tcw);
         if (frame.flag_for_view) {
             colors_cam.emplace_back(red);
@@ -125,7 +129,8 @@ void ViewerThread::update_map_colmap(const Map &map) {
     colors_pt.clear();
 
     for (const auto &[id, frame] : map.frame_map_) {
-        if (!frame.registered) continue;
+        if (!frame.registered)
+            continue;
         cameras.emplace_back(frame.Tcw);
         if (frame.flag_for_view) {
             colors_cam.emplace_back(red);
@@ -137,15 +142,18 @@ void ViewerThread::update_map_colmap(const Map &map) {
     }
 
     for (const auto &[id, track] : map.track_map_) {
-        if (track.outlier) continue;
+        if (track.outlier)
+            continue;
         points.emplace_back(track.point3d_);
         colors_pt.emplace_back(black);
     }
 }
 
-void ViewerThread::add_tag_points(const std::map<int, std::vector<vector3>> &pt_world_vec) {
+void ViewerThread::add_tag_points(
+    const std::map<int, std::vector<vector3>> &pt_world_vec) {
     for (const auto &[id, pt_world] : pt_world_vec) {
-        if (pt_world.empty()) continue;
+        if (pt_world.empty())
+            continue;
         for (const auto &pt : pt_world) {
             points.emplace_back(pt);
             colors_pt.emplace_back(red);

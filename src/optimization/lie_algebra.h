@@ -29,9 +29,13 @@ inline matrix3 jr(vector3 theta) {
     double norm = theta.norm();
     matrix3 jr;
     if (norm < 1.745329252e-7) {
-        jr = matrix3::Identity() - 1.0 / 2.0 * skewSymmetric(theta) + 1.0 / 6.0 * skewSymmetric(theta) * skewSymmetric(theta);
+        jr = matrix3::Identity() - 1.0 / 2.0 * skewSymmetric(theta) +
+             1.0 / 6.0 * skewSymmetric(theta) * skewSymmetric(theta);
     } else {
-        jr = matrix3::Identity() - (1.0 - cos(norm)) / (norm * norm) * skewSymmetric(theta) + (norm - sin(norm)) / (norm * norm * norm) * skewSymmetric(theta) * skewSymmetric(theta);
+        jr = matrix3::Identity() -
+             (1.0 - cos(norm)) / (norm * norm) * skewSymmetric(theta) +
+             (norm - sin(norm)) / (norm * norm * norm) * skewSymmetric(theta) *
+                 skewSymmetric(theta);
     }
     return jr;
 }
@@ -40,9 +44,13 @@ inline matrix3 jri(vector3 theta) {
     double norm = theta.norm();
     matrix3 jri;
     if (norm < 1.745329252e-7) {
-        jri = matrix3::Identity() + 1.0 / 2.0 * skewSymmetric(theta) + 1.0 / 12.0 * skewSymmetric(theta) * skewSymmetric(theta);
+        jri = matrix3::Identity() + 1.0 / 2.0 * skewSymmetric(theta) +
+              1.0 / 12.0 * skewSymmetric(theta) * skewSymmetric(theta);
     } else {
-        jri = matrix3::Identity() + 1.0 / 2.0 * skewSymmetric(theta) + ((1.0) / (norm * norm) - (1.0 + cos(norm)) / (2 * norm * sin(norm))) * skewSymmetric(theta) * skewSymmetric(theta);
+        jri = matrix3::Identity() + 1.0 / 2.0 * skewSymmetric(theta) +
+              ((1.0) / (norm * norm) -
+               (1.0 + cos(norm)) / (2 * norm * sin(norm))) *
+                  skewSymmetric(theta) * skewSymmetric(theta);
     }
     return jri;
 }

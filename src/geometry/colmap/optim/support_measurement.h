@@ -51,10 +51,11 @@ struct InlierSupportMeasurer {
     };
 
     // Compute the support of the residuals.
-    Support Evaluate(const std::vector<double>& residuals, const double max_residual);
+    Support Evaluate(const std::vector<double> &residuals,
+                     const double max_residual);
 
     // Compare the two supports and return the better support.
-    bool Compare(const Support& support1, const Support& support2);
+    bool Compare(const Support &support1, const Support &support2);
 };
 
 // Measure the support of a model by its fitness to the data as used in MSAC.
@@ -69,10 +70,11 @@ struct MEstimatorSupportMeasurer {
     };
 
     // Compute the support of the residuals.
-    Support Evaluate(const std::vector<double>& residuals, const double max_residual);
+    Support Evaluate(const std::vector<double> &residuals,
+                     const double max_residual);
 
     // Compare the two supports and return the better support.
-    bool Compare(const Support& support1, const Support& support2);
+    bool Compare(const Support &support1, const Support &support2);
 };
 
 } // namespace colmap
