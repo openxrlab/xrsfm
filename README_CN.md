@@ -1,5 +1,11 @@
 # XRSfM
 
+<div align="left">
+
+[![actions](https://github.com/openxrlab/xrsfm/workflows/build/badge.svg)](https://github.com/openxrlab/xrsfm/actions)
+[![LICENSE](https://img.shields.io/github/license/openxrlab/xrsfm)](https://github.com/openxrlab/xrsfm/blob/main/LICENSE)
+
+</div>
 
 ## Introduction
 
