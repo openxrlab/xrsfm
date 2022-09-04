@@ -12,7 +12,7 @@ generate code, e.g., Auto, All, Maxwell, Pascal, ...")
 ################################################################################
 
 set(XRPrimer_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../xrprimer/install/lib/cmake")
-find_package(XRPrimer REQUIRED)
+find_package(XRPrimer REQUIRED) 
 
 # for sift gpu & view
 set(OpenGL_GL_PREFERENCE "LEGACY")#for const
@@ -85,6 +85,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
+add_subdirectory(3rdparty/CudaSift)
 add_subdirectory(3rdparty/SiftGPU)
 add_subdirectory(3rdparty/apriltag)
 
@@ -147,6 +148,7 @@ target_include_directories(xrsfm
         ${CMAKE_SOURCE_DIR}/src
         ${CMAKE_SOURCE_DIR}/src/geometry/colmap
         ${CMAKE_SOURCE_DIR}/3rdparty/SiftGPU
+        ${CMAKE_SOURCE_DIR}/3rdparty/CudaSift
         ${CMAKE_SOURCE_DIR}/3rdparty/apriltag
         ${EIGEN3_INCLUDE_DIRS}
         )
@@ -158,6 +160,7 @@ target_link_libraries(xrsfm
         ${GTEST_LIBRARIES}
         ${Pangolin_LIBRARIES}
         sift_gpu
+        cudasift
         )
 
 add_executable(run_matching src/run_matching.cc)

@@ -7,6 +7,10 @@
 #include <GL/glew.h>
 #include <numeric>
 
+#include "cudaImage.h"
+#include "cudaSift.h"
+#include <opencv2/features2d.hpp> 
+
 namespace xrsfm {
 std::unique_ptr<SiftGPU> SiftExtractor::create_siftgpu() {
     std::vector<int> gpu_indices(1, 0);
@@ -101,7 +105,7 @@ L1RootNormalizeFeatureDescriptors(const Eigen::MatrixXf &descriptors) {
     Eigen::MatrixXf descriptors_normalized(descriptors.rows(),
                                            descriptors.cols());
     for (Eigen::MatrixXf::Index r = 0; r < descriptors.rows(); ++r) {
-        const float norm = descriptors.row(r).lpNorm<1>();
+        const float norm = descriptors.row(r).lpNorm<1>(); 
         descriptors_normalized.row(r) = descriptors.row(r) / norm;
         descriptors_normalized.row(r) =
             descriptors_normalized.row(r).array().sqrt();
@@ -109,6 +113,7 @@ L1RootNormalizeFeatureDescriptors(const Eigen::MatrixXf &descriptors) {
     return descriptors_normalized;
 }
 
+static bool init_cuda = false;
 void SiftExtractor::ExtractFLOAT(const cv::Mat &_image,
                                  std::vector<cv::KeyPoint> &keypoints,
                                  FeatureDescriptors &descriptors) {
@@ -119,6 +124,7 @@ void SiftExtractor::ExtractFLOAT(const cv::Mat &_image,
         image = _image;
     }
 
+if(0){
     SiftGPU *sift_gpu = sift_gpu1.get();
 
     constexpr int kSuccessCode = 1;
@@ -147,6 +153,48 @@ void SiftExtractor::ExtractFLOAT(const cv::Mat &_image,
     descriptors = L1RootNormalizeFeatureDescriptors(descriptors);
     // L2 Norm
     //    descriptors = descriptors.rowwise().normalized();
+}else{
+    if(!init_cuda){
+        InitCuda(0); 
+        init_cuda = true;
+    }
+    
+    const int w = image.cols;
+    const int h = image.rows;
+    cv::Mat img_32f;
+    image.convertTo(img_32f, CV_32FC1);
+
+    CudaImage img; 
+    img.Allocate(w, h, iAlignUp(w, 128), false, NULL, (float*)img_32f.data);  
+    img.Download(); 
+
+    // Extract Sift features from images
+    SiftData siftData;
+    InitSiftData(siftData, 32768, true, true);  
+    
+    // A bit of benchmarking 
+    constexpr float initBlur = 1.0f;
+    constexpr float thresh = 3.0f;
+    constexpr int numOctaves = 4;
+    float *memoryTmp = AllocSiftTempMemory(w, h, numOctaves, false);
+    ExtractSift(siftData, img, numOctaves, initBlur, thresh, 0.0f, false, memoryTmp);
+    FreeSiftTempMemory(memoryTmp);
+
+    const size_t num_features = siftData.numPts;
+    keypoints.resize(num_features);
+    descriptors.resize(num_features, 128);
+    std::cout<<num_features<<std::endl;
+    for (size_t i = 0; i < num_features; ++i) {
+        auto& kpt = siftData.h_data[i]; 
+        keypoints[i] = cv::KeyPoint(kpt.xpos, kpt.ypos, 0);
+        keypoints[i].size = kpt.scale;
+        keypoints[i].angle = kpt.orientation;
+        descriptors.row(i) = Eigen::Vector<float,128>(kpt.data);
+    } 
+    descriptors = L1RootNormalizeFeatureDescriptors(descriptors);
+    FreeSiftData(siftData);
+} 
+
 }
 
 void SiftExtractor::ExtractUINT8(const cv::Mat &image,

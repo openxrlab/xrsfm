@@ -20,6 +20,9 @@
 #include "utility/timer.h"
 #include "match_expansion.h"
 
+#include "cudaImage.h"
+#include "cudaSift.h"
+
 namespace xrsfm {
 constexpr int max_match = 16384;
 constexpr bool b_verbose_matches_option = true;
@@ -119,6 +122,7 @@ void SiftMatch(const FeatureDescriptors &descs1,
 void SiftMatch(const UINT8Descriptors &descs1, const UINT8Descriptors &descs2,
                std::vector<Match> &matches, SiftMatchGPU *sift_match_gpu,
                float max_ratio) {
+if(1){
     // Loose threshold will be slow while strict lead to little matches
     const float distance_th = 0.7; // 100
     max_ratio = 0.8;               // 0.9 highly affect
@@ -152,6 +156,46 @@ void SiftMatch(const UINT8Descriptors &descs1, const UINT8Descriptors &descs2,
         int id2 = t_matches[i].point2D_idx2;
         matches[i] = Match(id1, id2);
     }
+}else{
+    SiftData siftData1;
+    SiftData siftData2; 
+    const int num1 = (int)descs1.rows();
+    const int num2 = (int)descs2.rows();
+    const int max_num = std::max(num1,num2);
+    InitSiftData(siftData1, max_num, true, true);
+    InitSiftData(siftData2, max_num, true, true);
+    siftData1.numPts = num1;
+    siftData2.numPts = num2;
+    for(int i = 0;i<num1;++i){
+        for(int k = 0;k<128;++k){
+            siftData1.h_data[i].data[k] = float(descs1(i,k));
+        }
+    }
+    for(int i = 0;i<num2;++i){
+        for(int k = 0;k<128;++k){
+            siftData2.h_data[i].data[k] = float(descs2(i,k));
+        }
+    }
+    test(siftData1);
+    test(siftData2);
+    MatchSiftData(siftData1, siftData2);
+    // for(int i = 0;i<num1;++i){
+        // std::cout<<i<<" "<<siftData1.h_data[i].match<<" "<<std::endl;
+    // }
+    int id_match = 0;
+    matches.resize(num1);
+    for (int id1 = 0; id1 < num1; ++id1) {
+        const int id2 = siftData1.h_data[id1].match; 
+        if(id2!=-1&&siftData1.h_data[id1].match_error<10){
+            matches[id_match] = Match(id1, id2);
+            id_match++;
+        }
+    }
+    matches.resize(id_match);
+
+    FreeSiftData(siftData1);
+    FreeSiftData(siftData2);
+}
 }
 
 int OrbDistance(const unsigned char *A, const unsigned char *B) {
