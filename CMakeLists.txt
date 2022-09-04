@@ -104,6 +104,7 @@ endif ()
 add_library(xrsfm
         src/base/map.cc
 
+        src/feature/orb_extractor.cc
         src/feature/sift_extractor.cc
         src/feature/feature_extraction.cc
         src/feature/feature_processing.cc

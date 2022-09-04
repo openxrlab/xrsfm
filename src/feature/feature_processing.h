@@ -12,7 +12,7 @@
 #include "base/types.h"
 #include "base/map.h"
 
-// #define USE_ORB
+#define USE_ORB
 
 namespace xrsfm {
 

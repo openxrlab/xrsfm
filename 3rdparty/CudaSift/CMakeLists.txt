@@ -51,29 +51,3 @@ include_directories(
 )
 
 cuda_add_library(cudasift ${cuda_sources})
-
-#SET(CUDA_SEPARABLE_COMPILATION ON)
-
-# cuda_add_executable(cudasift ${cuda_sources} ${sources} OPTIONS -arch=sm_35)
-
-# #cuda_add_executable(l2net l2netD.cu OPTIONS -arch=sm_35)
-
-# set_target_properties(cudasift PROPERTIES
-#   COMPILE_FLAGS "${EXTRA_CXX_FLAGS}"			   
-# )
-
-# target_link_libraries(cudasift ${CUDA_cudadevrt_LIBRARY} ${OpenCV_LIBS})
-# #  /usr/local/cuda/lib64/libcudadevrt.a ${OpenCV_LIBS} 
-# #)
- 
-# install(FILES 
-#   ${cuda_sources} 
-#   ${sources}
-#   cudaSiftD.cu
-#   CMakeLists.txt
-#   Copyright.txt
-#   DESTINATION .
-# )
-# install(FILES data/left.pgm data/righ.pgm
-#   DESTINATION data
-# )

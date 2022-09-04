@@ -3,18 +3,15 @@
 //
 
 #include <x86intrin.h>
-
 #include <algorithm>
 #include <numeric>
 
 #include "feature_processing.h"
+#include "sift_extractor.h"
+#include "orb_extractor.h"
 #include "geometry/colmap/estimators/fundamental_matrix.h"
 #include "geometry/essential.h"
 #include "base/map.h"
-#include "optim/loransac.h"
-#include "optim/ransac.h"
-#include "sift_extractor.h"
-#include "utility/io_ecim.hpp"
 #include "utility/timer.h"
 
 namespace xrsfm {
@@ -22,9 +19,7 @@ namespace xrsfm {
 void FeatureExtract(const std::string &image_dir_path,
                     std::vector<Frame> &frames) {
 #ifndef USE_ORB
-    constexpr int _feature_num = 8192;
-    // std::cout << "FeatureExtract:  feature number = " << _feature_num <<
-    // "\n";
+    constexpr int _feature_num = 8192; 
     SiftExtractor sift(_feature_num);
 #else
     const int _feature_num = 2048;
@@ -32,7 +27,7 @@ void FeatureExtract(const std::string &image_dir_path,
     const int _lever_num = 8;
     const int _initTh = 20;
     const int _minTh = 7;
-    ORB_SLAM2::OrbExtractor orb(_feature_num, _lever_ratio, _lever_num, _initTh,
+    OrbExtractor orb(_feature_num, _lever_ratio, _lever_num, _initTh,
                                 _minTh);
 #endif
     for (int i = 0; i < frames.size(); i++) {
@@ -55,6 +50,7 @@ void FeatureExtract(const std::string &image_dir_path,
         // std::cout << i << " " << frame.uint_descs_.rows() << std::endl;
 #else
         orb(image, cv::Mat(), frame.keypoints_, frame.orb_descs_);
+        frame.uint_descs_.resize(frame.keypoints_.size(),128);
 #endif
     }
     SetUpFramePoints(frames);

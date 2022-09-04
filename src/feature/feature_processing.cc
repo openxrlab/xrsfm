@@ -9,14 +9,11 @@
 #include <algorithm>
 #include <numeric>
 
+#include "base/map.h" 
 #include "geometry/colmap/estimators/fundamental_matrix.h"
 #include "geometry/epipolar_geometry.hpp"
 #include "geometry/essential.h"
-#include "base/map.h"
-#include "optim/loransac.h"
-#include "optim/ransac.h"
-#include "sift_extractor.h"
-#include "utility/io_ecim.hpp"
+#include "sift_extractor.h" 
 #include "utility/timer.h"
 #include "match_expansion.h"
 
@@ -129,22 +126,11 @@ if(1){
 
     std::vector<FeatureMatch> t_matches(max_match);
     int num1 = (int)descs1.rows();
-    int num2 = (int)descs2.rows();
-    if (b_verbose_matches_size) {
-        std::cout << "n1: " << num1 << "->\n";
-        std::cout << "n2: " << num2 << "->\n";
-        std::cout << "c: " << (int)descs1.cols() << "->\n";
-        std::cout << "distance_th: " << distance_th << "->\n";
-        std::cout << "max_ratio: " << max_ratio << "->\n";
-        std::cout << "max_match: " << max_match << "->\n";
-    }
+    int num2 = (int)descs2.rows(); 
     sift_match_gpu->SetDescriptors(0, num1, descs1.data());
     sift_match_gpu->SetDescriptors(1, num2, descs2.data());
 
-    const int max_num_matches = max_match;
-    if (b_verbose_matches_size) {
-        std::cout << "max_num_matches: " << max_num_matches << "->\n";
-    }
+    const int max_num_matches = max_match; 
     t_matches.resize(static_cast<size_t>(max_num_matches));
     int num_matches = sift_match_gpu->GetSiftMatch(
         max_num_matches, reinterpret_cast<uint32_t(*)[2]>(t_matches.data()),
@@ -280,7 +266,7 @@ void FeatureMatching(const std::vector<Frame> &frames,
     }
 #endif
 
-    int count_inlier_pairs = 0;
+#pragma omp parallel for schedule(static, 8)
     const int num_frames = static_cast<const int>(frames.size());
     for (const auto &[id1, id2] : candidate_pairs) {
         const auto &frame1 = frames[id1];
@@ -298,6 +284,7 @@ void FeatureMatching(const std::vector<Frame> &frames,
 #endif
         frame_pairs.emplace_back(frame_pair);
     }
+
 #pragma omp parallel for schedule(static, 8)
     for (int i = 0; i < frame_pairs.size(); ++i) {
         auto &frame_pair = frame_pairs[i];
@@ -313,6 +300,10 @@ void FeatureMatching(const std::vector<Frame> &frames,
                 points2.push_back(frame2.points[match.id2]);
             }
             SolveFundamnetalCOLMAP(points1, points2, frame_pair);
+            // cv::Mat image1 = cv::imread("/data1/arkit_data/"+frame1.name);
+            // cv::Mat image2 = cv::imread("/data1/arkit_data/"+frame2.name);
+            // DrawFeatureMatches(image1, image2, frame1.points, frame2.points,frame_pair.matches,frame_pair.inlier_mask);
+
         } else {
             std::vector<Eigen::Vector2d> points1_normalized, points2_normalized;
             for (const auto &match : frame_pair.matches) {
@@ -339,6 +330,7 @@ void FeatureMatching(const std::vector<Frame> &frames,
         frame_pair.matches.swap(inliner_matches);
     }
 
+    int count_inlier_pairs = 0;
     std::vector<FramePair> frame_pairs_filter;
     for (auto &frame_pair : frame_pairs) {
         if (frame_pair.inlier_num == 0)
