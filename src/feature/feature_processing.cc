@@ -265,10 +265,8 @@ void FeatureMatching(const std::vector<Frame> &frames,
         init = true;
     }
 #endif
-
-#pragma omp parallel for schedule(static, 8)
-    const int num_frames = static_cast<const int>(frames.size());
-    for (const auto &[id1, id2] : candidate_pairs) {
+    for (int i = 0;i<candidate_pairs.size();++i){
+        const auto &[id1, id2] = candidate_pairs[i];
         const auto &frame1 = frames[id1];
         const auto &frame2 = frames[id2];
         FramePair frame_pair;
