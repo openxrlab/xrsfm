@@ -26,7 +26,7 @@ either expressed or implied, of the Regents of The University of Michigan.
 */
 #include <errno.h>
 
-#define _GNU_SOURCE  // Possible fix for 16.04
+#define _GNU_SOURCE // Possible fix for 16.04
 #define __USE_GNU
 #include <pthread.h>
 #include <sched.h>
