@@ -56,8 +56,9 @@ python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$
 你可以构建自己的端云定位ARDemo，更多的信息请查看[ARDemo](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#).
 
 ## License
+本代码库的许可证是[Apache-2.0](LICENSE)。请注意，本许可证仅适用于我们库中的代码，这些代码的依赖项是独立的，并单独许可。我们十分感谢这些依赖项的贡献者。
+本项目所使用依赖项的内容可能会影响我们代码库的许可证，一些依赖方法带有[附加许可证](docs/en/additional_licenses.md)。
 
-本项目遵从[Apache 2.0 license](LICENSE).
 
 ## Acknowledgement
 
