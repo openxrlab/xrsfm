@@ -54,14 +54,17 @@ namespace colmap {
 // @param point2         Corresponding 2D point in second image.
 //
 // @return               Triangulated 3D point.
-Eigen::Vector3d TriangulatePoint(const Eigen::Matrix3x4d& proj_matrix1, const Eigen::Matrix3x4d& proj_matrix2,
-                                 const Eigen::Vector2d& point1, const Eigen::Vector2d& point2);
+Eigen::Vector3d TriangulatePoint(const Eigen::Matrix3x4d &proj_matrix1,
+                                 const Eigen::Matrix3x4d &proj_matrix2,
+                                 const Eigen::Vector2d &point1,
+                                 const Eigen::Vector2d &point2);
 
 // Triangulate multiple 3D points from multiple image correspondences.
-std::vector<Eigen::Vector3d> TriangulatePoints(const Eigen::Matrix3x4d& proj_matrix1,
-                                               const Eigen::Matrix3x4d& proj_matrix2,
-                                               const std::vector<Eigen::Vector2d>& points1,
-                                               const std::vector<Eigen::Vector2d>& points2);
+std::vector<Eigen::Vector3d>
+TriangulatePoints(const Eigen::Matrix3x4d &proj_matrix1,
+                  const Eigen::Matrix3x4d &proj_matrix2,
+                  const std::vector<Eigen::Vector2d> &points1,
+                  const std::vector<Eigen::Vector2d> &points2);
 
 // Triangulate point from multiple views minimizing the L2 error.
 //
@@ -69,8 +72,9 @@ std::vector<Eigen::Vector3d> TriangulatePoints(const Eigen::Matrix3x4d& proj_mat
 // @param points              Image observations of multi-view observations.
 //
 // @return                    Estimated 3D point.
-Eigen::Vector3d TriangulateMultiViewPoint(const std::vector<Eigen::Matrix3x4d>& proj_matrices,
-                                          const std::vector<Eigen::Vector2d>& points);
+Eigen::Vector3d
+TriangulateMultiViewPoint(const std::vector<Eigen::Matrix3x4d> &proj_matrices,
+                          const std::vector<Eigen::Vector2d> &points);
 
 // Triangulate optimal 3D point from corresponding image point observations by
 // finding the optimal image observations.
@@ -95,18 +99,21 @@ Eigen::Vector3d TriangulateMultiViewPoint(const std::vector<Eigen::Matrix3x4d>& 
 //                                        const Eigen::Vector2d& point2);
 
 // Triangulate multiple optimal 3D points from multiple image correspondences.
-std::vector<Eigen::Vector3d> TriangulateOptimalPoints(const Eigen::Matrix3x4d& proj_matrix1,
-                                                      const Eigen::Matrix3x4d& proj_matrix2,
-                                                      const std::vector<Eigen::Vector2d>& points1,
-                                                      const std::vector<Eigen::Vector2d>& points2);
+std::vector<Eigen::Vector3d>
+TriangulateOptimalPoints(const Eigen::Matrix3x4d &proj_matrix1,
+                         const Eigen::Matrix3x4d &proj_matrix2,
+                         const std::vector<Eigen::Vector2d> &points1,
+                         const std::vector<Eigen::Vector2d> &points2);
 
 // Calculate angle in radians between the two rays of a triangulated point.
-double CalculateTriangulationAngle(const Eigen::Vector3d& proj_center1, const Eigen::Vector3d& proj_center2,
-                                   const Eigen::Vector3d& point3D);
+double CalculateTriangulationAngle(const Eigen::Vector3d &proj_center1,
+                                   const Eigen::Vector3d &proj_center2,
+                                   const Eigen::Vector3d &point3D);
 
-std::vector<double> CalculateTriangulationAngles(const Eigen::Vector3d& proj_center1,
-                                                 const Eigen::Vector3d& proj_center2,
-                                                 const std::vector<Eigen::Vector3d>& points3D);
+std::vector<double>
+CalculateTriangulationAngles(const Eigen::Vector3d &proj_center1,
+                             const Eigen::Vector3d &proj_center2,
+                             const std::vector<Eigen::Vector3d> &points3D);
 
 } // namespace colmap
 

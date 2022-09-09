@@ -60,32 +60,27 @@ class Frame {
     int hierarchical_level = -1;
 
     inline void AddNumCorHavePoint3D(int p2d_id) {
-        if (num_correspondences_have_point3D_[p2d_id] == 0) num_visible_points3D_++;
+        if (num_correspondences_have_point3D_[p2d_id] == 0)
+            num_visible_points3D_++;
         num_correspondences_have_point3D_[p2d_id]++;
     }
 
     inline void DeleteNumCorHavePoint3D(int p2d_id) {
         num_correspondences_have_point3D_[p2d_id]--;
-        if (num_correspondences_have_point3D_[p2d_id] == 0) num_visible_points3D_--;
+        if (num_correspondences_have_point3D_[p2d_id] == 0)
+            num_visible_points3D_--;
     }
 
-    inline vector3 center() const {
-        return -(Tcw.q.inverse() * Tcw.t);
-    }
+    inline vector3 center() const { return -(Tcw.q.inverse() * Tcw.t); }
 
-    inline quaternion qwc() const {
-        return Tcw.q.inverse();
-    }
+    inline quaternion qwc() const { return Tcw.q.inverse(); }
 
-    inline vector3 twc() const {
-        return -(Tcw.q.inverse() * Tcw.t);
-    }
+    inline vector3 twc() const { return -(Tcw.q.inverse() * Tcw.t); }
 };
 
 class FramePair {
   public:
-    explicit FramePair(int _id1 = 0, int _id2 = 0) :
-        id1(_id1), id2(_id2) {
+    explicit FramePair(int _id1 = 0, int _id2 = 0) : id1(_id1), id2(_id2) {
         inlier_num = inlier_num_f = 0;
         matches.resize(0);
     }
@@ -109,7 +104,8 @@ class CorrespondenceGraph {
         int num_observations = 0;
         int num_correspondences = 0;
         int num_visible_point3d = 0;
-        std::vector<std::vector<std::pair<int, int>>> corrs_vector; //<frame,feature>
+        std::vector<std::vector<std::pair<int, int>>>
+            corrs_vector; //<frame,feature>
     };
 
     std::vector<CorrNode> frame_node_vec_;
@@ -150,17 +146,24 @@ class Map {
 
     void DeregistrationFrame(int frame_id);
 
-    void SearchCorrespondences(const Frame &frame, std::vector<vector2> &points2d,
-                               std::vector<vector3> &points3d, std::vector<std::pair<int, int>> &cor_2d_3d_ids,
+    void SearchCorrespondences(const Frame &frame,
+                               std::vector<vector2> &points2d,
+                               std::vector<vector3> &points3d,
+                               std::vector<std::pair<int, int>> &cor_2d_3d_ids,
                                const bool use_p2d_normalized);
 
-    void SearchCorrespondences1(const Frame &frame, const std::set<int> cor_frame_id,
-                                std::vector<vector2> &points2d, std::vector<vector3> &points3d,
-                                std::vector<std::pair<int, int>> &cor_2d_3d_ids, const bool use_p2d_normalized);
+    void SearchCorrespondences1(const Frame &frame,
+                                const std::set<int> cor_frame_id,
+                                std::vector<vector2> &points2d,
+                                std::vector<vector3> &points3d,
+                                std::vector<std::pair<int, int>> &cor_2d_3d_ids,
+                                const bool use_p2d_normalized);
 
-    void SearchCorrespondencesOrder(const Frame &frame, std::vector<vector2> &points2d,
-                                    std::vector<vector3> &points3d,
-                                    std::vector<std::pair<int, int>> &cor_2d_3d_ids);
+    void
+    SearchCorrespondencesOrder(const Frame &frame,
+                               std::vector<vector2> &points2d,
+                               std::vector<vector3> &points3d,
+                               std::vector<std::pair<int, int>> &cor_2d_3d_ids);
 
     int MaxPoint3dFrameId();
     int MaxPoint3dFrameId1();
@@ -172,12 +175,14 @@ class Map {
     void LogFrameReprojectError1(int frame_id);
 
     inline void AddNumCorHavePoint3D(int frame_id, int p2d_id) {
-        for (const auto &[t_frame_id, t_p2d_id] : corr_graph_.frame_node_vec_[frame_id].corrs_vector[p2d_id]) {
+        for (const auto &[t_frame_id, t_p2d_id] :
+             corr_graph_.frame_node_vec_[frame_id].corrs_vector[p2d_id]) {
             frames_[t_frame_id].AddNumCorHavePoint3D(t_p2d_id);
         }
     }
     inline void DeleteNumCorHavePoint3D(int frame_id, int p2d_id) {
-        for (const auto &[t_frame_id, t_p2d_id] : corr_graph_.frame_node_vec_[frame_id].corrs_vector[p2d_id]) {
+        for (const auto &[t_frame_id, t_p2d_id] :
+             corr_graph_.frame_node_vec_[frame_id].corrs_vector[p2d_id]) {
             frames_[t_frame_id].DeleteNumCorHavePoint3D(t_p2d_id);
         }
     }
@@ -191,13 +196,16 @@ struct LoopInfo {
     double scale_obs = -1;
 };
 
-FramePair FindPair(const std::vector<FramePair> &frame_pairs, const int id1, const int id2);
+FramePair FindPair(const std::vector<FramePair> &frame_pairs, const int id1,
+                   const int id2);
 
-bool FindPair(const std::vector<FramePair> &frame_pairs, const int id1, const int id2, FramePair &frame_pair);
+bool FindPair(const std::vector<FramePair> &frame_pairs, const int id1,
+              const int id2, FramePair &frame_pair);
 
 bool UpdateCovisiblity(Map &map, int frame_id);
 
-void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id, const bool is_sequential_data = false);
+void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
+                       const bool is_sequential_data = false);
 
 void UpdateByRefFrame(Map &map);
 

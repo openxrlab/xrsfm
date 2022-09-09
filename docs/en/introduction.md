@@ -1,7 +1,7 @@
 # APIS
 ## run_matching
 input: images, retrivel results, matching strategy\
-purpose: extract feature from images and propose feature matching 
+purpose: extract feature from images and propose feature matching
 
 ## run_reconstruction
 input: matching results, camera intrinsic parameters \
@@ -9,7 +9,7 @@ purpose: reconstruct the scene for sequential images
 
 ## estimate_scale
 input: images, reconstruction results\
-purpose: estimate the true scale of the reconstruction 
+purpose: estimate the true scale of the reconstruction
 
 ## unpack_collect_data
 input: binary file recorded by RGBCaptureTool \
@@ -51,4 +51,3 @@ The frame pair file is a binary file that stores the matching results and epipol
 
 ## map files
 Map data consists of three binary files, which are the same as the format in colmap. You can run colmap gui to observe the map data.
-

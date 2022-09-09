@@ -24,8 +24,10 @@ void MatchMap::PatchInit(const Map &map) {
             auto &kpt = kps[k].pt;
             int x = (int)(kpt.x) / step_x;
             int y = (int)(kpt.y) / step_y;
-            if (x >= col_num) x = col_num - 1;
-            if (y >= row_num) y = row_num - 1;
+            if (x >= col_num)
+                x = col_num - 1;
+            if (y >= row_num)
+                y = row_num - 1;
             int patch_id = y * col_num + x;
             pt2patch_id_vec[i][k] = patch_id;
             m_patch_kpt_ids[i][patch_id].push_back(k);
@@ -38,19 +40,24 @@ void MatchMap::PrintImageSize() {
     for (size_t i = 0; i < image_size.size(); ++i) {
         // int step_x  =image_size[i].width / col_num;
         // int step_y  =image_size[i].height / row_num;
-        std::cout << "(" << i << "):(" << image_size[i].width << ", " << image_size[i].height << ")\n";
+        std::cout << "(" << i << "):(" << image_size[i].width << ", "
+                  << image_size[i].height << ")\n";
     }
 }
 
 void MatchMap::AddTrack(int frame_id1, int frame_id2, const Match &match,
-                        const size_t num_keypoint1, const size_t num_keypoints2) {
+                        const size_t num_keypoint1,
+                        const size_t num_keypoints2) {
     int idx1 = match.id1, idx2 = match.id2;
     auto &frame1_track = m_frames_track_ids[frame_id1];
     auto &frame2_track = m_frames_track_ids[frame_id2];
     if (idx1 > num_keypoint1 || idx2 > num_keypoints2) {
-        printf("-----------------------------------error-------------------------------\n");
-        std::cout << frame_id1 << " " << idx1 << " " << num_keypoint1 << std::endl;
-        std::cout << frame_id2 << " " << idx2 << " " << num_keypoints2 << std::endl;
+        printf("-----------------------------------error-----------------------"
+               "--------\n");
+        std::cout << frame_id1 << " " << idx1 << " " << num_keypoint1
+                  << std::endl;
+        std::cout << frame_id2 << " " << idx2 << " " << num_keypoints2
+                  << std::endl;
     }
     if (frame1_track[idx1] == -1 && frame2_track[idx2] == -1) {
         frame1_track[idx1] = m_track_num;
@@ -83,12 +90,14 @@ void MatchMap::AddTrack(int frame_id1, int frame_id2, const Match &match,
             int frame_id = iter.first;
             size_t point_id = iter.second;
             if (track1.observations_.count(frame_id) == 0) {
-                track1.observations_.insert(std::pair<int, int>(frame_id, point_id));
+                track1.observations_.insert(
+                    std::pair<int, int>(frame_id, point_id));
                 m_frames_track_ids[frame_id][point_id] = track_id1;
             } else if (track1.observations_[frame_id] == point_id) {
                 m_frames_track_ids[frame_id][point_id] = track_id1;
             } else {
-                // printf("Warning Merge Track %d %d\n", track1.mObservations[frame_id], point_id);
+                // printf("Warning Merge Track %d %d\n",
+                // track1.mObservations[frame_id], point_id);
                 m_frames_track_ids[frame_id][point_id] = -1;
             }
         }
@@ -130,7 +139,8 @@ void MatchMap::MakeTrack(const std::vector<Frame> &frames) { // map::
     for (auto &frame_pair : m_frame_pairs) {
         const int id1 = frame_pair.id1, id2 = frame_pair.id2;
         for (auto &match : frame_pair.matches) {
-            AddTrack(id1, id2, match, frames[id1].track_ids_.size(), frames[id2].track_ids_.size());
+            AddTrack(id1, id2, match, frames[id1].track_ids_.size(),
+                     frames[id2].track_ids_.size());
         }
     }
 }
@@ -139,8 +149,9 @@ void MatchMap::PrintFramesTrack() {
     std::cout << "PrintFramesTrack:\n";
     for (int i = 0; i < m_frames_track_ids.size(); i++) {
         for (int j = 0; j < m_frames_track_ids[i].size(); j++) {
-            std::cout << "Feature " << j << " of frame " << i << " is tracked in id "
-                      << m_frames_track_ids[i][j] << "\n";
+            std::cout << "Feature " << j << " of frame " << i
+                      << " is tracked in id " << m_frames_track_ids[i][j]
+                      << "\n";
         }
     }
 }
@@ -149,8 +160,8 @@ void MatchMap::PrintPatchIdOfFeatures() {
     std::cout << "PrintPatchIdOfFeatures:\n";
     for (int i = 0; i < pt2patch_id_vec.size(); i++) {
         for (int j = 0; j < pt2patch_id_vec[i].size(); j++) {
-            std::cout << "Feature " << j << " of frame " << i << " is  in Patch " << pt2patch_id_vec[i][j]
-                      << "\n";
+            std::cout << "Feature " << j << " of frame " << i
+                      << " is  in Patch " << pt2patch_id_vec[i][j] << "\n";
         }
     }
 }
@@ -159,7 +170,8 @@ void MatchMap::PrintFeaturesOfPatch() {
     std::cout << "PrintFeaturesOfPatch:\n";
     for (int i = 0; i < m_patch_kpt_ids.size(); i++) {
         for (int j = 0; j < m_patch_kpt_ids[i].size(); j++) {
-            std::cout << "of frame " << i << "is  in Patch " << j << " includes: ";
+            std::cout << "of frame " << i << "is  in Patch " << j
+                      << " includes: ";
             for (const auto &kpt_id : m_patch_kpt_ids[i][j]) {
                 std::cout << kpt_id << " ";
             }
@@ -171,7 +183,8 @@ void MatchMap::PrintFeaturesOfPatch() {
 void MatchMap::PrintIdPair() {
     for (size_t id1 = 0; id1 < id2pair_id.size(); id1++) {
         for (const auto &item : id2pair_id.at(id1)) {
-            std::cout << id1 << " - " << item.first << ":" << item.second << "\n";
+            std::cout << id1 << " - " << item.first << ":" << item.second
+                      << "\n";
         }
     }
 }
@@ -188,16 +201,17 @@ std::vector<std::map<int, int>> MatchMap::MakeIdPair() { // map::
 }
 
 // map::
-void MatchMap::LoadRetrievalRank(const std::string &filename,
-                                 const std::map<std::string, int> &name_map,
-                                 std::map<int, std::vector<int>> &retrieval_rank_of_frames,
-                                 bool skip_matches) {
+void MatchMap::LoadRetrievalRank(
+    const std::string &filename, const std::map<std::string, int> &name_map,
+    std::map<int, std::vector<int>> &retrieval_rank_of_frames,
+    bool skip_matches) {
     std::ifstream infile(filename.c_str());
 
     std::string line;
     std::set<std::string> missing_image_names;
     while (getline(infile, line)) {
-        if (line == "") continue;
+        if (line == "")
+            continue;
         FramePair fp;
         std::istringstream s1(line);
         std::string image_name1, image_name2;
@@ -254,7 +268,8 @@ void MatchMap::MakeCorrGraph(const Map &map) { // map::
     MatchExpansionSolver::CheckConsistenceOfFrameIdAndIndex(map);
     if (corr_graph.frame_node_vec_.size() == m_num_frame) {
         for (const auto &frame : map.frames_) {
-            corr_graph.frame_node_vec_[frame.id].num_observations = 0; //(TODO)Is it ok to use frame.id
+            corr_graph.frame_node_vec_[frame.id].num_observations =
+                0; //(TODO)Is it ok to use frame.id
             corr_graph.frame_node_vec_[frame.id].num_visible_point3d = 0;
         }
     } else {
@@ -263,7 +278,8 @@ void MatchMap::MakeCorrGraph(const Map &map) { // map::
             corr_graph.frame_node_vec_[frame.id].num_observations = 0;
             corr_graph.frame_node_vec_[frame.id].num_visible_point3d = 0;
             corr_graph.frame_node_vec_[frame.id].num_correspondences = 0;
-            corr_graph.frame_node_vec_[frame.id].corrs_vector.resize(frame.keypoints_.size());
+            corr_graph.frame_node_vec_[frame.id].corrs_vector.resize(
+                frame.keypoints_.size());
         }
         for (int i = 0; i < m_frame_pairs.size(); ++i) {
             int id1 = m_frame_pairs[i].id1;
@@ -285,14 +301,17 @@ void MatchMap::MakeCorrGraph(const Map &map) { // map::
     }
 }
 
-int MatchMap::GetMatches(int frame_id1, int frame_id2, std::vector<Match> &matches) {
+int MatchMap::GetMatches(int frame_id1, int frame_id2,
+                         std::vector<Match> &matches) {
     const auto &track_ids = m_frames_track_ids[frame_id1];
     int count = 0;
     matches.resize(0);
     for (size_t i = 0; i < track_ids.size(); ++i) {
-        if (track_ids[i] == -1) continue;
+        if (track_ids[i] == -1)
+            continue;
         TrackExpansionWrapper &track = m_tracks[track_ids[i]];
-        if (track.invalid) continue;
+        if (track.invalid)
+            continue;
         auto &obs_infos = track.observations_;
         for (auto &obs_info : obs_infos) {
             if (obs_info.first == frame_id2) {
@@ -308,9 +327,11 @@ int MatchMap::GetMatches(int frame_id1, int frame_id2, std::vector<Match> &match
 int MatchMap::GetMatcheNum(int frame_id1, int frame_id2) {
     int count = 0;
     for (const auto &track_id : m_frames_track_ids[frame_id1]) {
-        if (track_id == -1) continue;
+        if (track_id == -1)
+            continue;
         const auto &track = m_tracks[track_id];
-        if (track.invalid) continue;
+        if (track.invalid)
+            continue;
         if (track.observations_.count(frame_id2) != 0) {
             count++;
         }
@@ -324,14 +345,15 @@ int MatchMap::GetMatcheNum(int frame_id1, int frame_id2) {
 
 void MatchExpansionSolver::CheckConsistenceOfFrameIdAndIndex(const Map &map) {
     for (int i = 0; i < map.frames_.size(); i++) {
-        CHECK(i == map.frames_[i].id) << "Error: frame id" << map.frames_[i].id << " != " << i << "\n";
+        CHECK(i == map.frames_[i].id)
+            << "Error: frame id" << map.frames_[i].id << " != " << i << "\n";
     }
 }
 
-void MatchExpansionSolver::SetUp(const Map &map,
-                                 const std::map<int, std::vector<int>> &id2retrieval_result,
-                                 const std::vector<ImageSize> &image_size_vec,
-                                 const size_t &initial_frame1, const size_t &initial_frame2) {
+void MatchExpansionSolver::SetUp(
+    const Map &map, const std::map<int, std::vector<int>> &id2retrieval_result,
+    const std::vector<ImageSize> &image_size_vec, const size_t &initial_frame1,
+    const size_t &initial_frame2) {
     m_initial_frame1 = initial_frame1;
     m_initial_frame2 = initial_frame2;
 
@@ -363,8 +385,12 @@ void GetCandidateSimilarity(const int init_num, const std::vector<int> &can_reg,
                             std::vector<FramePair> &frame_pairs) {
     for (const auto &id1 : can_reg) {
         for (const auto &id2 : can_build) {
-            if (matched_ids[id1].count(id2) != 0) continue;
-            if ((id2rank_vec[id1].count(id2) != 0 && id2rank_vec[id1].at(id2) <= 40) || (id2rank_vec[id2].count(id1) != 0 && id2rank_vec[id2].at(id1) <= 40)) {
+            if (matched_ids[id1].count(id2) != 0)
+                continue;
+            if ((id2rank_vec[id1].count(id2) != 0 &&
+                 id2rank_vec[id1].at(id2) <= 40) ||
+                (id2rank_vec[id2].count(id1) != 0 &&
+                 id2rank_vec[id2].at(id1) <= 40)) {
                 frame_pairs.emplace_back(id1, id2);
                 matched_ids[id1].insert(id2);
                 matched_ids[id2].insert(id1);
@@ -373,11 +399,13 @@ void GetCandidateSimilarity(const int init_num, const std::vector<int> &can_reg,
     }
 }
 
-void GetMayreg(const std::vector<int> &connect_frames, const std::vector<int> &reg_frames,
-               const std::vector<std::map<int, int>> &frame2retrivalpairs,
+void GetMayreg(const std::vector<int> &connect_frames,
+               const std::vector<int> &reg_frames,
+               const std::vector<std::map<int, int>> &frame2retrievalpairs,
                std::vector<int> &may_reg);
 
-void MatchExpansionSolver::Run(const Map &map, std::vector<std::pair<int, int>> &image_pairs) {
+void MatchExpansionSolver::Run(const Map &map,
+                               std::vector<std::pair<int, int>> &image_pairs) {
     ///////////////////////////////////////////////////////////////////////////////////////
     // Get Potential Registered Frames
     //////////////////////////////////////////////////////////////////////////////////////
@@ -388,7 +416,8 @@ void MatchExpansionSolver::Run(const Map &map, std::vector<std::pair<int, int>> 
     GetConnectedFrames(map, connect_frames);
     GetPotentialRegisteredFrames(map, 30, reg_frames);
     GetPotentialRegisteredFrames(map, 100, strong_reg_set);
-    printf("frame number\n cov_1: %d  cov_30: %d cov_100:%d\n", connect_frames.size(), reg_frames.size(), strong_reg_set.size());
+    printf("frame number\n cov_1: %d  cov_30: %d cov_100:%d\n",
+           connect_frames.size(), reg_frames.size(), strong_reg_set.size());
     m_matchmap.corr_graph.frame_node_vec_.clear();
 
     /////////////////////////////////////////////////
@@ -396,14 +425,15 @@ void MatchExpansionSolver::Run(const Map &map, std::vector<std::pair<int, int>> 
     /////////////////////////////////////////////////
     std::vector<FramePair> candidates;
     // 在connect中,找到共视pair,pair中至少一帧为registered
-    GetCandidateCovisibility(map, reg_frames, connect_frames, id2rank_vec, id2matched_ids,
-                             candidates);
+    GetCandidateCovisibility(map, reg_frames, connect_frames, id2rank_vec,
+                             id2matched_ids, candidates);
     std::cout << "#covisiblity candidates: " << candidates.size() << "\n";
 
     // 找到由registered与mayreg组成pair
     // SetSubtraction(connect_frames, strong_reg_set, can_reg);
     GetMayreg(connect_frames, reg_frames, id2rank_vec, may_reg_set);
-    GetCandidateSimilarity(5, may_reg_set, reg_frames, id2rank_vec, id2matched_ids, candidates);
+    GetCandidateSimilarity(5, may_reg_set, reg_frames, id2rank_vec,
+                           id2matched_ids, candidates);
     std::cout << "#full candidates: " << candidates.size() << "\n";
 
     // remove duplicate frame pairs
@@ -437,7 +467,8 @@ std::vector<std::map<int, int>> MatchExpansionSolver::GetId2RankVec(
     for (size_t i = 0; i < m_matchmap.m_num_frame; ++i) {
         fp[i].clear();
         CHECK(retrieval_rank_of_frames.count(i))
-            << "Error: frame " << i << " is missing in retrieval_rank_of_frames.\n";
+            << "Error: frame " << i
+            << " is missing in retrieval_rank_of_frames.\n";
         for (int k = 0; k < retrieval_rank_of_frames[i].size(); ++k) {
             fp[i][retrieval_rank_of_frames[i][k]] = k + 1;
         }
@@ -445,7 +476,8 @@ std::vector<std::map<int, int>> MatchExpansionSolver::GetId2RankVec(
     return fp;
 }
 
-void MatchExpansionSolver::GetConnectedFrames(const Map &map, std::vector<int> &set) {
+void MatchExpansionSolver::GetConnectedFrames(const Map &map,
+                                              std::vector<int> &set) {
     const auto &id_pair = m_matchmap.id2pair_id;
     const auto &frame_pairs = m_matchmap.m_frame_pairs;
     if (verbose) {
@@ -483,7 +515,7 @@ void MatchExpansionSolver::GetConnectedFrames(const Map &map, std::vector<int> &
 }
 
 void MatchExpansionSolver::PrintRetrievalMap() {
-    std::cout << "retrivalframepairs_map";
+    std::cout << "retrievalframepairs_map";
     for (size_t i = 0; i < id2rank_vec.size(); i++) {
         for (const auto &item : id2rank_vec[i]) {
             std::cout << i << " - " << item.first << ":" << item.second << "\n";
@@ -491,8 +523,10 @@ void MatchExpansionSolver::PrintRetrievalMap() {
     }
 }
 
-int MatchExpansionSolver::GetInitFramePairId(const std::vector<std::map<int, int>> &id_pair) {
-    CHECK(id_pair[m_initial_frame1].count(m_initial_frame2) != 0) << "error 21\n";
+int MatchExpansionSolver::GetInitFramePairId(
+    const std::vector<std::map<int, int>> &id_pair) {
+    CHECK(id_pair[m_initial_frame1].count(m_initial_frame2) != 0)
+        << "error 21\n";
     int id = id_pair[m_initial_frame1].at(m_initial_frame2);
     return id;
 }
@@ -506,7 +540,8 @@ void MatchExpansionSolver::GetPotentialRegisteredFrames(const Map &map, int num,
     for (size_t i = 0; i < potential_tri_mask.size(); ++i) {
         int count = 0;
         for (auto inlier : potential_tri_mask[i]) {
-            if (inlier) count++;
+            if (inlier)
+                count++;
         }
         if (count != 0 && count >= num) {
             set.push_back(i);
@@ -540,20 +575,24 @@ void MatchExpansionSolver::SimulationSfM(const Map &map, int num,
         //  find next images
         std::vector<int> next_images(0);
         for (int i = 0; i < m_matchmap.m_num_frame; ++i) {
-            if (registered[i]) continue;
+            if (registered[i])
+                continue;
             if (corr_graph.frame_node_vec_[i].num_visible_point3d >= num) {
                 next_images.push_back(i);
                 registered[i] = true;
             }
         }
-        // printf("%d+%d/%d\n", count, next_images.size(), m_matchmap.m_num_frame);
+        // printf("%d+%d/%d\n", count, next_images.size(),
+        // m_matchmap.m_num_frame);
         count += next_images.size();
-        if (next_images.empty()) break;
+        if (next_images.empty())
+            break;
         //  triangulate
         for (const auto &image_id1 : next_images) {
             for (const auto &it : id_pair[image_id1]) {
                 int image_id2 = it.first;
-                if (!registered[image_id2]) continue;
+                if (!registered[image_id2])
+                    continue;
                 auto &image1 = corr_graph.frame_node_vec_[image_id1];
                 tri_points(image_id1, image_id2, corr_graph, tri);
             }
@@ -561,7 +600,8 @@ void MatchExpansionSolver::SimulationSfM(const Map &map, int num,
     }
 }
 
-void MatchExpansionSolver::tri_points(int image_id1, int image_id2, CorrespondenceGraph &corr_graph,
+void MatchExpansionSolver::tri_points(int image_id1, int image_id2,
+                                      CorrespondenceGraph &corr_graph,
                                       std::vector<std::vector<bool>> &tri) {
     auto &cor_vec = corr_graph.frame_node_vec_[image_id1].corrs_vector;
     for (const auto &cor_ftr : cor_vec) {
@@ -582,10 +622,11 @@ void MatchExpansionSolver::tri_points(int image_id1, int image_id2, Corresponden
     }
 }
 
-void GetMayreg(const std::vector<int> &connect_frames, const std::vector<int> &reg_frames,
-               const std::vector<std::map<int, int>> &frame2retrivalpairs,
+void GetMayreg(const std::vector<int> &connect_frames,
+               const std::vector<int> &reg_frames,
+               const std::vector<std::map<int, int>> &frame2retrievalpairs,
                std::vector<int> &may_reg) {
-    size_t num_frame = frame2retrivalpairs.size();
+    size_t num_frame = frame2retrievalpairs.size();
     std::vector<bool> mask_reg(num_frame, false), mask_con(num_frame, false);
     for (const int &id : reg_frames) {
         mask_reg[id] = true;
@@ -595,9 +636,10 @@ void GetMayreg(const std::vector<int> &connect_frames, const std::vector<int> &r
     }
 
     for (size_t id = 0; id < num_frame; ++id) {
-        if (mask_con[id]) continue;
+        if (mask_con[id])
+            continue;
         int count1 = 0, count2 = 0, count3 = 0;
-        for (auto &[id2, rank] : frame2retrivalpairs[id]) {
+        for (auto &[id2, rank] : frame2retrievalpairs[id]) {
             if (mask_reg[id2]) {
                 if (rank <= 5) { // 5
                     count1++;
@@ -618,10 +660,12 @@ void GetMayreg(const std::vector<int> &connect_frames, const std::vector<int> &r
 void MatchExpansionSolver::GetCandidateCovisibility(
     const Map &map, const std::vector<int> &registered_frames,
     const std::vector<int> &connected_frames,
-    const std::vector<std::map<int, int>> &retrival_rank_vec,
-    std::vector<std::set<int>> &matched_ids, std::vector<FramePair> &frame_pairs) {
-    const size_t num_frame = retrival_rank_vec.size();
-    std::vector<bool> mask_registered(num_frame, false), mask_connected(num_frame, false);
+    const std::vector<std::map<int, int>> &retrieval_rank_vec,
+    std::vector<std::set<int>> &matched_ids,
+    std::vector<FramePair> &frame_pairs) {
+    const size_t num_frame = retrieval_rank_vec.size();
+    std::vector<bool> mask_registered(num_frame, false),
+        mask_connected(num_frame, false);
     for (const int &id : registered_frames) {
         mask_registered[id] = true;
     }
@@ -634,24 +678,33 @@ void MatchExpansionSolver::GetCandidateCovisibility(
 
     // 计算每个frame的关联frame_patch的共视number
     // frame_id => （covisible_num_in_patch)_vec
-    std::vector<std::map<int, std::vector<int>>> covisibility_info_vec(num_frame);
+    std::vector<std::map<int, std::vector<int>>> covisibility_info_vec(
+        num_frame);
     for (size_t i = 0; i < num_frame; ++i) {
-        if (mask_connected[i]) covisibility_info_vec[i] = GetCovisibilityInfo(i);
+        if (mask_connected[i])
+            covisibility_info_vec[i] = GetCovisibilityInfo(i);
     }
 
     // select pair
     const auto &id2pair_id = m_matchmap.id2pair_id;
-    std::vector<std::vector<bool>> visit(num_frame, std::vector<bool>(num_frame, false));
+    std::vector<std::vector<bool>> visit(num_frame,
+                                         std::vector<bool>(num_frame, false));
     for (size_t id1 = 0; id1 < num_frame; ++id1) {
-        for (const auto &[id2, rank] : retrival_rank_vec[id1]) {
+        for (const auto &[id2, rank] : retrieval_rank_vec[id1]) {
             // skip self_match & visited & matched & shared enough matches
-            if (id1 == id2) continue;
-            if (visit[id1][id2]) continue;
-            if (matched_ids[id1].count(id2) != 0) continue;
+            if (id1 == id2)
+                continue;
+            if (visit[id1][id2])
+                continue;
+            if (matched_ids[id1].count(id2) != 0)
+                continue;
             // 两个connected组成pair并且中间至少一个registered frame
-            if (!mask_registered[id1] && !mask_registered[id2]) continue;
-            if (!mask_connected[id1] || !mask_connected[id2]) continue;
-            if (m_matchmap.GetMatcheNum(id1, id2) > 50) continue;
+            if (!mask_registered[id1] && !mask_registered[id2])
+                continue;
+            if (!mask_connected[id1] || !mask_connected[id2])
+                continue;
+            if (m_matchmap.GetMatcheNum(id1, id2) > 50)
+                continue;
 
             // check covisible
             int num_covisibility_patch = 0;
@@ -659,10 +712,12 @@ void MatchExpansionSolver::GetCandidateCovisibility(
             auto &set2 = covisibility_info_vec[id2];
             // frame_id1 -- frame_id -- frame_id2
             for (const auto &[frame_id, patch_state1] : set1) {
-                if (set2.count(frame_id) == 0) continue;
+                if (set2.count(frame_id) == 0)
+                    continue;
                 const auto &patch_state2 = set2[frame_id];
                 for (int i = 0; i < m_matchmap.patch_num; ++i) {
-                    if (patch_state1[i] >= _T_ && patch_state2[i] >= _T_) num_covisibility_patch++;
+                    if (patch_state1[i] >= _T_ && patch_state2[i] >= _T_)
+                        num_covisibility_patch++;
                 }
             }
             if (num_covisibility_patch >= 1) {
@@ -685,17 +740,22 @@ void MatchExpansionSolver::GetCandidateCovisibility(
     }
 }
 
-std::map<int, std::vector<int>> MatchExpansionSolver::GetCovisibilityInfo(int frame_id) {
+std::map<int, std::vector<int>>
+MatchExpansionSolver::GetCovisibilityInfo(int frame_id) {
     std::map<int, std::vector<int>> frame_patch_set;
     const auto &id_pair = m_matchmap.id2pair_id;
     for (int track_id : m_matchmap.m_frames_track_ids[frame_id]) {
-        if (track_id == -1) continue;
+        if (track_id == -1)
+            continue;
         const auto &track = m_matchmap.m_tracks[track_id];
-        if (track.invalid) continue;
+        if (track.invalid)
+            continue;
         for (const auto &[t_frame_id, pt_id] : track.observations_) {
-            if (frame_id == t_frame_id) continue;                   // self
-            if (id_pair[frame_id].count(t_frame_id) != 0) continue; // matched
-            if (frame_patch_set.count(t_frame_id) == 0)             // first visite
+            if (frame_id == t_frame_id)
+                continue; // self
+            if (id_pair[frame_id].count(t_frame_id) != 0)
+                continue;                               // matched
+            if (frame_patch_set.count(t_frame_id) == 0) // first visite
                 frame_patch_set[t_frame_id].assign(m_matchmap.patch_num, 0);
 
             const int patch_id = m_matchmap.pt2patch_id_vec[t_frame_id][pt_id];

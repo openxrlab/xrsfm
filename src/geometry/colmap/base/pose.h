@@ -41,7 +41,7 @@
 namespace colmap {
 
 // Compose the skew symmetric cross product matrix from a vector.
-Eigen::Matrix3d CrossProductMatrix(const Eigen::Vector3d& vector);
+Eigen::Matrix3d CrossProductMatrix(const Eigen::Vector3d &vector);
 
 // Convert 3D rotation matrix to Euler angles.
 //
@@ -50,7 +50,8 @@ Eigen::Matrix3d CrossProductMatrix(const Eigen::Vector3d& vector);
 //
 // @param R              3x3 rotation matrix.
 // @param rx, ry, rz     Euler angles in radians.
-void RotationMatrixToEulerAngles(const Eigen::Matrix3d& R, double* rx, double* ry, double* rz);
+void RotationMatrixToEulerAngles(const Eigen::Matrix3d &R, double *rx,
+                                 double *ry, double *rz);
 
 // Convert Euler angles to 3D rotation matrix.
 //
@@ -60,21 +61,22 @@ void RotationMatrixToEulerAngles(const Eigen::Matrix3d& R, double* rx, double* r
 // @param rx, ry, rz     Euler angles in radians.
 //
 // @return               3x3 rotation matrix.
-Eigen::Matrix3d EulerAnglesToRotationMatrix(const double rx, const double ry, const double rz);
+Eigen::Matrix3d EulerAnglesToRotationMatrix(const double rx, const double ry,
+                                            const double rz);
 
 // Convert 3D rotation matrix to Quaternion representation.
 //
 // @param rot_mat        3x3 rotation matrix.
 //
 // @return               Unit Quaternion rotation coefficients (w, x, y, z).
-Eigen::Vector4d RotationMatrixToQuaternion(const Eigen::Matrix3d& rot_mat);
+Eigen::Vector4d RotationMatrixToQuaternion(const Eigen::Matrix3d &rot_mat);
 
 // Convert Quaternion representation to 3D rotation matrix.
 //
 // @param qvec           Unit Quaternion rotation coefficients (w, x, y, z).
 //
 // @return               3x3 rotation matrix.
-Eigen::Matrix3d QuaternionToRotationMatrix(const Eigen::Vector4d& qvec);
+Eigen::Matrix3d QuaternionToRotationMatrix(const Eigen::Vector4d &qvec);
 
 // Compose the Quaternion vector corresponding to a  identity transformation.
 inline Eigen::Vector4d ComposeIdentityQuaternion();
@@ -84,14 +86,14 @@ inline Eigen::Vector4d ComposeIdentityQuaternion();
 // @param qvec          Quaternion rotation coefficients (w, x, y, z).
 //
 // @return              Unit Quaternion rotation coefficients (w, x, y, z).
-Eigen::Vector4d NormalizeQuaternion(const Eigen::Vector4d& qvec);
+Eigen::Vector4d NormalizeQuaternion(const Eigen::Vector4d &qvec);
 
 // Invert Quaternion vector to return Quaternion of inverse rotation.
 //
 // @param qvec          Quaternion rotation coefficients (w, x, y, z).
 //
 // @return              Inverse Quaternion rotation coefficients (w, x, y, z).
-Eigen::Vector4d InvertQuaternion(const Eigen::Vector4d& qvec);
+Eigen::Vector4d InvertQuaternion(const Eigen::Vector4d &qvec);
 
 // Concatenate Quaternion rotations such that the rotation of `qvec1` is applied
 // before the rotation of `qvec2`.
@@ -100,7 +102,8 @@ Eigen::Vector4d InvertQuaternion(const Eigen::Vector4d& qvec);
 // @param qvec2         Quaternion rotation coefficients (w, x, y, z).
 //
 // @return              Concatenated Quaternion coefficients (w, x, y, z).
-Eigen::Vector4d ConcatenateQuaternions(const Eigen::Vector4d& qvec1, const Eigen::Vector4d& qvec2);
+Eigen::Vector4d ConcatenateQuaternions(const Eigen::Vector4d &qvec1,
+                                       const Eigen::Vector4d &qvec2);
 
 // Transform point by quaternion rotation.
 //
@@ -108,7 +111,8 @@ Eigen::Vector4d ConcatenateQuaternions(const Eigen::Vector4d& qvec1, const Eigen
 // @param point         Point to rotate.
 //
 // @return              Rotated point.
-Eigen::Vector3d QuaternionRotatePoint(const Eigen::Vector4d& qvec, const Eigen::Vector3d& point);
+Eigen::Vector3d QuaternionRotatePoint(const Eigen::Vector4d &qvec,
+                                      const Eigen::Vector3d &point);
 
 // Compute the weighted average of multiple Quaternions according to:
 //
@@ -119,16 +123,19 @@ Eigen::Vector3d QuaternionRotatePoint(const Eigen::Vector4d& qvec, const Eigen::
 // @param weights       Non-negative weights.
 //
 // @return              The average Quaternion.
-Eigen::Vector4d AverageQuaternions(const std::vector<Eigen::Vector4d>& qvecs, const std::vector<double>& weights);
+Eigen::Vector4d AverageQuaternions(const std::vector<Eigen::Vector4d> &qvecs,
+                                   const std::vector<double> &weights);
 
 // Compose rotation matrix that rotates unit vector 1 to unit vector 2.
 // Note that when vector 1 points into the opposite direction of vector 2,
 // the function returns an identity rotation.
-Eigen::Matrix3d RotationFromUnitVectors(const Eigen::Vector3d& vec1, const Eigen::Vector3d& vec2);
+Eigen::Matrix3d RotationFromUnitVectors(const Eigen::Vector3d &vec1,
+                                        const Eigen::Vector3d &vec2);
 
 // Extract camera projection center from projection matrix, i.e. the projection
 // center in world coordinates `-R^T t`.
-Eigen::Vector3d ProjectionCenterFromMatrix(const Eigen::Matrix3x4d& proj_matrix);
+Eigen::Vector3d
+ProjectionCenterFromMatrix(const Eigen::Matrix3x4d &proj_matrix);
 
 // Extract camera projection center from projection parameters.
 //
@@ -136,29 +143,36 @@ Eigen::Vector3d ProjectionCenterFromMatrix(const Eigen::Matrix3x4d& proj_matrix)
 // @param tvec           3x1 translation vector.
 //
 // @return               3x1 camera projection center.
-Eigen::Vector3d ProjectionCenterFromPose(const Eigen::Vector4d& qvec, const Eigen::Vector3d& tvec);
+Eigen::Vector3d ProjectionCenterFromPose(const Eigen::Vector4d &qvec,
+                                         const Eigen::Vector3d &tvec);
 
 // Compute the relative transformation from pose 1 to 2.
 //
 // @param qvec1, tvec1      First camera pose.
 // @param qvec2, tvec2      Second camera pose.
 // @param qvec12, tvec12    Relative pose.
-void ComputeRelativePose(const Eigen::Vector4d& qvec1, const Eigen::Vector3d& tvec1, const Eigen::Vector4d& qvec2,
-                         const Eigen::Vector3d& tvec2, Eigen::Vector4d* qvec12, Eigen::Vector3d* tvec12);
+void ComputeRelativePose(const Eigen::Vector4d &qvec1,
+                         const Eigen::Vector3d &tvec1,
+                         const Eigen::Vector4d &qvec2,
+                         const Eigen::Vector3d &tvec2, Eigen::Vector4d *qvec12,
+                         Eigen::Vector3d *tvec12);
 
 // Concatenate the transformations of the two poses.
 //
 // @param qvec1, tvec1      First camera pose.
 // @param qvec2, tvec2      Second camera pose.
 // @param qvec12, tvec12    Concatenated pose.
-void ConcatenatePoses(const Eigen::Vector4d& qvec1, const Eigen::Vector3d& tvec1, const Eigen::Vector4d& qvec2,
-                      const Eigen::Vector3d& tvec2, Eigen::Vector4d* qvec12, Eigen::Vector3d* tvec12);
+void ConcatenatePoses(const Eigen::Vector4d &qvec1,
+                      const Eigen::Vector3d &tvec1,
+                      const Eigen::Vector4d &qvec2,
+                      const Eigen::Vector3d &tvec2, Eigen::Vector4d *qvec12,
+                      Eigen::Vector3d *tvec12);
 
 // Invert transformation of the pose.
 // @param qvec, tvec          Input camera pose.
 // @param inv_qvec, inv_tvec  Inverse camera pose.
-void InvertPose(const Eigen::Vector4d& qvec, const Eigen::Vector3d& tvec, Eigen::Vector4d* inv_qvec,
-                Eigen::Vector3d* inv_tvec);
+void InvertPose(const Eigen::Vector4d &qvec, const Eigen::Vector3d &tvec,
+                Eigen::Vector4d *inv_qvec, Eigen::Vector3d *inv_tvec);
 
 // Linearly interpolate camera pose.
 //
@@ -166,8 +180,10 @@ void InvertPose(const Eigen::Vector4d& qvec, const Eigen::Vector3d& tvec, Eigen:
 // @param qvec2, tvec2      Camera pose at t1 = 1.
 // @param t                 Interpolation time.
 // @param qveci, tveci      Camera pose at time t.
-void InterpolatePose(const Eigen::Vector4d& qvec1, const Eigen::Vector3d& tvec1, const Eigen::Vector4d& qvec2,
-                     const Eigen::Vector3d& tvec2, const double t, Eigen::Vector4d* qveci, Eigen::Vector3d* tveci);
+void InterpolatePose(const Eigen::Vector4d &qvec1, const Eigen::Vector3d &tvec1,
+                     const Eigen::Vector4d &qvec2, const Eigen::Vector3d &tvec2,
+                     const double t, Eigen::Vector4d *qveci,
+                     Eigen::Vector3d *tveci);
 
 // Calculate baseline vector from first to second pose.
 //
@@ -180,8 +196,10 @@ void InterpolatePose(const Eigen::Vector4d& qvec1, const Eigen::Vector3d& tvec1,
 // @param tvec2           3x1 translation vector.
 //
 // @return                Baseline vector from 1 to 2.
-Eigen::Vector3d CalculateBaseline(const Eigen::Vector4d& qvec1, const Eigen::Vector3d& tvec1,
-                                  const Eigen::Vector4d& qvec2, const Eigen::Vector3d& tvec2);
+Eigen::Vector3d CalculateBaseline(const Eigen::Vector4d &qvec1,
+                                  const Eigen::Vector3d &tvec1,
+                                  const Eigen::Vector4d &qvec2,
+                                  const Eigen::Vector3d &tvec2);
 
 // Perform cheirality constraint test, i.e., determine which of the triangulated
 // correspondences lie in front of of both cameras. The first camera has the
@@ -193,8 +211,10 @@ Eigen::Vector3d CalculateBaseline(const Eigen::Vector4d& qvec1, const Eigen::Vec
 // @param points1      First set of corresponding points.
 // @param points2      Second set of corresponding points.
 // @param points3D     Points that lie in front of both cameras.
-bool CheckCheirality(const Eigen::Matrix3d& R, const Eigen::Vector3d& t, const std::vector<Eigen::Vector2d>& points1,
-                     const std::vector<Eigen::Vector2d>& points2, std::vector<Eigen::Vector3d>* points3D);
+bool CheckCheirality(const Eigen::Matrix3d &R, const Eigen::Vector3d &t,
+                     const std::vector<Eigen::Vector2d> &points1,
+                     const std::vector<Eigen::Vector2d> &points2,
+                     std::vector<Eigen::Vector3d> *points3D);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Implementation

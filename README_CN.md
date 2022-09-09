@@ -1,9 +1,15 @@
 # XRSfM
 
+<div align="left">
+
+[![actions](https://github.com/openxrlab/xrsfm/workflows/build/badge.svg)](https://github.com/openxrlab/xrsfm/actions)
+[![LICENSE](https://img.shields.io/github/license/openxrlab/xrsfm)](https://github.com/openxrlab/xrsfm/blob/main/LICENSE)
+
+</div>
 
 ## Introduction
 
-[English](README.md) | [简体中文] 
+[English](README.md) | [简体中文]
 
 XRSfM 是一个开源的运动恢复结构代码仓库，它是[OpenXRLab](https://openxrlab.com/)项目的一部分.
 关于XRSfM更详细的介绍放在[introduction.md](docs/en/introduction.md).
@@ -40,8 +46,9 @@ XRSfM 是一个开源的运动恢复结构代码仓库，它是[OpenXRLab](https
 
 3.运行以下脚本进行重建:
 ```
-python3 ./scripts/auto_reconstruction.py --data_path ${your_data_path}$.
+python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$
 ```
+更多细节请查看[tutorial.md](docs/zh/tutorial.md)
 
 ## Build ARDemo
 
@@ -49,8 +56,9 @@ python3 ./scripts/auto_reconstruction.py --data_path ${your_data_path}$.
 你可以构建自己的端云定位ARDemo，更多的信息请查看[ARDemo](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#).
 
 ## License
+本代码库的许可证是[Apache-2.0](LICENSE)。请注意，本许可证仅适用于我们库中的代码，这些代码的依赖项是独立的，并单独许可。我们十分感谢这些依赖项的贡献者。
+本项目所使用依赖项的内容可能会影响我们代码库的许可证，一些依赖方法带有[附加许可证](docs/en/additional_licenses.md)。
 
-本项目遵从[Apache 2.0 license](LICENSE).
 
 ## Acknowledgement
 

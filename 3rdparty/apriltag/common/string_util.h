@@ -38,12 +38,10 @@ either expressed or implied, of the Regents of The University of Michigan.
 extern "C" {
 #endif
 
-
 typedef struct string_buffer string_buffer_t;
 
 typedef struct string_feeder string_feeder_t;
-struct string_feeder
-{
+struct string_feeder {
     char *s;
     size_t len;
     size_t pos;
@@ -58,9 +56,9 @@ struct string_feeder
  */
 char *sprintf_alloc(const char *fmt, ...)
 #ifndef _MSC_VER
-__attribute__ ((format (printf, 1, 2)))
+    __attribute__((format(printf, 1, 2)))
 #endif
-;
+    ;
 
 /**
  * Similar to vsprintf(), except that it will malloc() enough space for the
@@ -70,15 +68,14 @@ __attribute__ ((format (printf, 1, 2)))
 char *vsprintf_alloc(const char *fmt, va_list args);
 
 /**
- * Concatenates 1 or more strings together and returns the result, which will be a
- * newly allocated string which it is the caller's responsibility to free.
+ * Concatenates 1 or more strings together and returns the result, which will be
+ * a newly allocated string which it is the caller's responsibility to free.
  */
 #define str_concat(...) _str_concat_private(__VA_ARGS__, NULL)
 char *_str_concat_private(const char *first, ...);
 
-
 // Returns the index of the first character that differs:
-int str_diff_idx(const char * a, const char * b);
+int str_diff_idx(const char *a, const char *b);
 
 /**
  * Splits the supplied string into an array of strings by subdividing it at
@@ -86,7 +83,7 @@ int str_diff_idx(const char * a, const char * b);
  * contain the delimiter. The original string will remain unchanged.
  * If str is composed of all delimiters, an empty array will be returned.
  *
- * It is the caller's responsibilty to free the returned zarray, as well as
+ * It is the caller's responsibility to free the returned zarray, as well as
  * the strings contained within it, e.g.:
  *
  *   zarray_t *za = str_split("this is a haystack", " ");
@@ -101,12 +98,12 @@ zarray_t *str_split_spaces(const char *str);
 void str_split_destroy(zarray_t *s);
 
 /*
- * Determines if str1 exactly matches str2 (more efficient than strcmp(...) == 0)
+ * Determines if str1 exactly matches str2 (more efficient than strcmp(...) ==
+ * 0)
  */
-static inline bool streq(const char *str1, const char* str2)
-{
+static inline bool streq(const char *str1, const char *str2) {
     int i;
-    for (i = 0 ; str1[i] != '\0' ; i++) {
+    for (i = 0; str1[i] != '\0'; i++) {
         if (str1[i] != str2[i])
             return false;
     }
@@ -118,10 +115,9 @@ static inline bool streq(const char *str1, const char* str2)
  * Determines if str1 exactly matches str2, ignoring case (more efficient than
  * strcasecmp(...) == 0)
  */
-static inline bool strcaseeq(const char *str1, const char* str2)
-{
+static inline bool strcaseeq(const char *str1, const char *str2) {
     int i;
-    for (i = 0 ; str1[i] != '\0' ; i++) {
+    for (i = 0; str1[i] != '\0'; i++) {
         if (str1[i] == str2[i])
             continue;
         else if (islower(str1[i]) && (str1[i] - 32) == str2[i])
@@ -136,9 +132,9 @@ static inline bool strcaseeq(const char *str1, const char* str2)
 }
 
 /**
- * Trims whitespace characters (i.e. matching isspace()) from the beginning and/or
- * end of the supplied string. This change affects the supplied string in-place.
- * The supplied/edited string is returned to enable chained reference.
+ * Trims whitespace characters (i.e. matching isspace()) from the beginning
+ * and/or end of the supplied string. This change affects the supplied string
+ * in-place. The supplied/edited string is returned to enable chained reference.
  *
  * Note: do not pass a string literal to this function
  */
@@ -177,16 +173,19 @@ bool str_ends_with(const char *haystack, const char *needle);
 bool str_starts_with(const char *haystack, const char *needle);
 
 /**
- * Returns true if the start of string 'haystack' matches any needle, else false.
+ * Returns true if the start of string 'haystack' matches any needle, else
+ * false.
  *
  * Note: An empty needle ("") will match any source.
  */
-bool str_starts_with_any(const char *haystack, const char **needles, int num_needles);
+bool str_starts_with_any(const char *haystack, const char **needles,
+                         int num_needles);
 
 /**
  * Returns true if the string 'haystack' matches any needle, else false.
  */
-bool str_matches_any(const char *haystack, const char **needles, int num_needles);
+bool str_matches_any(const char *haystack, const char **needles,
+                     int num_needles);
 
 /**
  * Retrieves a (newly-allocated) substring of the given string, 'str', starting
@@ -212,9 +211,9 @@ char *str_substring(const char *str, size_t startidx, long endidx);
  */
 int str_indexof(const char *haystack, const char *needle);
 
-    static inline int str_contains(const char *haystack, const char *needle) {
-        return str_indexof(haystack, needle) >= 0;
-    }
+static inline int str_contains(const char *haystack, const char *needle) {
+    return str_indexof(haystack, needle) >= 0;
+}
 
 // same as above, but returns last match
 int str_last_indexof(const char *haystack, const char *needle);
@@ -237,8 +236,8 @@ char *str_touppercase(char *s);
 
 /**
  * Replaces all occurrences of 'needle' in the string 'haystack', substituting
- * for them the value of 'replacement', and returns the result as a newly-allocated
- * string. The original strings remain unchanged.
+ * for them the value of 'replacement', and returns the result as a
+ * newly-allocated string. The original strings remain unchanged.
  *
  * It is the caller's responsibility to free the returned string.
  *
@@ -249,9 +248,10 @@ char *str_touppercase(char *s);
  *
  * Note: An empty needle will match only an empty haystack
  */
-char *str_replace(const char *haystack, const char *needle, const char *replacement);
+char *str_replace(const char *haystack, const char *needle,
+                  const char *replacement);
 
-    char *str_replace_many(const char *_haystack, ...);
+char *str_replace_many(const char *_haystack, ...);
 //////////////////////////////////////////////////////
 // String Buffer
 
@@ -292,9 +292,9 @@ void string_buffer_append_string(string_buffer_t *sb, const char *str);
  */
 void string_buffer_appendf(string_buffer_t *sb, const char *fmt, ...)
 #ifndef _MSC_VER
-__attribute__ ((format (printf, 2, 3)))
+    __attribute__((format(printf, 2, 3)))
 #endif
-;
+    ;
 
 /**
  * Determines whether the character contents held by the supplied string buffer
@@ -305,8 +305,9 @@ __attribute__ ((format (printf, 2, 3)))
 bool string_buffer_ends_with(string_buffer_t *sb, const char *str);
 
 /**
- * Returns the string-length of the contents of the string buffer (not counting \0).
- * Equivalent to calling strlen() on the string returned by string_buffer_to_string(sb).
+ * Returns the string-length of the contents of the string buffer (not counting
+ * \0). Equivalent to calling strlen() on the string returned by
+ * string_buffer_to_string(sb).
  */
 size_t string_buffer_size(string_buffer_t *sb);
 
@@ -369,7 +370,8 @@ char string_feeder_next(string_feeder_t *sf);
  * It is the caller's responsibility to free the returned string when it is no
  * longer needed.
  *
- * Note: Calling once the end of the string has already been read will throw an assertion.
+ * Note: Calling once the end of the string has already been read will throw an
+ * assertion.
  */
 char *string_feeder_next_length(string_feeder_t *sf, size_t length);
 
@@ -392,7 +394,8 @@ char string_feeder_peek(string_feeder_t *sf);
  * It is the caller's responsibility to free the returned string when it is no
  * longer needed.
  *
- * Note: Calling once the end of the string has already been read will throw an assertion.
+ * Note: Calling once the end of the string has already been read will throw an
+ * assertion.
  */
 char *string_feeder_peek_length(string_feeder_t *sf, size_t length);
 
@@ -430,8 +433,8 @@ int string_feeder_get_column(string_feeder_t *sf);
  * Determines whether the supplied string feeder's remaining contents starts
  * with the given string.
  *
- * Returns true if the beginning of the string feeder's remaining contents matches
- * the supplied string exactly, else false.
+ * Returns true if the beginning of the string feeder's remaining contents
+ * matches the supplied string exactly, else false.
  */
 bool string_feeder_starts_with(string_feeder_t *sf, const char *str);
 
@@ -453,7 +456,6 @@ void string_feeder_require(string_feeder_t *sf, const char *str);
     }
 #endif
 */
-
 
 // find everything that looks like an env variable and expand it
 // using getenv. Caller should free the result.

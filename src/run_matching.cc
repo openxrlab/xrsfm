@@ -11,8 +11,8 @@
 
 using namespace xrsfm;
 
-void GetFeatures(const std::string& images_path, const std::string& ftr_path,
-                 std::vector<Frame>& frames) {
+void GetFeatures(const std::string &images_path, const std::string &ftr_path,
+                 std::vector<Frame> &frames) {
     std::ifstream ftr_bin(ftr_path);
     if (ftr_bin.good()) {
         ReadFeatures(ftr_path, frames);
@@ -23,13 +23,15 @@ void GetFeatures(const std::string& images_path, const std::string& ftr_path,
     }
 }
 
-void GetImageSizeVec(const std::string& images_path, const std::vector<std::string>& image_names,
-                     const std::string& path, std::vector<ImageSize>& image_size) {
+void GetImageSizeVec(const std::string &images_path,
+                     const std::vector<std::string> &image_names,
+                     const std::string &path,
+                     std::vector<ImageSize> &image_size) {
     std::ifstream bin(path);
     if (bin.good()) {
         LoadImageSize(path, image_size);
     } else {
-        for (const auto& image_name : image_names) {
+        for (const auto &image_name : image_names) {
             const cv::Mat image = cv::imread(images_path + image_name);
             image_size.push_back(ImageSize(image.cols, image.rows));
         }
@@ -37,9 +39,10 @@ void GetImageSizeVec(const std::string& images_path, const std::vector<std::stri
     }
 }
 
-void GetInitFramePairs(const std::string& path, const std::vector<Frame>& frames,
+void GetInitFramePairs(const std::string &path,
+                       const std::vector<Frame> &frames,
                        const std::vector<std::pair<int, int>> id_pairs,
-                       std::vector<FramePair>& frame_pairs) {
+                       std::vector<FramePair> &frame_pairs) {
     std::ifstream bin(path);
     if (bin.good()) {
         ReadFramePairs(path, frame_pairs);
@@ -49,28 +52,36 @@ void GetInitFramePairs(const std::string& path, const std::vector<Frame>& frames
     }
 }
 
-inline void ExtractNearestImagePairs(const std::map<int, std::vector<int>>& id2rank,
-                                     const int num_candidates,
-                                     std::vector<std::pair<int, int>>& image_id_pairs) {
+inline void
+ExtractNearestImagePairs(const std::map<int, std::vector<int>> &id2rank,
+                         const int num_candidates,
+                         std::vector<std::pair<int, int>> &image_id_pairs) {
     std::set<std::pair<int, int>> image_pair_set;
     // search nv5 in candidates except for nearest images
-    for (const auto& [id, retrieval_results] : id2rank) {
+    for (const auto &[id, retrieval_results] : id2rank) {
         int count = 0;
-        for (const auto& id2 : retrieval_results) {
-            auto ret = image_pair_set.insert(std::make_pair(std::min(id, id2), std::max(id, id2)));
+        for (const auto &id2 : retrieval_results) {
+            auto ret = image_pair_set.insert(
+                std::make_pair(std::min(id, id2), std::max(id, id2)));
             // if (!ret.second)continue;
             count++;
-            if (count >= num_candidates) break;
+            if (count >= num_candidates)
+                break;
         }
     }
-    image_id_pairs.insert(image_id_pairs.end(), image_pair_set.begin(), image_pair_set.end());
-    std::sort(image_id_pairs.begin(), image_id_pairs.end(), [](auto& a, auto& b) {
-        if (a.first < b.first || (a.first == b.first && a.second < b.second)) return true;
-        return false;
-    });
+    image_id_pairs.insert(image_id_pairs.end(), image_pair_set.begin(),
+                          image_pair_set.end());
+    std::sort(image_id_pairs.begin(), image_id_pairs.end(),
+              [](auto &a, auto &b) {
+                  if (a.first < b.first ||
+                      (a.first == b.first && a.second < b.second))
+                      return true;
+                  return false;
+              });
 }
 
-std::tuple<int, int> GetInitId(const int num_image, std::vector<FramePair>& frame_pairs) {
+std::tuple<int, int> GetInitId(const int num_image,
+                               std::vector<FramePair> &frame_pairs) {
     std::vector<std::map<int, int>> id2cor_num_vec(num_image);
     std::vector<std::pair<int, int>> connect_number_vec(num_image);
     std::map<int, std::set<int>> connect_id_vec;
@@ -78,21 +89,23 @@ std::tuple<int, int> GetInitId(const int num_image, std::vector<FramePair>& fram
         connect_number_vec[i] = {i, 0};
     }
 
-    for (auto& fp : frame_pairs) {
-        if (fp.inlier_num < 100) continue; // for Trafalgar
+    for (auto &fp : frame_pairs) {
+        if (fp.inlier_num < 100)
+            continue; // for Trafalgar
         connect_number_vec[fp.id1].second++;
         connect_number_vec[fp.id2].second++;
         id2cor_num_vec[fp.id1][fp.id2] = fp.matches.size();
         id2cor_num_vec[fp.id2][fp.id1] = fp.matches.size();
     }
     std::sort(connect_number_vec.begin(), connect_number_vec.end(),
-              [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+              [](const std::pair<int, int> &a, const std::pair<int, int> &b) {
                   return a.second > b.second;
               });
     const int init_id1 = connect_number_vec[0].first;
     int init_id2 = -1;
-    for (auto& [id, number] : connect_number_vec) {
-        if (id2cor_num_vec[init_id1].count(id) != 0 && id2cor_num_vec[init_id1][id] >= 100) {
+    for (auto &[id, number] : connect_number_vec) {
+        if (id2cor_num_vec[init_id1].count(id) != 0 &&
+            id2cor_num_vec[init_id1][id] >= 100) {
             init_id2 = id;
             break;
         }
@@ -100,14 +113,17 @@ std::tuple<int, int> GetInitId(const int num_image, std::vector<FramePair>& fram
     return std::tuple<int, int>(init_id1, init_id2);
 }
 
-void MatchingSeq(std::vector<Frame>& frames, const std::string& fp_path, std::map<int, std::vector<int>>& id2rank) {
+void MatchingSeq(std::vector<Frame> &frames, const std::string &fp_path,
+                 std::map<int, std::vector<int>> &id2rank) {
     std::set<std::pair<int, int>> set_pairs;
     for (int i = 0, num = frames.size(); i < num; ++i) {
-        for (int k = 0; k < 20 && i + k < num; ++k) set_pairs.insert(std::pair<int, int>(i, i + k));
+        for (int k = 0; k < 20 && i + k < num; ++k)
+            set_pairs.insert(std::pair<int, int>(i, i + k));
     }
-    for (auto& [id1, vec] : id2rank) {
-        if (id1 % 5 != 0) continue;
-        for (auto& id2 : vec) {
+    for (auto &[id1, vec] : id2rank) {
+        if (id1 % 5 != 0)
+            continue;
+        for (auto &id2 : vec) {
             set_pairs.insert(std::pair<int, int>(id1, id2));
         }
     }
@@ -119,10 +135,10 @@ void MatchingSeq(std::vector<Frame>& frames, const std::string& fp_path, std::ma
     SaveFramePairs(fp_path, frame_pairs);
 }
 
-int main(int argc, const char* argv[]) {
+int main(int argc, const char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
-    std::string images_path, retrival_path, matching_type, output_path;
+    std::string images_path, retrieval_path, matching_type, output_path;
     if (argc <= 2) {
         std::string config_path = "./config_mat.json";
         if (argc == 2) {
@@ -130,12 +146,12 @@ int main(int argc, const char* argv[]) {
         }
         auto config_json = LoadJSON(config_path);
         images_path = config_json["images_path"];
-        retrival_path = config_json["retrival_path"];
+        retrieval_path = config_json["retrieval_path"];
         matching_type = config_json["matching_type"];
         output_path = config_json["output_path"];
     } else if (argc == 5) {
         images_path = argv[1];
-        retrival_path = argv[2];
+        retrieval_path = argv[2];
         matching_type = argv[3];
         output_path = argv[4];
     } else {
@@ -167,19 +183,22 @@ int main(int argc, const char* argv[]) {
 
     // 5.image matching
     std::map<int, std::vector<int>> id2rank;
-    bool have_retrival_info = LoadRetrievalRank(retrival_path, name2id, id2rank);
+    bool have_retrieval_info =
+        LoadRetrievalRank(retrieval_path, name2id, id2rank);
     std::cout << "Load Retrieval Info Done.\n";
 
     Timer timer("%lf s\n");
     timer.start();
     if (matching_type == "sequential") {
-        if (!have_retrival_info) {
-            std::cout << "Without the retrival file, sequential matching method only matchs adjacent frames.\n";
+        if (!have_retrieval_info) {
+            std::cout << "Without the retrieval file, sequential matching "
+                         "method only matches adjacent frames.\n";
         }
         MatchingSeq(frames, fp_path, id2rank);
-    } else if (matching_type == "retrival") {
-        if (!have_retrival_info) {
-            std::cout << "The retrieval file is required when using retrival-based matching!!!\n";
+    } else if (matching_type == "retrieval") {
+        if (!have_retrieval_info) {
+            std::cout << "The retrieval file is required when using "
+                         "retrieval-based matching!!!\n";
             return 0;
         }
         std::vector<std::pair<int, int>> id_pairs;
@@ -188,8 +207,9 @@ int main(int argc, const char* argv[]) {
         FeatureMatching(frames, id_pairs, frame_pairs, true);
         SaveFramePairs(fp_path, frame_pairs);
     } else if (matching_type == "covisibility") {
-        if (!have_retrival_info) {
-            std::cout << "The retrieval file is required when using covisibility-based matching!!!\n";
+        if (!have_retrieval_info) {
+            std::cout << "The retrieval file is required when using "
+                         "covisibility-based matching!!!\n";
             return 0;
         }
         std::vector<std::pair<int, int>> id_pairs;
@@ -205,8 +225,8 @@ int main(int argc, const char* argv[]) {
         Map map;
         map.frames_ = std::move(frames);
         map.frame_pairs_ = std::move(frame_pairs);
-        ExpansionAndMatching(map, id2rank, num_iteration, image_size_vec, init_id1, init_id2,
-                             use_fundamental, id_pairs);
+        ExpansionAndMatching(map, id2rank, num_iteration, image_size_vec,
+                             init_id1, init_id2, use_fundamental, id_pairs);
         SaveFramePairs(fp_path, map.frame_pairs_);
     }
     timer.stop();

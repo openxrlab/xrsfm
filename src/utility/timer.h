@@ -9,11 +9,11 @@
 #include <vector>
 
 namespace xrsfm {
-#define TIMING(a, b) \
-    {                \
-        a.resume();  \
-        b;           \
-        a.stop();    \
+#define TIMING(a, b)                                                           \
+    {                                                                          \
+        a.resume();                                                            \
+        b;                                                                     \
+        a.stop();                                                              \
     };
 
 class Timer {
@@ -24,15 +24,11 @@ class Timer {
     std::chrono::time_point<_Clock> start_time;
 
   public:
-    Timer() :
-        time_count(0){};
+    Timer() : time_count(0){};
 
-    Timer(std::string _format) :
-        format(std::move(_format)), time_count(0){};
+    Timer(std::string _format) : format(std::move(_format)), time_count(0){};
 
-    void init(std::string _format) {
-        format = std::move(_format);
-    }
+    void init(std::string _format) { format = std::move(_format); }
 
     void start() {
         time_count = 0;
@@ -41,16 +37,14 @@ class Timer {
 
     void stop() {
         auto stop_time = _Clock::now();
-        time_count += std::chrono::duration_cast<std::chrono::duration<double>>(stop_time - start_time).count();
+        time_count += std::chrono::duration_cast<std::chrono::duration<double>>(
+                          stop_time - start_time)
+                          .count();
     }
 
-    void resume() {
-        start_time = _Clock::now();
-    }
+    void resume() { start_time = _Clock::now(); }
 
-    void print() {
-        printf(format.c_str(), time_count);
-    };
+    void print() { printf(format.c_str(), time_count); };
 
     void log(std::ofstream &time_log_stream) {
         // char buffer[128];

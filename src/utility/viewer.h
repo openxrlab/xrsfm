@@ -2,7 +2,6 @@
 // Created by SENSETIME\yezhichao1 on 2020/10/18.
 //
 
-
 #pragma once
 
 #include <pangolin/pangolin.h>
@@ -21,7 +20,8 @@ class ViewerThread {
 
     void update_map(const Map &map);
     void update_map_colmap(const Map &map);
-    void add_tag_points(const std::map<int, std::vector<vector3>> &pt_world_vec);
+    void
+    add_tag_points(const std::map<int, std::vector<vector3>> &pt_world_vec);
 
     double camera_size_ = 0.1;
     std::vector<Pose> cameras;

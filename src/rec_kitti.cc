@@ -11,7 +11,8 @@
 
 using namespace xrsfm;
 
-void PreProcess(const std::string dir_path, const int camera_param_id, Map& map) {
+void PreProcess(const std::string dir_path, const int camera_param_id,
+                Map &map) {
     std::vector<Frame> frames;
     std::vector<Camera> cameras;
     std::vector<FramePair> frame_pairs;
@@ -28,18 +29,18 @@ void PreProcess(const std::string dir_path, const int camera_param_id, Map& map)
         seq = Camera(0, 707.0912, 707.0912, 601.8873, 183.1104, 0.0); // 04-12
     }
     cameras.emplace_back(seq);
-    for (auto& frame : frames) {
+    for (auto &frame : frames) {
         frame.camera_id = 0;
     }
 
     // set points for reconstruction
-    for (auto& frame : frames) {
+    for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
         frame.points_normalized.clear();
         frame.track_ids_.assign(num_points, -1);
-        for (const auto& kpt : frame.keypoints_) {
-            const auto& pt = kpt.pt;
+        for (const auto &kpt : frame.keypoints_) {
+            const auto &pt = kpt.pt;
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
             ImageToNormalized(cameras[0], ept, eptn);
             frame.points.emplace_back(ept);
@@ -54,7 +55,7 @@ void PreProcess(const std::string dir_path, const int camera_param_id, Map& map)
     map.Init();
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
     std::string bin_path, data_path, seq_name, output_path;
@@ -83,7 +84,9 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
     const std::string seq_path = data_path + seq_name + "/";
-    std::map<std::string, int> name2camera_id = {{"00", 0}, {"01", 0}, {"02", 0}, {"03", 1}, {"04", 2}, {"05", 2}, {"06", 2}, {"07", 2}, {"08", 2}, {"09", 2}, {"10", 2}};
+    std::map<std::string, int> name2camera_id = {
+        {"00", 0}, {"01", 0}, {"02", 0}, {"03", 1}, {"04", 2}, {"05", 2},
+        {"06", 2}, {"07", 2}, {"08", 2}, {"09", 2}, {"10", 2}};
     CHECK(name2camera_id.count(seq_name) != 0) << "NO suitable camera param.";
     const int camera_param_id = name2camera_id[seq_name];
 

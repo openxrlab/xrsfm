@@ -10,12 +10,12 @@ Avoid lack of motion. It is necessary to keep the camera moving during the acqui
 
 
 
-## the problem in matching stage 
+## the problem in matching stage
 
 For large data sets, ensure that there is enough memory and space to store the feature extraction and matching results.
 The matching of 1W images may require about 20GB of memory and hard disk space.
 
-## the problem in scale estimation 
+## the problem in scale estimation
 
-The side length of apriltag (in A4 paper) should be 0.113 M. 
+The side length of apriltag (in A4 paper) should be 0.113 M.
 if markers of other sizes are used, this parameter should be changed in [scale estimation](../../src/estimate_scale).

@@ -38,9 +38,8 @@
 
 namespace colmap {
 
-CombinationSampler::CombinationSampler(const size_t num_samples) :
-    num_samples_(num_samples) {
-}
+CombinationSampler::CombinationSampler(const size_t num_samples)
+    : num_samples_(num_samples) {}
 
 void CombinationSampler::Initialize(const size_t total_num_samples) {
     CHECK_LE(num_samples_, total_num_samples);
@@ -66,10 +65,12 @@ std::vector<size_t> CombinationSampler::Sample() {
         sampled_idxs[i] = total_sample_idxs_[i];
     }
 
-    if (!NextCombination(total_sample_idxs_.begin(), total_sample_idxs_.begin() + num_samples_,
+    if (!NextCombination(total_sample_idxs_.begin(),
+                         total_sample_idxs_.begin() + num_samples_,
                          total_sample_idxs_.end())) {
         // Reached all possible combinations, so reset to original state.
-        // Note that the samples must be in increasing order for `NextCombination`.
+        // Note that the samples must be in increasing order for
+        // `NextCombination`.
         std::iota(total_sample_idxs_.begin(), total_sample_idxs_.end(), 0);
     }
 

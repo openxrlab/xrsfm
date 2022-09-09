@@ -17,7 +17,7 @@ As a necessary input, the image retrieval results can be downloaded from  [link]
 
 Run the following python script to process the matching stage
 ```
-python3 ./scripts/run_kitti_matching.py --data_path ${dataset_path}$ --retrival_dir_path ${retrival_dir_path}$  --output_dir_path ${output_dir_path}$
+python3 ./scripts/run_kitti_matching.py --data_path ${dataset_path}$ --retrieval_dir_path ${retrieval_dir_path}$  --output_dir_path ${output_dir_path}$
 ```
 
 ### Run reconstruction stage
@@ -46,7 +46,7 @@ Download the data set and the retrieval data, unzip them and place them into '/p
 
 Run the following scripts:
 ```
-python3 ./scripts/run_kitti_matching.py --data_path /path/dataset/sequences/ --retrival_dir_path /path/KITTI/ --output_dir_path /path/KITTI/
+python3 ./scripts/run_kitti_matching.py --data_path /path/dataset/sequences/ --retrieval_dir_path /path/KITTI/ --output_dir_path /path/KITTI/
 python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/sequences/ --bin_dir_path /path/KITTI/
 ```
 
@@ -63,7 +63,7 @@ The image retrieval results and camera intrinsic parameters can be downloaded fr
 
 Run the following python script to process the matching stage
 ```
-python3 ./scripts/run_1dsfm_matching.py --data_path ${dataset_path}$ --retrival_dir_path ${retrival_dir_path}$ --output_dir_path ${output_dir_path}$
+python3 ./scripts/run_1dsfm_matching.py --data_path ${dataset_path}$ --retrieval_dir_path ${retrieval_dir_path}$ --output_dir_path ${output_dir_path}$
 ```
 
 ### Run reconstruction
@@ -74,7 +74,7 @@ Run the following python script to process the reconstruction stage
 python3 ./scripts/run_1dsfm_reconstruction.py --data_path ${dataset_path}$ --bin_dir_path ${bin_dir_path}$
 ```
 
-### Results 
+### Results
 
 
 |  | Registered Frames | Matching Time |

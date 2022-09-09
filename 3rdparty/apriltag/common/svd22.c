@@ -58,22 +58,22 @@ USV' = [ CT -ST ][  e*CP  e*SP ]
 
 A00+A11 = e*CT*CP + f*ST*SP + e*SP*ST + f*CP*CT
         = e*(CP*CT + SP*ST) + f*(SP*ST + CP*CT)
-    	= (e+f)(CP*CT + SP*ST)
+        = (e+f)(CP*CT + SP*ST)
 B0	    = (e+f)*cos(P-T)
 
 A00-A11 = e*CT*CP + f*ST*SP - e*SP*ST - f*CP*CT
         = e*(CP*CT - SP*ST) - f*(-ST*SP + CP*CT)
-	    = (e-f)(CP*CT - SP*ST)
+            = (e-f)(CP*CT - SP*ST)
 B1	    = (e-f)*cos(P+T)
 
 A01+A10 = e*CT*SP - f*ST*CP + e*ST*CP - f*SP*CT
-	    = e(CT*SP + ST*CP) - f*(ST*CP + SP*CT)
-	    = (e-f)*(CT*SP + ST*CP)
+            = e(CT*SP + ST*CP) - f*(ST*CP + SP*CT)
+            = (e-f)*(CT*SP + ST*CP)
 B2	    = (e-f)*sin(P+T)
 
 A01-A10 = e*CT*SP - f*ST*CP - e*ST*CP + f*SP*CT
-	= e*(CT*SP - ST*CP) + f(SP*CT - ST*CP)
-	= (e+f)*(CT*SP - ST*CP)
+        = e*(CT*SP - ST*CP) + f(SP*CT - ST*CP)
+        = (e+f)*(CT*SP - ST*CP)
 B3	= (e+f)*sin(P-T)
 
 B0 = (e+f)*cos(P-T)
@@ -85,8 +85,7 @@ B3/B0 = tan(P-T)
 
 B2/B1 = tan(P+T)
  **/
-void svd22(const double A[4], double U[4], double S[2], double V[4])
-{
+void svd22(const double A[4], double U[4], double S[2], double V[4]) {
     double A00 = A[0];
     double A01 = A[1];
     double A10 = A[2];
@@ -118,7 +117,7 @@ void svd22(const double A[4], double U[4], double S[2], double V[4])
 
     // C0 = e+f. There are two ways to compute C0; we pick the one
     // that is better conditioned.
-    double CPmT = cos(P-T), SPmT = sin(P-T);
+    double CPmT = cos(P - T), SPmT = sin(P - T);
     double C0 = 0;
     if (fabs(CPmT) > fabs(SPmT))
         C0 = B0 / CPmT;
@@ -127,7 +126,7 @@ void svd22(const double A[4], double U[4], double S[2], double V[4])
 
     // C1 = e-f. There are two ways to compute C1; we pick the one
     // that is better conditioned.
-    double CPpT = cos(P+T), SPpT = sin(P+T);
+    double CPpT = cos(P + T), SPpT = sin(P + T);
     double C1 = 0;
     if (fabs(CPpT) > fabs(SPpT))
         C1 = B1 / CPpT;
@@ -210,14 +209,11 @@ void svd22(const double A[4], double U[4], double S[2], double V[4])
     doubles_print_mat(diff, 2, 2, "%20.10g");
 
     */
-
 }
 
-
 // for the matrix [a b; b d]
-void svd_sym_singular_values(double A00, double A01, double A11,
-                             double *Lmin, double *Lmax)
-{
+void svd_sym_singular_values(double A00, double A01, double A11, double *Lmin,
+                             double *Lmax) {
     double A10 = A01;
 
     double B0 = A00 + A11;
@@ -233,7 +229,7 @@ void svd_sym_singular_values(double A00, double A01, double A11,
 
     // C0 = e+f. There are two ways to compute C0; we pick the one
     // that is better conditioned.
-    double CPmT = cos(P-T), SPmT = sin(P-T);
+    double CPmT = cos(P - T), SPmT = sin(P - T);
     double C0 = 0;
     if (fabs(CPmT) > fabs(SPmT))
         C0 = B0 / CPmT;
@@ -242,7 +238,7 @@ void svd_sym_singular_values(double A00, double A01, double A11,
 
     // C1 = e-f. There are two ways to compute C1; we pick the one
     // that is better conditioned.
-    double CPpT = cos(P+T), SPpT = sin(P+T);
+    double CPpT = cos(P + T), SPpT = sin(P + T);
     double C1 = 0;
     if (fabs(CPpT) > fabs(SPpT))
         C1 = B1 / CPpT;

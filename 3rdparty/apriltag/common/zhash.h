@@ -35,19 +35,19 @@ extern "C" {
 
 #include "zarray.h"
 
-
 /**
  * A hash table for structs and primitive types that stores entries by value.
- *   - The size of the key/values must be known at instantiation time, and remain fixed.
- *     e.g. for pointers: zhash_create(sizeof(void*), sizeof(void*)....)
- *          for structs: zhash_create(sizeof(struct key_struct), sizeof(struct value_struct)...)
- *          for bytes: zhash_create(sizeof(uint8_t), sizeof(uint8_t)...)
- *   - Entries are copied by value. This means you must always pass a reference to the start
- *     of 'key_size' and 'value_size' bytes, which you have already malloc'd or stack allocated
- *   - This data structure can be used to store types of any size, from bytes & doubles to
- *     user defined structs
- *     Note: if zhash stores pointers, user must be careful to manually manage the lifetime
- *     of the memory they point to.
+ *   - The size of the key/values must be known at instantiation time, and
+ * remain fixed. e.g. for pointers: zhash_create(sizeof(void*),
+ * sizeof(void*)....) for structs: zhash_create(sizeof(struct key_struct),
+ * sizeof(struct value_struct)...) for bytes: zhash_create(sizeof(uint8_t),
+ * sizeof(uint8_t)...)
+ *   - Entries are copied by value. This means you must always pass a reference
+ * to the start of 'key_size' and 'value_size' bytes, which you have already
+ * malloc'd or stack allocated
+ *   - This data structure can be used to store types of any size, from bytes &
+ * doubles to user defined structs Note: if zhash stores pointers, user must be
+ * careful to manually manage the lifetime of the memory they point to.
  *
  */
 
@@ -56,8 +56,7 @@ typedef struct zhash zhash_t;
 // The contents of the iterator should be considered private. However,
 // since our usage model prefers stack-based allocation of iterators,
 // we must publicly declare them.
-struct zhash_iterator
-{
+struct zhash_iterator {
     zhash_t *zh;
     const zhash_t *czh;
     int last_entry; // points to the last entry returned by _next
@@ -75,12 +74,13 @@ typedef struct zhash_iterator zhash_iterator_t;
  * parameters as *uint64_t.
  */
 zhash_t *zhash_create(size_t keysz, size_t valuesz,
-                      uint32_t(*hash)(const void *a),
-                      int(*equals)(const void *a, const void *b));
+                      uint32_t (*hash)(const void *a),
+                      int (*equals)(const void *a, const void *b));
 
 /**
  * Frees all resources associated with the hash table structure which was
- * created by zhash_create(). After calling, 'zh' will no longer be valid for storage.
+ * created by zhash_create(). After calling, 'zh' will no longer be valid for
+ * storage.
  *
  * If 'zh' contains pointer data, it is the caller's responsibility to manage
  * the resources pointed to by those pointers.
@@ -88,13 +88,13 @@ zhash_t *zhash_create(size_t keysz, size_t valuesz,
 void zhash_destroy(zhash_t *zh);
 
 /**
- * Creates and returns a new identical copy of the zhash (i.e. a "shallow" copy).
- * If you're storing pointers, be sure not to double free their pointees!
- * It is the caller's responsibility to call zhash_destroy() on the returned array
- * when it is no longer needed (in addition to the zhash_destroy() call for the
- * original zhash).
+ * Creates and returns a new identical copy of the zhash (i.e. a "shallow"
+ * copy). If you're storing pointers, be sure not to double free their pointees!
+ * It is the caller's responsibility to call zhash_destroy() on the returned
+ * array when it is no longer needed (in addition to the zhash_destroy() call
+ * for the original zhash).
  */
-zhash_t * zhash_copy(const zhash_t* other);
+zhash_t *zhash_copy(const zhash_t *other);
 
 /**
  * Determines whether the supplied key value exists as an entry in the zhash
@@ -129,13 +129,13 @@ int zhash_get_volatile(const zhash_t *zh, const void *key, void *out_p);
  * Adds a key/value pair to the hash table, if the supplied key does not already
  * exist in the table, or overwrites the value for the supplied key if it does
  * already exist. In the latter case, the previous contents of the key and value
- * will be copied into the spaces pointed to by 'oldkey' and 'oldvalue', respectively,
- * if they are not NULL.
+ * will be copied into the spaces pointed to by 'oldkey' and 'oldvalue',
+ * respectively, if they are not NULL.
  *
- * The key/value is added to / updated in the hash table by copying 'keysz' bytes
- * from the data pointed to by 'key' and 'valuesz' bytes from the data pointed
- * to by 'value'. It is up to the caller to manage the memory allocation of the
- * passed-in values, zhash will store and manage a copy.
+ * The key/value is added to / updated in the hash table by copying 'keysz'
+ * bytes from the data pointed to by 'key' and 'valuesz' bytes from the data
+ * pointed to by 'value'. It is up to the caller to manage the memory allocation
+ * of the passed-in values, zhash will store and manage a copy.
  *
  * NOTE: If the key is a pointer type (such as a string), the contents of the
  * data that it points to must not be modified after the call to zhash_put(),
@@ -143,11 +143,9 @@ int zhash_get_volatile(const zhash_t *zh, const void *key, void *out_p);
  * previous or new value).
  *
  * NOTE: When using array data as a key (such as a string), the array should not
- * be passed directly or it will cause a segmentation fault when it is dereferenced.
- * Instead, pass a pointer which points to the array location, i.e.:
- *   char key[strlen];
- *   char *keyptr = key;
- *   zhash_put(zh, &keyptr, ...)
+ * be passed directly or it will cause a segmentation fault when it is
+ * dereferenced. Instead, pass a pointer which points to the array location,
+ * i.e.: char key[strlen]; char *keyptr = key; zhash_put(zh, &keyptr, ...)
  *
  * Example:
  *   char * key = ...;
@@ -161,7 +159,8 @@ int zhash_get_volatile(const zhash_t *zh, const void *key, void *out_p);
  * which case the data pointed to by 'oldkey' and 'oldvalue' will be set to zero
  * if they are not NULL.
  */
-int zhash_put(zhash_t *zh, const void *key, const void *value, void *oldkey, void *oldvalue);
+int zhash_put(zhash_t *zh, const void *key, const void *value, void *oldkey,
+              void *oldvalue);
 
 /**
  * Removes from the zhash table the key/value pair for the supplied key, if
@@ -176,9 +175,9 @@ int zhash_put(zhash_t *zh, const void *key, const void *value, void *oldkey, voi
 int zhash_remove(zhash_t *zh, const void *key, void *oldkey, void *oldvalue);
 
 /**
- * Removes all entries in the has table to create the equivalent of starting from
- * a zhash_create(), using the same size parameters. If any elements need to be
- * freed manually, this will need to occur before calling clear.
+ * Removes all entries in the has table to create the equivalent of starting
+ * from a zhash_create(), using the same size parameters. If any elements need
+ * to be freed manually, this will need to occur before calling clear.
  */
 void zhash_clear(zhash_t *zh);
 
@@ -191,8 +190,8 @@ int zhash_size(const zhash_t *zh);
 /**
  * Initializes an iterator which can be used to traverse the key/value pairs of
  * the supplied zhash table via successive calls to zhash_iterator_next() or
- * zhash_iterator_next_volatile(). The iterator can also be used to remove elements
- * from the zhash with zhash_iterator_remove().
+ * zhash_iterator_next_volatile(). The iterator can also be used to remove
+ * elements from the zhash with zhash_iterator_remove().
  *
  * Any modifications to the zhash table structure will invalidate the
  * iterator, with the exception of zhash_iterator_remove().
@@ -224,12 +223,11 @@ void zhash_iterator_init_const(const zhash_t *zh, zhash_iterator_t *zit);
 int zhash_iterator_next(zhash_iterator_t *zit, void *outkey, void *outvalue);
 
 /**
- * Similar to zhash_iterator_next() except that it retrieves a pointer to zhash's
- * internal storage.  This can be used to avoid the memcpys associated with
- * zhash_iterator_next(). Call no other zhash functions for the
- * period during which you intend to use the pointer.
- * 'outkey' and 'outvalue' should be pointers to the pointers which will be set
- * to the internal data addresses.
+ * Similar to zhash_iterator_next() except that it retrieves a pointer to
+ * zhash's internal storage.  This can be used to avoid the memcpys associated
+ * with zhash_iterator_next(). Call no other zhash functions for the period
+ * during which you intend to use the pointer. 'outkey' and 'outvalue' should be
+ * pointers to the pointers which will be set to the internal data addresses.
  *
  * Example:
  *   key_t *outkey;
@@ -241,7 +239,8 @@ int zhash_iterator_next(zhash_iterator_t *zit, void *outkey, void *outvalue);
  * indicating that no entries remain, in which case the pointers outkey and
  * outvalue will remain unchanged.
  */
-int zhash_iterator_next_volatile(zhash_iterator_t *zit, void *outkey, void *outvalue);
+int zhash_iterator_next_volatile(zhash_iterator_t *zit, void *outkey,
+                                 void *outvalue);
 
 /**
  * Removes from the zhash table the key/value pair most recently returned via
@@ -256,25 +255,25 @@ void zhash_iterator_remove(zhash_iterator_t *zit);
 /**
  * Calls the supplied function with a pointer to every key in the hash table in
  * turn. The function will be passed a pointer to the table's internal storage
- * for the key, which the caller should not modify, as the hash table will not be
- * re-indexed. The function may be NULL, in which case no action is taken.
+ * for the key, which the caller should not modify, as the hash table will not
+ * be re-indexed. The function may be NULL, in which case no action is taken.
  */
 void zhash_map_keys(zhash_t *zh, void (*f)());
 
 /**
- * Calls the supplied function with a pointer to every value in the hash table in
- * turn. The function will be passed a pointer to the table's internal storage
- * for the value, which the caller may safely modify. The function may be NULL,
- * in which case no action is taken.
+ * Calls the supplied function with a pointer to every value in the hash table
+ * in turn. The function will be passed a pointer to the table's internal
+ * storage for the value, which the caller may safely modify. The function may
+ * be NULL, in which case no action is taken.
  */
 void zhash_map_values(zhash_t *zh, void (*f)());
 
 /**
  * Calls the supplied function with a copy of every key in the hash table in
- * turn. While zhash_map_keys() passes a pointer to internal storage, this function
- * passes a copy of the actual storage. If the zhash stores pointers to data,
- * functions like free() can be used directly with zhash_vmap_keys().
- * The function may be NULL, in which case no action is taken.
+ * turn. While zhash_map_keys() passes a pointer to internal storage, this
+ * function passes a copy of the actual storage. If the zhash stores pointers to
+ * data, functions like free() can be used directly with zhash_vmap_keys(). The
+ * function may be NULL, in which case no action is taken.
  *
  * NOTE: zhash_vmap_keys() can only be used with pointer-data keys.
  * Use with non-pointer keys (i.e. integer, double, etc.) will likely cause a
@@ -284,9 +283,9 @@ void zhash_vmap_keys(zhash_t *vh, void (*f)());
 
 /**
  * Calls the supplied function with a copy of every value in the hash table in
- * turn. While zhash_map_values() passes a pointer to internal storage, this function
- * passes a copy of the actual storage. If the zhash stores pointers to data,
- * functions like free() can be used directly with zhash_vmap_values().
+ * turn. While zhash_map_values() passes a pointer to internal storage, this
+ * function passes a copy of the actual storage. If the zhash stores pointers to
+ * data, functions like free() can be used directly with zhash_vmap_values().
  * The function may be NULL, in which case no action is taken.
  *
  * NOTE: zhash_vmap_values() can only be used with pointer-data values.
@@ -303,9 +302,9 @@ void zhash_vmap_values(zhash_t *vh, void (*f)());
 zarray_t *zhash_keys(const zhash_t *zh);
 
 /**
- * Returns an array which contains copies of all of the hash table's values, in no
- * particular order. It is the caller's responsibility to call zarray_destroy()
- * on the returned structure when it is no longer needed.
+ * Returns an array which contains copies of all of the hash table's values, in
+ * no particular order. It is the caller's responsibility to call
+ * zarray_destroy() on the returned structure when it is no longer needed.
  */
 zarray_t *zhash_values(const zhash_t *zh);
 
@@ -365,66 +364,57 @@ int zhash_str_equals(const void *a, const void *b);
 
 void zhash_debug(zhash_t *zh);
 
-    static inline zhash_t *zhash_str_str_create(void)
-    {
-        return zhash_create(sizeof(char*), sizeof(char*),
-                            zhash_str_hash, zhash_str_equals);
-    }
-
-
+static inline zhash_t *zhash_str_str_create(void) {
+    return zhash_create(sizeof(char *), sizeof(char *), zhash_str_hash,
+                        zhash_str_equals);
+}
 
 // for zhashes that map strings to strings, this is a convenience
 // function that allows easier retrieval of values. NULL is returned
 // if the key is not found.
-static inline char *zhash_str_str_get(zhash_t *zh, const char *key)
-{
+static inline char *zhash_str_str_get(zhash_t *zh, const char *key) {
     char *value;
     if (zhash_get(zh, &key, &value))
         return value;
     return NULL;
 }
 
-    static inline void zhash_str_str_put(zhash_t *zh, char *key, char *value)
-    {
-        char *oldkey, *oldval;
-        if (zhash_put(zh, &key, &value, &oldkey, &oldval)) {
-            free(oldkey);
-            free(oldval);
-        }
+static inline void zhash_str_str_put(zhash_t *zh, char *key, char *value) {
+    char *oldkey, *oldval;
+    if (zhash_put(zh, &key, &value, &oldkey, &oldval)) {
+        free(oldkey);
+        free(oldval);
+    }
+}
+
+static inline void zhash_str_str_destroy(zhash_t *zh) {
+    zhash_iterator_t zit;
+    zhash_iterator_init(zh, &zit);
+
+    char *key, *value;
+    while (zhash_iterator_next(&zit, &key, &value)) {
+        free(key);
+        free(value);
     }
 
-    static inline void zhash_str_str_destroy(zhash_t *zh)
-    {
-        zhash_iterator_t zit;
-        zhash_iterator_init(zh, &zit);
+    zhash_destroy(zh);
+}
 
-        char *key, *value;
-        while (zhash_iterator_next(&zit, &key, &value)) {
-            free(key);
-            free(value);
-        }
-
-        zhash_destroy(zh);
-    }
-
-
-static inline uint32_t zhash_int_hash(const void *_a)
-{
+static inline uint32_t zhash_int_hash(const void *_a) {
     assert(_a != NULL);
 
-    uint32_t a = *((int*) _a);
+    uint32_t a = *((int *)_a);
     return a;
 }
 
-static inline int zhash_int_equals(const void *_a, const void *_b)
-{
+static inline int zhash_int_equals(const void *_a, const void *_b) {
     assert(_a != NULL);
     assert(_b != NULL);
 
-    int a = *((int*) _a);
-    int b = *((int*) _b);
+    int a = *((int *)_a);
+    int b = *((int *)_b);
 
-    return a==b;
+    return a == b;
 }
 
 #ifdef __cplusplus

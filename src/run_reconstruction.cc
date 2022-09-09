@@ -11,7 +11,8 @@
 
 using namespace xrsfm;
 
-void PreProcess(const std::string dir_path, const std::string camera_path, Map& map) {
+void PreProcess(const std::string dir_path, const std::string camera_path,
+                Map &map) {
     std::vector<Frame> frames;
     std::vector<FramePair> frame_pairs;
     std::vector<std::string> image_names;
@@ -24,20 +25,20 @@ void PreProcess(const std::string dir_path, const std::string camera_path, Map& 
     Camera seq = ReadCameraIOSRecord(camera_path);
     seq.log();
     cameras.emplace_back(seq);
-    for (auto& frame : frames) {
+    for (auto &frame : frames) {
         frame.camera_id = 0;
         // std::cout<<image_names.at(frame.id)<<" "<<frame.name<<std::endl;
         // frame.name = image_names.at(frame.id);
     }
 
     // set points for reconstruction
-    for (auto& frame : frames) {
+    for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
         frame.points_normalized.clear();
         frame.track_ids_.assign(num_points, -1);
-        for (const auto& kpt : frame.keypoints_) {
-            const auto& pt = kpt.pt;
+        for (const auto &kpt : frame.keypoints_) {
+            const auto &pt = kpt.pt;
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
             ImageToNormalized(cameras[0], ept, eptn);
             frame.points.emplace_back(ept);
@@ -52,7 +53,7 @@ void PreProcess(const std::string dir_path, const std::string camera_path, Map& 
     map.Init();
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     // 1.Read Config
     std::string bin_path, camera_path, output_path;

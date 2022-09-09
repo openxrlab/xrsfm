@@ -32,8 +32,7 @@ either expressed or implied, of the Regents of The University of Michigan.
 
 #include "pam.h"
 
-pam_t *pam_create_from_file(const char *inpath)
-{
+pam_t *pam_create_from_file(const char *inpath) {
     FILE *infile = fopen(inpath, "r");
     if (infile == NULL) {
         printf("pam.c: couldn't open input file: %s\n", inpath);
@@ -68,10 +67,11 @@ pam_t *pam_create_from_file(const char *inpath)
             if (line[idx] == ' ') {
                 line[idx] = 0;
                 if (tok1) {
-                    printf("pam.c: More than two tokens, %s:%d\n", inpath, linenumber);
+                    printf("pam.c: More than two tokens, %s:%d\n", inpath,
+                           linenumber);
                 }
 
-                tok1 = &line[idx+1];
+                tok1 = &line[idx + 1];
             }
             if (line[idx] == '\n')
                 line[idx] = 0;
@@ -149,38 +149,39 @@ pam_t *pam_create_from_file(const char *inpath)
     fclose(infile);
     return pam;
 
-  fail:
+fail:
     free(pam);
     fclose(infile);
     return NULL;
 }
 
-int pam_write_file(pam_t *pam, const char *outpath)
-{
+int pam_write_file(pam_t *pam, const char *outpath) {
     FILE *f = fopen(outpath, "w+");
     if (!f)
         return -1;
 
     const char *tupl = NULL;
     switch (pam->type) {
-        case PAM_GRAYSCALE_ALPHA:
-            tupl = "GRAYSCALE_ALPHA";
-            break;
-        case PAM_RGB_ALPHA:
-            tupl = "RGB_ALPHA";
-            break;
-        case PAM_RGB:
-            tupl = "RGB";
-            break;
-        case PAM_GRAYSCALE:
-            tupl = "GRAYSCALE";
-            break;
-        default:
-            assert(0);
+    case PAM_GRAYSCALE_ALPHA:
+        tupl = "GRAYSCALE_ALPHA";
+        break;
+    case PAM_RGB_ALPHA:
+        tupl = "RGB_ALPHA";
+        break;
+    case PAM_RGB:
+        tupl = "RGB";
+        break;
+    case PAM_GRAYSCALE:
+        tupl = "GRAYSCALE";
+        break;
+    default:
+        assert(0);
     }
 
-    fprintf(f, "P7\nWIDTH %d\nHEIGHT %d\nDEPTH %d\nMAXVAL %d\nTUPLTYPE %s\nENDHDR\n",
-            pam->width, pam->height, pam->depth, pam->maxval, tupl);
+    fprintf(
+        f,
+        "P7\nWIDTH %d\nHEIGHT %d\nDEPTH %d\nMAXVAL %d\nTUPLTYPE %s\nENDHDR\n",
+        pam->width, pam->height, pam->depth, pam->maxval, tupl);
     int len = pam->width * pam->height * pam->depth;
     if (len != fwrite(pam->data, 1, len, f)) {
         fclose(f);
@@ -192,8 +193,7 @@ int pam_write_file(pam_t *pam, const char *outpath)
     return 0;
 }
 
-void pam_destroy(pam_t *pam)
-{
+void pam_destroy(pam_t *pam) {
     if (!pam)
         return;
 
@@ -201,8 +201,7 @@ void pam_destroy(pam_t *pam)
     free(pam);
 }
 
-pam_t *pam_copy(pam_t *pam)
-{
+pam_t *pam_copy(pam_t *pam) {
     pam_t *copy = calloc(1, sizeof(pam_t));
     copy->width = pam->width;
     copy->height = pam->height;
@@ -217,8 +216,7 @@ pam_t *pam_copy(pam_t *pam)
     return copy;
 }
 
-pam_t *pam_convert(pam_t *in, int type)
-{
+pam_t *pam_convert(pam_t *in, int type) {
     if (type == in->type)
         return pam_copy(in);
 
@@ -241,10 +239,13 @@ pam_t *pam_convert(pam_t *in, int type)
         assert(in->depth == 3);
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                out->data[y*4*w + 4*x + 0] = in->data[y*3*w + 3*x + 0];
-                out->data[y*4*w + 4*x + 1] = in->data[y*3*w + 3*x + 1];
-                out->data[y*4*w + 4*x + 2] = in->data[y*3*w + 3*x + 2];
-                out->data[y*4*w + 4*x + 3] = 255;
+                out->data[y * 4 * w + 4 * x + 0] =
+                    in->data[y * 3 * w + 3 * x + 0];
+                out->data[y * 4 * w + 4 * x + 1] =
+                    in->data[y * 3 * w + 3 * x + 1];
+                out->data[y * 4 * w + 4 * x + 2] =
+                    in->data[y * 3 * w + 3 * x + 2];
+                out->data[y * 4 * w + 4 * x + 3] = 255;
             }
         }
     } else {

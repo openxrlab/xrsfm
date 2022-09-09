@@ -55,8 +55,10 @@ namespace colmap {
 // @param points          Image coordinates.
 // @param normed_points   Transformed image coordinates.
 // @param matrix          3x3 transformation matrix.
-// void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d>& points,
-//                                    std::vector<Eigen::Vector2d>* normed_points, Eigen::Matrix3d* matrix);
+// void CenterAndNormalizeImagePoints(const std::vector<Eigen::Vector2d>&
+// points,
+//                                    std::vector<Eigen::Vector2d>*
+//                                    normed_points, Eigen::Matrix3d* matrix);
 
 // Calculate the residuals of a set of corresponding points and a given
 // fundamental or essential matrix.
@@ -68,7 +70,8 @@ namespace colmap {
 // @param E           3x3 fundamental or essential matrix.
 // @param residuals   Output vector of residuals.
 // void ComputeSquaredSampsonError(const std::vector<Eigen::Vector2d>& points1,
-//                                 const std::vector<Eigen::Vector2d>& points2, const Eigen::Matrix3d& E,
+//                                 const std::vector<Eigen::Vector2d>& points2,
+//                                 const Eigen::Matrix3d& E,
 //                                 std::vector<double>* residuals);
 
 // Calculate the squared reprojection error given a set of 2D-3D point
@@ -79,9 +82,10 @@ namespace colmap {
 // @param points3D      3D world points.
 // @param proj_matrix   3x4 projection matrix.
 // @param residuals     Output vector of residuals.
-void ComputeSquaredReprojectionError(const std::vector<Eigen::Vector2d>& points2D,
-                                     const std::vector<Eigen::Vector3d>& points3D, const Eigen::Matrix3x4d& proj_matrix,
-                                     std::vector<double>* residuals);
+void ComputeSquaredReprojectionError(
+    const std::vector<Eigen::Vector2d> &points2D,
+    const std::vector<Eigen::Vector3d> &points3D,
+    const Eigen::Matrix3x4d &proj_matrix, std::vector<double> *residuals);
 
 } // namespace colmap
 

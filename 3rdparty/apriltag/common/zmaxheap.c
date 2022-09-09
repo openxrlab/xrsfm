@@ -36,10 +36,7 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include "debug_print.h"
 
 #ifdef _WIN32
-static inline long int random(void)
-{
-        return rand();
-}
+static inline long int random(void) { return rand(); }
 #endif
 
 //                 0
@@ -54,8 +51,7 @@ static inline long int random(void)
 
 #define MIN_CAPACITY 16
 
-struct zmaxheap
-{
+struct zmaxheap {
     size_t el_sz;
 
     int size;
@@ -67,60 +63,52 @@ struct zmaxheap
     void (*swap)(zmaxheap_t *heap, int a, int b);
 };
 
-static inline void swap_default(zmaxheap_t *heap, int a, int b)
-{
+static inline void swap_default(zmaxheap_t *heap, int a, int b) {
     float t = heap->values[a];
     heap->values[a] = heap->values[b];
     heap->values[b] = t;
 
-    char *tmp = malloc(sizeof(char)*heap->el_sz);
-    memcpy(tmp, &heap->data[a*heap->el_sz], heap->el_sz);
-    memcpy(&heap->data[a*heap->el_sz], &heap->data[b*heap->el_sz], heap->el_sz);
-    memcpy(&heap->data[b*heap->el_sz], tmp, heap->el_sz);
+    char *tmp = malloc(sizeof(char) * heap->el_sz);
+    memcpy(tmp, &heap->data[a * heap->el_sz], heap->el_sz);
+    memcpy(&heap->data[a * heap->el_sz], &heap->data[b * heap->el_sz],
+           heap->el_sz);
+    memcpy(&heap->data[b * heap->el_sz], tmp, heap->el_sz);
     free(tmp);
 }
 
-static inline void swap_pointer(zmaxheap_t *heap, int a, int b)
-{
+static inline void swap_pointer(zmaxheap_t *heap, int a, int b) {
     float t = heap->values[a];
     heap->values[a] = heap->values[b];
     heap->values[b] = t;
 
-    void **pp = (void**) heap->data;
+    void **pp = (void **)heap->data;
     void *tmp = pp[a];
     pp[a] = pp[b];
     pp[b] = tmp;
 }
 
-
-zmaxheap_t *zmaxheap_create(size_t el_sz)
-{
+zmaxheap_t *zmaxheap_create(size_t el_sz) {
     zmaxheap_t *heap = calloc(1, sizeof(zmaxheap_t));
     heap->el_sz = el_sz;
 
     heap->swap = swap_default;
 
-    if (el_sz == sizeof(void*))
+    if (el_sz == sizeof(void *))
         heap->swap = swap_pointer;
 
     return heap;
 }
 
-void zmaxheap_destroy(zmaxheap_t *heap)
-{
+void zmaxheap_destroy(zmaxheap_t *heap) {
     free(heap->values);
     free(heap->data);
     memset(heap, 0, sizeof(zmaxheap_t));
     free(heap);
 }
 
-int zmaxheap_size(zmaxheap_t *heap)
-{
-    return heap->size;
-}
+int zmaxheap_size(zmaxheap_t *heap) { return heap->size; }
 
-void zmaxheap_ensure_capacity(zmaxheap_t *heap, int capacity)
-{
+void zmaxheap_ensure_capacity(zmaxheap_t *heap, int capacity) {
     if (heap->alloc >= capacity)
         return;
 
@@ -140,16 +128,17 @@ void zmaxheap_ensure_capacity(zmaxheap_t *heap, int capacity)
     heap->alloc = newcap;
 }
 
-void zmaxheap_add(zmaxheap_t *heap, void *p, float v)
-{
+void zmaxheap_add(zmaxheap_t *heap, void *p, float v) {
 
-    assert (isfinite(v) && "zmaxheap_add: Trying to add non-finite number to heap.  NaN's prohibited, could allow INF with testing");
+    assert(isfinite(v) &&
+           "zmaxheap_add: Trying to add non-finite number to heap.  NaN's "
+           "prohibited, could allow INF with testing");
     zmaxheap_ensure_capacity(heap, heap->size + 1);
 
     int idx = heap->size;
 
     heap->values[idx] = v;
-    memcpy(&heap->data[idx*heap->el_sz], p, heap->el_sz);
+    memcpy(&heap->data[idx * heap->el_sz], p, heap->el_sz);
 
     heap->size++;
 
@@ -167,15 +156,14 @@ void zmaxheap_add(zmaxheap_t *heap, void *p, float v)
     }
 }
 
-void zmaxheap_vmap(zmaxheap_t *heap, void (*f)())
-{
+void zmaxheap_vmap(zmaxheap_t *heap, void (*f)()) {
     assert(heap != NULL);
     assert(f != NULL);
-    assert(heap->el_sz == sizeof(void*));
+    assert(heap->el_sz == sizeof(void *));
 
     for (int idx = 0; idx < heap->size; idx++) {
         void *p = NULL;
-        memcpy(&p, &heap->data[idx*heap->el_sz], heap->el_sz);
+        memcpy(&p, &heap->data[idx * heap->el_sz], heap->el_sz);
         if (p == NULL) {
             debug_print("Warning: zmaxheap_vmap item %d is NULL\n", idx);
         }
@@ -186,8 +174,7 @@ void zmaxheap_vmap(zmaxheap_t *heap, void (*f)())
 // Removes the item in the heap at the given index.  Returns 1 if the
 // item existed. 0 Indicates an invalid idx (heap is smaller than
 // idx). This is mostly intended to be used by zmaxheap_remove_max.
-int zmaxheap_remove_index(zmaxheap_t *heap, int idx, void *p, float *v)
-{
+int zmaxheap_remove_index(zmaxheap_t *heap, int idx, void *p, float *v) {
     if (idx >= heap->size)
         return 0;
 
@@ -195,7 +182,7 @@ int zmaxheap_remove_index(zmaxheap_t *heap, int idx, void *p, float *v)
     if (v != NULL)
         *v = heap->values[idx];
     if (p != NULL)
-        memcpy(p, &heap->data[idx*heap->el_sz], heap->el_sz);
+        memcpy(p, &heap->data[idx * heap->el_sz], heap->el_sz);
 
     heap->size--;
 
@@ -207,7 +194,8 @@ int zmaxheap_remove_index(zmaxheap_t *heap, int idx, void *p, float *v)
     // copy last element to first element. (which probably upsets
     // the heap property).
     heap->values[idx] = heap->values[heap->size];
-    memcpy(&heap->data[idx*heap->el_sz], &heap->data[heap->el_sz * heap->size], heap->el_sz);
+    memcpy(&heap->data[idx * heap->el_sz],
+           &heap->data[heap->el_sz * heap->size], heap->el_sz);
 
     // now fix the heap. Note, as we descend, we're "pushing down"
     // the same node the entire time. Thus, while the index of the
@@ -218,13 +206,14 @@ int zmaxheap_remove_index(zmaxheap_t *heap, int idx, void *p, float *v)
     // descend, fixing the heap.
     while (parent < heap->size) {
 
-        int left = 2*parent + 1;
+        int left = 2 * parent + 1;
         int right = left + 1;
 
-//            assert(parent_score == heap->values[parent]);
+        //            assert(parent_score == heap->values[parent]);
 
         float left_score = (left < heap->size) ? heap->values[left] : -INFINITY;
-        float right_score = (right < heap->size) ? heap->values[right] : -INFINITY;
+        float right_score =
+            (right < heap->size) ? heap->values[right] : -INFINITY;
 
         // put the biggest of (parent, left, right) as the parent.
 
@@ -238,7 +227,8 @@ int zmaxheap_remove_index(zmaxheap_t *heap, int idx, void *p, float *v)
             heap->swap(heap, parent, left);
             parent = left;
         } else {
-            // right_score can't be less than left_score if right_score is -INFINITY.
+            // right_score can't be less than left_score if right_score is
+            // -INFINITY.
             assert(right < heap->size);
             heap->swap(heap, parent, right);
             parent = right;
@@ -248,32 +238,30 @@ int zmaxheap_remove_index(zmaxheap_t *heap, int idx, void *p, float *v)
     return 1;
 }
 
-int zmaxheap_remove_max(zmaxheap_t *heap, void *p, float *v)
-{
+int zmaxheap_remove_max(zmaxheap_t *heap, void *p, float *v) {
     return zmaxheap_remove_index(heap, 0, p, v);
 }
 
-void zmaxheap_iterator_init(zmaxheap_t *heap, zmaxheap_iterator_t *it)
-{
+void zmaxheap_iterator_init(zmaxheap_t *heap, zmaxheap_iterator_t *it) {
     memset(it, 0, sizeof(zmaxheap_iterator_t));
     it->heap = heap;
     it->in = 0;
     it->out = 0;
 }
 
-int zmaxheap_iterator_next(zmaxheap_iterator_t *it, void *p, float *v)
-{
+int zmaxheap_iterator_next(zmaxheap_iterator_t *it, void *p, float *v) {
     zmaxheap_t *heap = it->heap;
 
     if (it->in >= zmaxheap_size(heap))
         return 0;
 
     *v = heap->values[it->in];
-    memcpy(p, &heap->data[it->in*heap->el_sz], heap->el_sz);
+    memcpy(p, &heap->data[it->in * heap->el_sz], heap->el_sz);
 
     if (it->in != it->out) {
         heap->values[it->out] = heap->values[it->in];
-        memcpy(&heap->data[it->out*heap->el_sz], &heap->data[it->in*heap->el_sz], heap->el_sz);
+        memcpy(&heap->data[it->out * heap->el_sz],
+               &heap->data[it->in * heap->el_sz], heap->el_sz);
     }
 
     it->in++;
@@ -281,19 +269,20 @@ int zmaxheap_iterator_next(zmaxheap_iterator_t *it, void *p, float *v)
     return 1;
 }
 
-int zmaxheap_iterator_next_volatile(zmaxheap_iterator_t *it, void *p, float *v)
-{
+int zmaxheap_iterator_next_volatile(zmaxheap_iterator_t *it, void *p,
+                                    float *v) {
     zmaxheap_t *heap = it->heap;
 
     if (it->in >= zmaxheap_size(heap))
         return 0;
 
     *v = heap->values[it->in];
-    *((void**) p) = &heap->data[it->in*heap->el_sz];
+    *((void **)p) = &heap->data[it->in * heap->el_sz];
 
     if (it->in != it->out) {
         heap->values[it->out] = heap->values[it->in];
-        memcpy(&heap->data[it->out*heap->el_sz], &heap->data[it->in*heap->el_sz], heap->el_sz);
+        memcpy(&heap->data[it->out * heap->el_sz],
+               &heap->data[it->in * heap->el_sz], heap->el_sz);
     }
 
     it->in++;
@@ -301,15 +290,11 @@ int zmaxheap_iterator_next_volatile(zmaxheap_iterator_t *it, void *p, float *v)
     return 1;
 }
 
-void zmaxheap_iterator_remove(zmaxheap_iterator_t *it)
-{
-    it->out--;
-}
+void zmaxheap_iterator_remove(zmaxheap_iterator_t *it) { it->out--; }
 
-static void maxheapify(zmaxheap_t *heap, int parent)
-{
-    int left = 2*parent + 1;
-    int right = 2*parent + 2;
+static void maxheapify(zmaxheap_t *heap, int parent) {
+    int left = 2 * parent + 1;
+    int right = 2 * parent + 2;
 
     int betterchild = parent;
 
@@ -324,7 +309,7 @@ static void maxheapify(zmaxheap_t *heap, int parent)
     }
 }
 
-#if 0 //won't compile if defined but not used
+#if 0 // won't compile if defined but not used
 // test the heap property
 static void validate(zmaxheap_t *heap)
 {
@@ -342,8 +327,7 @@ static void validate(zmaxheap_t *heap)
     }
 }
 #endif
-void zmaxheap_iterator_finish(zmaxheap_iterator_t *it)
-{
+void zmaxheap_iterator_finish(zmaxheap_iterator_t *it) {
     // if nothing was removed, no work to do.
     if (it->in == it->out)
         return;
@@ -353,12 +337,11 @@ void zmaxheap_iterator_finish(zmaxheap_iterator_t *it)
     heap->size = it->out;
 
     // restore heap property
-    for (int i = heap->size/2 - 1; i >= 0; i--)
+    for (int i = heap->size / 2 - 1; i >= 0; i--)
         maxheapify(heap, i);
 }
 
-void zmaxheap_test()
-{
+void zmaxheap_test() {
     int cap = 10000;
     int sz = 0;
     int32_t *vals = calloc(sizeof(int32_t), cap);
@@ -373,7 +356,7 @@ void zmaxheap_test()
 
         if ((random() & 1) == 0 && sz < cap) {
             // add a value
-            int32_t v = (int32_t) (random() / 1000);
+            int32_t v = (int32_t)(random() / 1000);
             float fv = v;
             assert(v == fv);
 
@@ -381,7 +364,7 @@ void zmaxheap_test()
             zmaxheap_add(heap, &v, fv);
             sz++;
 
-//            printf("add %d %f\n", v, fv);
+            //            printf("add %d %f\n", v, fv);
         } else {
             // remove a value
             int maxv = -1, maxi = -1;
@@ -393,14 +376,14 @@ void zmaxheap_test()
                 }
             }
 
-
             int32_t outv;
             float outfv;
             int res = zmaxheap_remove_max(heap, &outv, &outfv);
             if (sz == 0) {
                 assert(res == 0);
             } else {
-//                printf("%d %d %d %f\n", sz, maxv, outv, outfv);
+                //                printf("%d %d %d %f\n", sz, maxv, outv,
+                //                outfv);
                 assert(outv == outfv);
                 assert(maxv == outv);
 
@@ -418,5 +401,5 @@ void zmaxheap_test()
     }
 
     printf("max size: %d, zcount %d\n", maxsz, zcnt);
-    free (vals);
+    free(vals);
 }

@@ -41,7 +41,7 @@
 
 namespace colmap {
 
-extern thread_local std::mt19937* PRNG;
+extern thread_local std::mt19937 *PRNG;
 
 static const unsigned kRandomPRNGSeed = std::numeric_limits<unsigned>::max();
 
@@ -54,20 +54,17 @@ void SetPRNGSeed(unsigned seed = kRandomPRNGSeed);
 // Generate uniformly distributed random integer number.
 //
 // This implementation is unbiased and thread-safe in contrast to `rand()`.
-template <typename T>
-T RandomInteger(const T min, const T max);
+template <typename T> T RandomInteger(const T min, const T max);
 
 // Generate uniformly distributed random real number.
 //
 // This implementation is unbiased and thread-safe in contrast to `rand()`.
-template <typename T>
-T RandomReal(const T min, const T max);
+template <typename T> T RandomReal(const T min, const T max);
 
 // Generate Gaussian distributed random real number.
 //
 // This implementation is unbiased and thread-safe in contrast to `rand()`.
-template <typename T>
-T RandomGaussian(const T mean, const T stddev);
+template <typename T> T RandomGaussian(const T mean, const T stddev);
 
 // Fisher-Yates shuffling.
 //
@@ -79,14 +76,13 @@ T RandomGaussian(const T mean, const T stddev);
 // @param num_to_shuffle   Optional parameter, specifying the number of first
 //                         N elements in the vector to shuffle.
 template <typename T>
-void Shuffle(const uint32_t num_to_shuffle, std::vector<T>* elems);
+void Shuffle(const uint32_t num_to_shuffle, std::vector<T> *elems);
 
 ////////////////////////////////////////////////////////////////////////////////
 // Implementation
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-T RandomInteger(const T min, const T max) {
+template <typename T> T RandomInteger(const T min, const T max) {
     if (PRNG == nullptr) {
         SetPRNGSeed();
     }
@@ -96,8 +92,7 @@ T RandomInteger(const T min, const T max) {
     return distribution(*PRNG);
 }
 
-template <typename T>
-T RandomReal(const T min, const T max) {
+template <typename T> T RandomReal(const T min, const T max) {
     if (PRNG == nullptr) {
         SetPRNGSeed();
     }
@@ -107,8 +102,7 @@ T RandomReal(const T min, const T max) {
     return distribution(*PRNG);
 }
 
-template <typename T>
-T RandomGaussian(const T mean, const T stddev) {
+template <typename T> T RandomGaussian(const T mean, const T stddev) {
     if (PRNG == nullptr) {
         SetPRNGSeed();
     }
@@ -118,7 +112,7 @@ T RandomGaussian(const T mean, const T stddev) {
 }
 
 template <typename T>
-void Shuffle(const uint32_t num_to_shuffle, std::vector<T>* elems) {
+void Shuffle(const uint32_t num_to_shuffle, std::vector<T> *elems) {
     CHECK_LE(num_to_shuffle, elems->size());
     const uint32_t last_idx = static_cast<uint32_t>(elems->size() - 1);
     for (uint32_t i = 0; i < num_to_shuffle; ++i) {

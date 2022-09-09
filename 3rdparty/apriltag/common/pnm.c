@@ -31,8 +31,7 @@ either expressed or implied, of the Regents of The University of Michigan.
 
 #include "pnm.h"
 
-pnm_t *pnm_create_from_file(const char *path)
-{
+pnm_t *pnm_create_from_file(const char *path) {
     FILE *f = fopen(path, "rb");
     if (f == NULL)
         return NULL;
@@ -49,20 +48,22 @@ pnm_t *pnm_create_from_file(const char *path)
             goto error;
 
         // skip comments
-        if (tmp[0]=='#')
+        if (tmp[0] == '#')
             continue;
 
         char *p = tmp;
 
-        if (pnm->format == -1 && tmp[0]=='P') {
-            pnm->format = tmp[1]-'0';
-            assert(pnm->format == PNM_FORMAT_GRAY || pnm->format == PNM_FORMAT_RGB || pnm->format == PNM_FORMAT_BINARY);
+        if (pnm->format == -1 && tmp[0] == 'P') {
+            pnm->format = tmp[1] - '0';
+            assert(pnm->format == PNM_FORMAT_GRAY ||
+                   pnm->format == PNM_FORMAT_RGB ||
+                   pnm->format == PNM_FORMAT_BINARY);
             p = &tmp[2];
         }
 
         // pull integers out of this line until there are no more.
-        while (nparams < 3 && *p!=0) {
-            while (*p==' ')
+        while (nparams < 3 && *p != 0) {
+            while (*p == ' ')
                 p++;
 
             // encounter rubbish? (End of line?)
@@ -71,7 +72,7 @@ pnm_t *pnm_create_from_file(const char *path)
 
             int acc = 0;
             while (*p >= '0' && *p <= '9') {
-                acc = acc*10 + *p - '0';
+                acc = acc * 10 + *p - '0';
                 p++;
             }
 
@@ -85,52 +86,52 @@ pnm_t *pnm_create_from_file(const char *path)
     pnm->max = params[2];
 
     switch (pnm->format) {
-        case PNM_FORMAT_BINARY: {
-            // files in the wild sometimes simply don't set max
-            pnm->max = 1;
+    case PNM_FORMAT_BINARY: {
+        // files in the wild sometimes simply don't set max
+        pnm->max = 1;
 
-            pnm->buflen = pnm->height * ((pnm->width + 7)  / 8);
-            pnm->buf = malloc(pnm->buflen);
-            size_t len = fread(pnm->buf, 1, pnm->buflen, f);
-            if (len != pnm->buflen)
-                goto error;
+        pnm->buflen = pnm->height * ((pnm->width + 7) / 8);
+        pnm->buf = malloc(pnm->buflen);
+        size_t len = fread(pnm->buf, 1, pnm->buflen, f);
+        if (len != pnm->buflen)
+            goto error;
 
-            fclose(f);
-            return pnm;
-        }
+        fclose(f);
+        return pnm;
+    }
 
-        case PNM_FORMAT_GRAY: {
-            if (pnm->max == 255)
-                pnm->buflen = pnm->width * pnm->height;
-            else if (pnm->max == 65535)
-                pnm->buflen = 2 * pnm->width * pnm->height;
-            else
-                assert(0);
+    case PNM_FORMAT_GRAY: {
+        if (pnm->max == 255)
+            pnm->buflen = pnm->width * pnm->height;
+        else if (pnm->max == 65535)
+            pnm->buflen = 2 * pnm->width * pnm->height;
+        else
+            assert(0);
 
-            pnm->buf = malloc(pnm->buflen);
-            size_t len = fread(pnm->buf, 1, pnm->buflen, f);
-            if (len != pnm->buflen)
-                goto error;
+        pnm->buf = malloc(pnm->buflen);
+        size_t len = fread(pnm->buf, 1, pnm->buflen, f);
+        if (len != pnm->buflen)
+            goto error;
 
-            fclose(f);
-            return pnm;
-        }
+        fclose(f);
+        return pnm;
+    }
 
-        case PNM_FORMAT_RGB: {
-            if (pnm->max == 255)
-                pnm->buflen = pnm->width * pnm->height * 3;
-            else if (pnm->max == 65535)
-                pnm->buflen = 2 * pnm->width * pnm->height * 3;
-            else
-                assert(0);
+    case PNM_FORMAT_RGB: {
+        if (pnm->max == 255)
+            pnm->buflen = pnm->width * pnm->height * 3;
+        else if (pnm->max == 65535)
+            pnm->buflen = 2 * pnm->width * pnm->height * 3;
+        else
+            assert(0);
 
-            pnm->buf = malloc(pnm->buflen);
-            size_t len = fread(pnm->buf, 1, pnm->buflen, f);
-            if (len != pnm->buflen)
-                goto error;
-            fclose(f);
-            return pnm;
-        }
+        pnm->buf = malloc(pnm->buflen);
+        size_t len = fread(pnm->buf, 1, pnm->buflen, f);
+        if (len != pnm->buflen)
+            goto error;
+        fclose(f);
+        return pnm;
+    }
     }
 
 error:
@@ -144,8 +145,7 @@ error:
     return NULL;
 }
 
-void pnm_destroy(pnm_t *pnm)
-{
+void pnm_destroy(pnm_t *pnm) {
     if (pnm == NULL)
         return;
 

@@ -16,7 +16,7 @@ KITTI数据集可以从[链接](https://s3.eu-central-1.amazonaws.com/avg-kitti/
 
 运行下列python脚本来进行匹配阶段
 ```
-python3 ./scripts/run_kitti_matching.py --data_path ${dataset_path}$ --retrival_dir_path ${retrival_dir_path}$ --output_dir_path ${output_dir_path}$
+python3 ./scripts/run_kitti_matching.py --data_path ${dataset_path}$ --retrieval_dir_path ${retrieval_dir_path}$ --output_dir_path ${output_dir_path}$
 ```
 
 ### 重建阶段
@@ -43,7 +43,7 @@ path
 ```
 运行以下脚本
 ```
-python3 ./scripts/run_kitti_matching.py --data_path /path/dataset/sequences/ --retrival_dir_path /path/KITTI/ --output_dir_path /path/KITTI/
+python3 ./scripts/run_kitti_matching.py --data_path /path/dataset/sequences/ --retrieval_dir_path /path/KITTI/ --output_dir_path /path/KITTI/
 python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/sequences/ --bin_dir_path /path/KITTI/
 ```
 生成的相机轨迹文件将存储在/KITTI/XX/目录下
@@ -60,7 +60,7 @@ python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/sequence
 
 运行下列python脚本来进行匹配阶段
 ```
-python3 ./scripts/run_1dsfm_matching.py --data_path ${dataset_path}$ --retrival_dir_path ${retrival_dir_path}$ --output_dir_path ${output_dir_path}$
+python3 ./scripts/run_1dsfm_matching.py --data_path ${dataset_path}$ --retrieval_dir_path ${retrieval_dir_path}$ --output_dir_path ${output_dir_path}$
 ```
 
 ### 重建阶段
@@ -87,7 +87,7 @@ path
 ```
 运行以下脚本
 ```
-python3 ./scripts/run_kitti_matching.py --data_path /path/dataset/ --retrival_dir_path /path/1DSfM/ --output_dir_path /path/1DSfM/
+python3 ./scripts/run_kitti_matching.py --data_path /path/dataset/ --retrieval_dir_path /path/1DSfM/ --output_dir_path /path/1DSfM/
 python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/ --bin_dir_path /path/1DSfM/
 ```
 
@@ -95,7 +95,7 @@ python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/ --bin_d
 
 ### 基于NetVLAD50的匹配结果
 |  | 注册帧数 | 匹配耗时 |
-|:------:|:-------:|:--------:| 
+|:------:|:-------:|:--------:|
 |Alamo	            |862|	1405 |
 |Ellis Island	    |351|	988  |
 |Gendarmenmarkt	    |1020|	596  |
@@ -113,7 +113,7 @@ python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/ --bin_d
 
 ### 基于共视性的匹配结果
 |  | 注册帧数 | 匹配耗时 |
-|:------:|:-------:|:--------:| 
+|:------:|:-------:|:--------:|
 |Alamo	            |787 |	120 |
 |Ellis Island	    |339 |	97  |
 |Gendarmenmarkt	    |970 |	222 |

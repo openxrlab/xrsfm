@@ -36,7 +36,7 @@
 
 namespace colmap {
 
-std::string EnsureTrailingSlash(const std::string& str) {
+std::string EnsureTrailingSlash(const std::string &str) {
     if (str.length() > 0) {
         if (str.back() != '/') {
             return str + "/";
@@ -47,18 +47,21 @@ std::string EnsureTrailingSlash(const std::string& str) {
     return str;
 }
 
-bool HasFileExtension(const std::string& file_name, const std::string& ext) {
+bool HasFileExtension(const std::string &file_name, const std::string &ext) {
     CHECK(!ext.empty());
     CHECK_EQ(ext.at(0), '.');
     std::string ext_lower = ext;
     StringToLower(&ext_lower);
-    if (file_name.size() >= ext_lower.size() && file_name.substr(file_name.size() - ext_lower.size(), ext_lower.size()) == ext_lower) {
+    if (file_name.size() >= ext_lower.size() &&
+        file_name.substr(file_name.size() - ext_lower.size(),
+                         ext_lower.size()) == ext_lower) {
         return true;
     }
     return false;
 }
 
-void SplitFileExtension(const std::string& path, std::string* root, std::string* ext) {
+void SplitFileExtension(const std::string &path, std::string *root,
+                        std::string *ext) {
     const auto parts = StringSplit(path, ".");
     CHECK_GT(parts.size(), 0);
     if (parts.size() == 1) {
@@ -78,26 +81,27 @@ void SplitFileExtension(const std::string& path, std::string* root, std::string*
     }
 }
 
-bool ExistsFile(const std::string& path) {
+bool ExistsFile(const std::string &path) {
     return boost::filesystem::is_regular_file(path);
 }
 
-bool ExistsDir(const std::string& path) {
+bool ExistsDir(const std::string &path) {
     return boost::filesystem::is_directory(path);
 }
 
-bool ExistsPath(const std::string& path) {
+bool ExistsPath(const std::string &path) {
     return boost::filesystem::exists(path);
 }
 
-void CreateDirIfNotExists(const std::string& path) {
+void CreateDirIfNotExists(const std::string &path) {
     if (!ExistsDir(path)) {
         CHECK(boost::filesystem::create_directory(path));
     }
 }
 
-std::string GetPathBaseName(const std::string& path) {
-    const std::vector<std::string> names = StringSplit(StringReplace(path, "\\", "/"), "/");
+std::string GetPathBaseName(const std::string &path) {
+    const std::vector<std::string> names =
+        StringSplit(StringReplace(path, "\\", "/"), "/");
     if (names.size() > 1 && names.back() == "") {
         return names[names.size() - 2];
     } else {
@@ -105,11 +109,11 @@ std::string GetPathBaseName(const std::string& path) {
     }
 }
 
-std::string GetParentDir(const std::string& path) {
+std::string GetParentDir(const std::string &path) {
     return boost::filesystem::path(path).parent_path().string();
 }
 
-std::string GetRelativePath(const std::string& from, const std::string& to) {
+std::string GetRelativePath(const std::string &from, const std::string &to) {
     // This implementation is adapted from:
     // https://stackoverflow.com/questions/10167382
     // A native implementation in boost::filesystem is only available starting
@@ -125,8 +129,10 @@ std::string GetRelativePath(const std::string& from, const std::string& to) {
     path::const_iterator from_iter = from_path.begin();
     path::const_iterator to_iter = to_path.begin();
 
-    // Loop through both while they are the same to find nearest common directory
-    while (from_iter != from_path.end() && to_iter != to_path.end() && (*to_iter) == (*from_iter)) {
+    // Loop through both while they are the same to find nearest common
+    // directory
+    while (from_iter != from_path.end() && to_iter != to_path.end() &&
+           (*to_iter) == (*from_iter)) {
         ++to_iter;
         ++from_iter;
     }
@@ -147,9 +153,10 @@ std::string GetRelativePath(const std::string& from, const std::string& to) {
     return rel_path.string();
 }
 
-std::vector<std::string> GetFileList(const std::string& path) {
+std::vector<std::string> GetFileList(const std::string &path) {
     std::vector<std::string> file_list;
-    for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it) {
+    for (auto it = boost::filesystem::directory_iterator(path);
+         it != boost::filesystem::directory_iterator(); ++it) {
         if (boost::filesystem::is_regular_file(*it)) {
             const boost::filesystem::path file_path = *it;
             file_list.push_back(file_path.string());
@@ -158,7 +165,7 @@ std::vector<std::string> GetFileList(const std::string& path) {
     return file_list;
 }
 
-std::vector<std::string> GetRecursiveFileList(const std::string& path) {
+std::vector<std::string> GetRecursiveFileList(const std::string &path) {
     std::vector<std::string> file_list;
     for (auto it = boost::filesystem::recursive_directory_iterator(path);
          it != boost::filesystem::recursive_directory_iterator(); ++it) {
@@ -170,9 +177,10 @@ std::vector<std::string> GetRecursiveFileList(const std::string& path) {
     return file_list;
 }
 
-std::vector<std::string> GetDirList(const std::string& path) {
+std::vector<std::string> GetDirList(const std::string &path) {
     std::vector<std::string> dir_list;
-    for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it) {
+    for (auto it = boost::filesystem::directory_iterator(path);
+         it != boost::filesystem::directory_iterator(); ++it) {
         if (boost::filesystem::is_directory(*it)) {
             const boost::filesystem::path dir_path = *it;
             dir_list.push_back(dir_path.string());
@@ -181,7 +189,7 @@ std::vector<std::string> GetDirList(const std::string& path) {
     return dir_list;
 }
 
-std::vector<std::string> GetRecursiveDirList(const std::string& path) {
+std::vector<std::string> GetRecursiveDirList(const std::string &path) {
     std::vector<std::string> dir_list;
     for (auto it = boost::filesystem::recursive_directory_iterator(path);
          it != boost::filesystem::recursive_directory_iterator(); ++it) {
@@ -193,32 +201,29 @@ std::vector<std::string> GetRecursiveDirList(const std::string& path) {
     return dir_list;
 }
 
-size_t GetFileSize(const std::string& path) {
+size_t GetFileSize(const std::string &path) {
     std::ifstream file(path, std::ifstream::ate | std::ifstream::binary);
     CHECK(file.is_open()) << path;
     return file.tellg();
 }
 
-void PrintHeading1(const std::string& heading) {
-    std::cout << std::endl
-              << std::string(78, '=') << std::endl;
+void PrintHeading1(const std::string &heading) {
+    std::cout << std::endl << std::string(78, '=') << std::endl;
     std::cout << heading << std::endl;
-    std::cout << std::string(78, '=') << std::endl
+    std::cout << std::string(78, '=') << std::endl << std::endl;
+}
+
+void PrintHeading2(const std::string &heading) {
+    std::cout << std::endl << heading << std::endl;
+    std::cout << std::string(std::min<int>(heading.size(), 78), '-')
               << std::endl;
 }
 
-void PrintHeading2(const std::string& heading) {
-    std::cout << std::endl
-              << heading << std::endl;
-    std::cout << std::string(std::min<int>(heading.size(), 78), '-') << std::endl;
-}
-
-template <>
-std::vector<std::string> CSVToVector(const std::string& csv) {
+template <> std::vector<std::string> CSVToVector(const std::string &csv) {
     auto elems = StringSplit(csv, ",;");
     std::vector<std::string> values;
     values.reserve(elems.size());
-    for (auto& elem : elems) {
+    for (auto &elem : elems) {
         StringTrim(&elem);
         if (elem.empty()) {
             continue;
@@ -228,12 +233,11 @@ std::vector<std::string> CSVToVector(const std::string& csv) {
     return values;
 }
 
-template <>
-std::vector<int> CSVToVector(const std::string& csv) {
+template <> std::vector<int> CSVToVector(const std::string &csv) {
     auto elems = StringSplit(csv, ",;");
     std::vector<int> values;
     values.reserve(elems.size());
-    for (auto& elem : elems) {
+    for (auto &elem : elems) {
         StringTrim(&elem);
         if (elem.empty()) {
             continue;
@@ -247,12 +251,11 @@ std::vector<int> CSVToVector(const std::string& csv) {
     return values;
 }
 
-template <>
-std::vector<float> CSVToVector(const std::string& csv) {
+template <> std::vector<float> CSVToVector(const std::string &csv) {
     auto elems = StringSplit(csv, ",;");
     std::vector<float> values;
     values.reserve(elems.size());
-    for (auto& elem : elems) {
+    for (auto &elem : elems) {
         StringTrim(&elem);
         if (elem.empty()) {
             continue;
@@ -266,12 +269,11 @@ std::vector<float> CSVToVector(const std::string& csv) {
     return values;
 }
 
-template <>
-std::vector<double> CSVToVector(const std::string& csv) {
+template <> std::vector<double> CSVToVector(const std::string &csv) {
     auto elems = StringSplit(csv, ",;");
     std::vector<double> values;
     values.reserve(elems.size());
-    for (auto& elem : elems) {
+    for (auto &elem : elems) {
         StringTrim(&elem);
         if (elem.empty()) {
             continue;
@@ -285,7 +287,7 @@ std::vector<double> CSVToVector(const std::string& csv) {
     return values;
 }
 
-std::vector<std::string> ReadTextFileLines(const std::string& path) {
+std::vector<std::string> ReadTextFileLines(const std::string &path) {
     std::ifstream file(path);
     CHECK(file.is_open()) << path;
 
@@ -304,7 +306,7 @@ std::vector<std::string> ReadTextFileLines(const std::string& path) {
     return lines;
 }
 
-void RemoveCommandLineArgument(const std::string& arg, int* argc, char** argv) {
+void RemoveCommandLineArgument(const std::string &arg, int *argc, char **argv) {
     for (int i = 0; i < *argc; ++i) {
         if (argv[i] == arg) {
             for (int j = i + 1; j < *argc; ++j) {

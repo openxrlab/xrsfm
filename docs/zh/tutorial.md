@@ -1,5 +1,5 @@
- 
-# 教程 
+
+# 教程
 
 ## 运动恢复结构
 
@@ -19,16 +19,16 @@ XRSfM的尺度估计功能依赖于场景中预先放置的已知尺度的人工
 
 通过下列命令行运行匹配阶段
 ```
-./bin/run_matching images_path retrival_path matching_type output_path
+./bin/run_matching images_path retrieval_path matching_type output_path
 ```
 
-"retrival_path" 指向检索文件的路径。
+"retrieval_path" 指向检索文件的路径。
 检索文件是一个文本文件存储着图像检索的结果。
 目前图像检索功能被封装在XRLocalization, 具体的生成方式可以参考[链接](https://github.com/openxrlab/xrlocalization/tree/main/docs/en/tutorials/generate_image_pairs.md)。
 你也可以通过其他检索方法生成该文件，具体的文件格式可以参考[introduction.md](./introduction.md)。
 
 "matching_type" 指定了匹配策略。
-XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrival")和基于共视性的匹配("covisibility")。
+XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrieval")和基于共视性的匹配("covisibility")。
 基于共视性的匹配策略在无序图像集上具有较高的匹配效率，其实现参考了ICRA2020论文“Efficient Covisibility-Based Image Matching for Large-Scale SfM”。
 
 
@@ -37,7 +37,7 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrival")和基�
 
 输出:重建结果
 
-通过下列命令行运行重建阶段 
+通过下列命令行运行重建阶段
 ```
 ./bin/run_reconstruction bin_path camera_path output_path init_id1 init_id2
 ```
@@ -57,7 +57,7 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrival")和基�
 输出:恢复尺度的重建结果
 
 
-通过下列命令行运行重建阶段 
+通过下列命令行运行重建阶段
 ```
 ./bin/estimate_scale images_dir map_dir
 ```
@@ -79,7 +79,7 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrival")和基�
 用户也可以直接下载[测试数据](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj)来运行程序。
 在运行重建前，你应该确保有以下数据：
 存储着图像数据的文件夹（images_path） ，
-检索文件（retrival_path），
+检索文件（retrieval_path），
 相机内参文件（camera_path）。
 运行结果将需要两个文件夹存储，存储初始重建结果的文件夹（results_path）和存储尺度恢复后结果的文件夹（refined_results_path）。
 
@@ -87,7 +87,7 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrival")和基�
 
 运行下列命令行以进行重建。
 ```
-./bin/run_matching ${images_path}$ ${retrival_path}$ sequential ${results_path}$
+./bin/run_matching ${images_path}$ ${retrieval_path}$ sequential ${results_path}$
 ./bin/run_reconstruction ${results_path}$ ${camera_path}$ ${results_path}$
 ./bin/estimate_scale ${images_path}$ ${results_path}$ ${refined_results_path}$
 ```
@@ -100,9 +100,9 @@ workspace
 ...
 --imagen.png
 -camera.txt
--retrival.txt
+-retrieval.txt
 ```
 然后通过以下脚本达到相同的效果。
 ```
 python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$ --estimate_scale
-``` 
+```

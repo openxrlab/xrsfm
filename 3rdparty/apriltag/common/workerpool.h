@@ -41,7 +41,8 @@ void workerpool_add_task(workerpool_t *wp, void (*f)(void *p), void *p);
 // runs all added tasks, waits for them to complete.
 void workerpool_run(workerpool_t *wp);
 
-// same as workerpool_run, except always single threaded. (mostly for debugging).
+// same as workerpool_run, except always single threaded. (mostly for
+// debugging).
 void workerpool_run_single(workerpool_t *wp);
 
 int workerpool_get_nthreads(workerpool_t *wp);

@@ -15,13 +15,15 @@ struct SRT {
     vector3 t;
 };
 
-inline matrix3 kabsch(const std::vector<vector3> &src, const std::vector<vector3> &dst) {
+inline matrix3 kabsch(const std::vector<vector3> &src,
+                      const std::vector<vector3> &dst) {
     matrix3 cov = matrix3::Zero();
     for (size_t i = 0; i < src.size(); ++i) {
         cov += src[i] * dst[i].transpose();
     }
     cov = cov * (1.0 / src.size());
-    Eigen::JacobiSVD<matrix3> svd(cov, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    Eigen::JacobiSVD<matrix3> svd(cov,
+                                  Eigen::ComputeFullU | Eigen::ComputeFullV);
     const matrix3 &U = svd.matrixU();
     const matrix3 &V = svd.matrixV();
     matrix3 E = matrix3::Identity();
@@ -34,7 +36,8 @@ inline matrix3 kabsch(const std::vector<vector3> &src, const std::vector<vector3
     return V * E * U.transpose();
 }
 
-inline SRT umeyama(std::vector<vector3> gt, std::vector<vector3> in, bool fix_scale = false) {
+inline SRT umeyama(std::vector<vector3> gt, std::vector<vector3> in,
+                   bool fix_scale = false) {
     vector3 gt_avg = vector3::Zero();
     vector3 in_avg = vector3::Zero();
     for (size_t i = 0; i < gt.size(); ++i) {

@@ -1,6 +1,6 @@
 {
-	"bin_path": "/path/refine/images.bin",
-	"feature_path": "/path/features.bin",
-	"matches_path": "/path/matches.bin",
-	"output_path": "/output_path/"
+  "bin_path": "/path/refine/images.bin",
+  "feature_path": "/path/features.bin",
+  "matches_path": "/path/matches.bin",
+  "output_path": "/output_path/"
 }

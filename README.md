@@ -1,5 +1,11 @@
 # XRSfM
 
+<div align="left">
+
+[![actions](https://github.com/openxrlab/xrsfm/workflows/build/badge.svg)](https://github.com/openxrlab/xrsfm/actions)
+[![LICENSE](https://img.shields.io/github/license/openxrlab/xrsfm)](https://github.com/openxrlab/xrsfm/blob/main/LICENSE)
+
+</div>
 
 ## Introduction
 
@@ -42,8 +48,9 @@ If you use the covisibility-based matching method for your research, please cite
 
 3.Run the following script to automatically reconstruction:
 ```
-python3 ./scripts/auto_reconstruction.py --data_path ${your_data_path}$.
+python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$
 ```
+Refer to [tutorial.md](docs/en/tutorial.md) for more details.
 
 ## Build ARDemo
 
@@ -52,7 +59,7 @@ Users can build a simple cloud-end combined ARDemo. For more information, please
 
 ## License
 
-This project is released under the [Apache 2.0 license](LICENSE).
+The license of our codebase is [Apache-2.0](LICENSE). Note that this license only applies to code in our library, the dependencies of which are separate and individually licensed. We would like to pay tribute to open-source implementations to which we rely on. Please be aware that using the content of dependencies may affect the license of our codebase. Some supported methods may carry [additional licenses](docs/en/additional_licenses.md).
 
 ## Acknowledgement
 

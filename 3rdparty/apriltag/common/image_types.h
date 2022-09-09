@@ -34,8 +34,7 @@ either expressed or implied, of the Regents of The University of Michigan.
 // file, assured that the basic types of each image are known.
 
 typedef struct image_u8 image_u8_t;
-struct image_u8
-{
+struct image_u8 {
     const int32_t width;
     const int32_t height;
     const int32_t stride;
@@ -44,8 +43,7 @@ struct image_u8
 };
 
 typedef struct image_u8x3 image_u8x3_t;
-struct image_u8x3
-{
+struct image_u8x3 {
     const int32_t width;
     const int32_t height;
     const int32_t stride; // bytes per line
@@ -54,8 +52,7 @@ struct image_u8x3
 };
 
 typedef struct image_u8x4 image_u8x4_t;
-struct image_u8x4
-{
+struct image_u8x4 {
     const int32_t width;
     const int32_t height;
     const int32_t stride; // bytes per line
@@ -64,8 +61,7 @@ struct image_u8x4
 };
 
 typedef struct image_f32 image_f32_t;
-struct image_f32
-{
+struct image_f32 {
     const int32_t width;
     const int32_t height;
     const int32_t stride; // floats per line
@@ -74,8 +70,7 @@ struct image_f32
 };
 
 typedef struct image_u32 image_u32_t;
-struct image_u32
-{
+struct image_u32 {
     const int32_t width;
     const int32_t height;
     const int32_t stride; // int32_ts per line

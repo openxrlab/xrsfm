@@ -49,8 +49,8 @@ struct RANSACOptions {
     // the residual of an estimator corresponds to a squared error.
     double max_error = 0.0;
 
-    // A priori assumed minimum inlier ratio, which determines the maximum number
-    // of iterations. Only applies if smaller than `max_num_trials`.
+    // A priori assumed minimum inlier ratio, which determines the maximum
+    // number of iterations. Only applies if smaller than `max_num_trials`.
     double min_inlier_ratio = 0.1;
 
     // Abort the iteration if minimum probability that one sample is free from
@@ -71,7 +71,8 @@ struct RANSACOptions {
     }
 };
 
-template <typename Estimator, typename SupportMeasurer = InlierSupportMeasurer, typename Sampler = RandomSampler>
+template <typename Estimator, typename SupportMeasurer = InlierSupportMeasurer,
+          typename Sampler = RandomSampler>
 class RANSAC {
   public:
     struct Report {
@@ -93,7 +94,7 @@ class RANSAC {
         typename Estimator::M_t model;
     };
 
-    explicit RANSAC(const RANSACOptions& options);
+    explicit RANSAC(const RANSACOptions &options);
 
     // Determine the maximum number of trials required to sample at least one
     // outlier-free random set of samples with the specified confidence,
@@ -104,7 +105,9 @@ class RANSAC {
     // @param confidence     Confidence that one sample is outlier-free.
     //
     // @return               The required number of iterations.
-    static size_t ComputeNumTrials(const size_t num_inliers, const size_t num_samples, const double confidence);
+    static size_t ComputeNumTrials(const size_t num_inliers,
+                                   const size_t num_samples,
+                                   const double confidence);
 
     // Robustly estimate model with RANSAC (RANdom SAmple Consensus).
     //
@@ -112,7 +115,8 @@ class RANSAC {
     // @param Y              Dependent variables.
     //
     // @return               The report with the results of the estimation.
-    Report Estimate(const std::vector<typename Estimator::X_t>& X, const std::vector<typename Estimator::Y_t>& Y);
+    Report Estimate(const std::vector<typename Estimator::X_t> &X,
+                    const std::vector<typename Estimator::Y_t> &Y);
 
     // Objects used in RANSAC procedure. Access useful to define custom behavior
     // through options or e.g. to compute residuals.
@@ -129,20 +133,24 @@ class RANSAC {
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename Estimator, typename SupportMeasurer, typename Sampler>
-RANSAC<Estimator, SupportMeasurer, Sampler>::RANSAC(const RANSACOptions& options) :
-    sampler(Sampler(Estimator::kMinNumSamples)), options_(options) {
+RANSAC<Estimator, SupportMeasurer, Sampler>::RANSAC(
+    const RANSACOptions &options)
+    : sampler(Sampler(Estimator::kMinNumSamples)), options_(options) {
     options.Check();
 
     // Determine max_num_trials based on assumed `min_inlier_ratio`.
     const size_t kNumSamples = 100000;
-    const size_t dyn_max_num_trials =
-        ComputeNumTrials(static_cast<size_t>(options_.min_inlier_ratio * kNumSamples), kNumSamples, options_.confidence);
-    options_.max_num_trials = std::min<size_t>(options_.max_num_trials, dyn_max_num_trials);
+    const size_t dyn_max_num_trials = ComputeNumTrials(
+        static_cast<size_t>(options_.min_inlier_ratio * kNumSamples),
+        kNumSamples, options_.confidence);
+    options_.max_num_trials =
+        std::min<size_t>(options_.max_num_trials, dyn_max_num_trials);
 }
 
 template <typename Estimator, typename SupportMeasurer, typename Sampler>
-size_t RANSAC<Estimator, SupportMeasurer, Sampler>::ComputeNumTrials(const size_t num_inliers, const size_t num_samples,
-                                                                     const double confidence) {
+size_t RANSAC<Estimator, SupportMeasurer, Sampler>::ComputeNumTrials(
+    const size_t num_inliers, const size_t num_samples,
+    const double confidence) {
     const double inlier_ratio = num_inliers / static_cast<double>(num_samples);
 
     const double nom = 1 - confidence;
@@ -159,8 +167,10 @@ size_t RANSAC<Estimator, SupportMeasurer, Sampler>::ComputeNumTrials(const size_
 }
 
 template <typename Estimator, typename SupportMeasurer, typename Sampler>
-typename RANSAC<Estimator, SupportMeasurer, Sampler>::Report RANSAC<Estimator, SupportMeasurer, Sampler>::Estimate(
-    const std::vector<typename Estimator::X_t>& X, const std::vector<typename Estimator::Y_t>& Y) {
+typename RANSAC<Estimator, SupportMeasurer, Sampler>::Report
+RANSAC<Estimator, SupportMeasurer, Sampler>::Estimate(
+    const std::vector<typename Estimator::X_t> &X,
+    const std::vector<typename Estimator::Y_t> &Y) {
     CHECK_EQ(X.size(), Y.size());
 
     const size_t num_samples = X.size();
@@ -191,7 +201,8 @@ typename RANSAC<Estimator, SupportMeasurer, Sampler>::Report RANSAC<Estimator, S
     max_num_trials = std::min<size_t>(max_num_trials, sampler.MaxNumSamples());
     size_t dyn_max_num_trials = max_num_trials;
 
-    for (report.num_trials = 0; report.num_trials < max_num_trials; ++report.num_trials) {
+    for (report.num_trials = 0; report.num_trials < max_num_trials;
+         ++report.num_trials) {
         if (abort) {
             report.num_trials += 1;
             break;
@@ -200,24 +211,28 @@ typename RANSAC<Estimator, SupportMeasurer, Sampler>::Report RANSAC<Estimator, S
         sampler.SampleXY(X, Y, &X_rand, &Y_rand);
 
         // Estimate model for current subset.
-        const std::vector<typename Estimator::M_t> sample_models = estimator.Estimate(X_rand, Y_rand);
+        const std::vector<typename Estimator::M_t> sample_models =
+            estimator.Estimate(X_rand, Y_rand);
 
         // Iterate through all estimated models.
-        for (const auto& sample_model : sample_models) {
+        for (const auto &sample_model : sample_models) {
             estimator.Residuals(X, Y, sample_model, &residuals);
             CHECK_EQ(residuals.size(), X.size());
 
-            const auto support = support_measurer.Evaluate(residuals, max_residual);
+            const auto support =
+                support_measurer.Evaluate(residuals, max_residual);
 
             // Save as best subset if better than all previous subsets.
             if (support_measurer.Compare(support, best_support)) {
                 best_support = support;
                 best_model = sample_model;
 
-                dyn_max_num_trials = ComputeNumTrials(best_support.num_inliers, num_samples, options_.confidence);
+                dyn_max_num_trials = ComputeNumTrials(
+                    best_support.num_inliers, num_samples, options_.confidence);
             }
 
-            if (report.num_trials >= dyn_max_num_trials && report.num_trials >= options_.min_num_trials) {
+            if (report.num_trials >= dyn_max_num_trials &&
+                report.num_trials >= options_.min_num_trials) {
                 abort = true;
                 break;
             }

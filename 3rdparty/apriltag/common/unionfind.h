@@ -32,14 +32,12 @@ either expressed or implied, of the Regents of The University of Michigan.
 
 typedef struct unionfind unionfind_t;
 
-struct unionfind
-{
+struct unionfind {
     uint32_t maxid;
     struct ufrec *data;
 };
 
-struct ufrec
-{
+struct ufrec {
     // the parent of this node. If a node's parent is its own index,
     // then it is a root.
     uint32_t parent;
@@ -49,11 +47,10 @@ struct ufrec
     uint32_t size;
 };
 
-static inline unionfind_t *unionfind_create(uint32_t maxid)
-{
-    unionfind_t *uf = (unionfind_t*) calloc(1, sizeof(unionfind_t));
+static inline unionfind_t *unionfind_create(uint32_t maxid) {
+    unionfind_t *uf = (unionfind_t *)calloc(1, sizeof(unionfind_t));
     uf->maxid = maxid;
-    uf->data = (struct ufrec*) malloc((maxid+1) * sizeof(struct ufrec));
+    uf->data = (struct ufrec *)malloc((maxid + 1) * sizeof(struct ufrec));
     for (uint32_t i = 0; i <= maxid; i++) {
         uf->data[i].size = 1;
         uf->data[i].parent = i;
@@ -61,14 +58,14 @@ static inline unionfind_t *unionfind_create(uint32_t maxid)
     return uf;
 }
 
-static inline void unionfind_destroy(unionfind_t *uf)
-{
+static inline void unionfind_destroy(unionfind_t *uf) {
     free(uf->data);
     free(uf);
 }
 
 /*
-static inline uint32_t unionfind_get_representative(unionfind_t *uf, uint32_t id)
+static inline uint32_t unionfind_get_representative(unionfind_t *uf, uint32_t
+id)
 {
     // base case: a node is its own parent
     if (uf->data[id].parent == id)
@@ -86,8 +83,8 @@ static inline uint32_t unionfind_get_representative(unionfind_t *uf, uint32_t id
 
 // this one seems to be every-so-slightly faster than the recursive
 // version above.
-static inline uint32_t unionfind_get_representative(unionfind_t *uf, uint32_t id)
-{
+static inline uint32_t unionfind_get_representative(unionfind_t *uf,
+                                                    uint32_t id) {
     uint32_t root = id;
 
     // chase down the root
@@ -105,14 +102,13 @@ static inline uint32_t unionfind_get_representative(unionfind_t *uf, uint32_t id
     return root;
 }
 
-static inline uint32_t unionfind_get_set_size(unionfind_t *uf, uint32_t id)
-{
-    uint32_t repid = unionfind_get_representative(uf, id);
-    return uf->data[repid].size;
+static inline uint32_t unionfind_get_set_size(unionfind_t *uf, uint32_t id) {
+    uint32_t rep_id = unionfind_get_representative(uf, id);
+    return uf->data[rep_id].size;
 }
 
-static inline uint32_t unionfind_connect(unionfind_t *uf, uint32_t aid, uint32_t bid)
-{
+static inline uint32_t unionfind_connect(unionfind_t *uf, uint32_t aid,
+                                         uint32_t bid) {
     uint32_t aroot = unionfind_get_representative(uf, aid);
     uint32_t broot = unionfind_get_representative(uf, bid);
 

@@ -28,10 +28,13 @@ namespace xrsfm {
  *  T underlying scalar type, itslam always uses `double`.
  * @see @ref vector, @ref quaternion, @ref map, @ref const_map.
  **/
-template <int Rows = Eigen::Dynamic, int Cols = Rows, bool UseRowMajor = false, typename T = double>
-using matrix = typename std::conditional<Rows != 1 && Cols != 1,
-                                         Eigen::Matrix<T, Rows, Cols, UseRowMajor ? Eigen::RowMajor : Eigen::ColMajor>,
-                                         Eigen::Matrix<T, Rows, Cols>>::type;
+template <int Rows = Eigen::Dynamic, int Cols = Rows, bool UseRowMajor = false,
+          typename T = double>
+using matrix = typename std::conditional<
+    Rows != 1 && Cols != 1,
+    Eigen::Matrix<T, Rows, Cols,
+                  UseRowMajor ? Eigen::RowMajor : Eigen::ColMajor>,
+    Eigen::Matrix<T, Rows, Cols>>::type;
 using matrix3 = matrix<3, 3>;
 
 /**
@@ -50,8 +53,7 @@ using vector3 = vector<3>;
  * @tparam T target type to map.
  * @see @ref matrix, @ref vector, @ref quaternion, @ref const_map.
  **/
-template <typename T>
-using map = Eigen::Map<T>;
+template <typename T> using map = Eigen::Map<T>;
 
 /**
  * @brief Maps continuous memory to a compatible matrix/vector/quaternion, while
@@ -59,8 +61,7 @@ using map = Eigen::Map<T>;
  * @tparam T target type to map.
  * @see @ref matrix, @ref vector, @ref quaternion, @ref map.
  **/
-template <typename T>
-using const_map = Eigen::Map<const T>;
+template <typename T> using const_map = Eigen::Map<const T>;
 
 /**
  * @brief
@@ -74,9 +75,7 @@ using const_map = Eigen::Map<const T>;
  **/
 using quaternion = Eigen::Quaternion<double>;
 
-inline constexpr size_t nil() {
-    return size_t(-1);
-}
+inline constexpr size_t nil() { return size_t(-1); }
 
 } // namespace xrsfm
 

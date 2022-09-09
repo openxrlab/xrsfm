@@ -5,13 +5,14 @@
 #include "utility/global.h"
 
 namespace xrsfm {
-typedef Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> UINT8Descriptors;
-typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> FeatureDescriptors;
+typedef Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+    UINT8Descriptors;
+typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+    FeatureDescriptors;
 
 struct Match {
-    Match(int _id1 = 0, int _id2 = 0, double _dist = 0) :
-        id1(_id1), id2(_id2), distance(_dist) {
-    }
+    Match(int _id1 = 0, int _id2 = 0, double _dist = 0)
+        : id1(_id1), id2(_id2), distance(_dist) {}
 
     int id1;
     int id2;
@@ -20,8 +21,7 @@ struct Match {
 
 struct ImageSize {
     int width, height;
-    ImageSize() {
-    }
+    ImageSize() {}
     ImageSize(int w, int h) {
         width = w;
         height = h;
@@ -29,8 +29,9 @@ struct ImageSize {
 };
 
 struct Pose {
-    explicit Pose(Eigen::Quaterniond _q = Eigen::Quaterniond::Identity(), Eigen::Vector3d _t = Eigen::Vector3d::Zero()) :
-        q(_q), t(_t){};
+    explicit Pose(Eigen::Quaterniond _q = Eigen::Quaterniond::Identity(),
+                  Eigen::Vector3d _t = Eigen::Vector3d::Zero())
+        : q(_q), t(_t){};
     Pose(Eigen::Matrix4d T) {
         Eigen::Matrix3d R = T.block<3, 3>(0, 0);
         q = Eigen::Quaterniond(R);
@@ -40,9 +41,7 @@ struct Pose {
     Eigen::Quaterniond q;
     Eigen::Vector3d t;
 
-    inline Eigen::Vector3d center() {
-        return -(q.inverse() * t);
-    }
+    inline Eigen::Vector3d center() { return -(q.inverse() * t); }
 
     inline Pose inverse() {
         Pose p;
@@ -57,9 +56,7 @@ struct Pose {
         return p;
     }
 
-    inline Pose scale(double s) {
-        return Pose(q, s * t);
-    }
+    inline Pose scale(double s) { return Pose(q, s * t); }
 };
 } // namespace xrsfm
 

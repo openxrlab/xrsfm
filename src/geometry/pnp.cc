@@ -19,17 +19,21 @@ bool RegisterImage(const int frame_id, Map &map) {
     std::vector<vector3> points3ds;
     std::vector<std::pair<int, int>> id_pair_vec;
     map.SearchCorrespondences(frame, points2ds, points3ds, id_pair_vec, true);
-    if (id_pair_vec.size() < min_num_correspondence) return false;
+    if (id_pair_vec.size() < min_num_correspondence)
+        return false;
 
-    const double max_error = max_error_pixel / map.cameras_[frame.camera_id].fx();
+    const double max_error =
+        max_error_pixel / map.cameras_[frame.camera_id].fx();
     std::vector<char> inlier_mask;
-    if (SolvePnP_colmap(points2ds, points3ds, max_error, frame.Tcw, inlier_mask)) {
+    if (SolvePnP_colmap(points2ds, points3ds, max_error, frame.Tcw,
+                        inlier_mask)) {
         frame.registered = frame.is_keyframe = true;
         // Continue tracks
         std::vector<int> level_vec;
         int num_inlier = 0;
         for (int id = 0; id < inlier_mask.size(); ++id) {
-            if (!inlier_mask[id]) continue;
+            if (!inlier_mask[id])
+                continue;
             num_inlier++;
             const auto &[p2d_id, track_id] = id_pair_vec[id];
             auto &track = map.tracks_[track_id];
@@ -42,8 +46,10 @@ bool RegisterImage(const int frame_id, Map &map) {
             }
         }
         std::sort(level_vec.begin(), level_vec.end());
-        frame.hierarchical_level =
-            (level_vec.size() >= MIN_OBS_NUM_LEVEL ? level_vec[MIN_OBS_NUM_LEVEL - 1] : level_vec.back()) + 1;
+        frame.hierarchical_level = (level_vec.size() >= MIN_OBS_NUM_LEVEL
+                                        ? level_vec[MIN_OBS_NUM_LEVEL - 1]
+                                        : level_vec.back()) +
+                                   1;
 
         printf("PnP %d/%zu\n", num_inlier, points2ds.size());
         return true;
@@ -52,24 +58,30 @@ bool RegisterImage(const int frame_id, Map &map) {
     return false;
 }
 
-bool RegisterNextImage(const int _frame_id, Map &map, Pose &tcw, std::vector<std::pair<int, int>> &cor_2d_3d_ids) {
+bool RegisterNextImage(const int _frame_id, Map &map, Pose &tcw,
+                       std::vector<std::pair<int, int>> &cor_2d_3d_ids) {
     Frame &next_frame = map.frames_[_frame_id];
     // search for 2D-3D correspondences
     std::vector<vector2> cor_points2ds;
     std::vector<vector3> cor_points3ds;
-    map.SearchCorrespondences(next_frame, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
+    map.SearchCorrespondences(next_frame, cor_points2ds, cor_points3ds,
+                              cor_2d_3d_ids, true);
     printf("frame: %d  cor num: %zu\n", _frame_id, cor_2d_3d_ids.size());
-    if (cor_2d_3d_ids.size() < 20) return false;
+    if (cor_2d_3d_ids.size() < 20)
+        return false;
     const double max_error = 16.0 / map.cameras_[next_frame.camera_id].fx();
     std::vector<char> inlier_mask;
-    if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, tcw, inlier_mask)) {
+    if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, tcw,
+                        inlier_mask)) {
         // Continue tracks
         std::vector<std::pair<int, int>> inlier_cor_2d_3d_ids;
         for (int id = 0; id < inlier_mask.size(); ++id) {
-            if (!inlier_mask[id]) continue;
+            if (!inlier_mask[id])
+                continue;
             inlier_cor_2d_3d_ids.emplace_back(cor_2d_3d_ids[id]);
         }
-        printf("PnP %zu/%zu\n", inlier_cor_2d_3d_ids.size(), cor_2d_3d_ids.size());
+        printf("PnP %zu/%zu\n", inlier_cor_2d_3d_ids.size(),
+               cor_2d_3d_ids.size());
         cor_2d_3d_ids = inlier_cor_2d_3d_ids;
         return true;
     }
@@ -77,25 +89,31 @@ bool RegisterNextImage(const int _frame_id, Map &map, Pose &tcw, std::vector<std
     return false;
 }
 
-bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set, Map &map, Pose &tcw,
+bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set,
+                            Map &map, Pose &tcw,
                             std::vector<std::pair<int, int>> &cor_2d_3d_ids) {
     Frame &next_frame = map.frames_[_frame_id];
     // search for 2D-3D correspondences
     std::vector<vector2> cor_points2ds;
     std::vector<vector3> cor_points3ds;
-    map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
+    map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds,
+                               cor_points3ds, cor_2d_3d_ids, true);
     printf("frame: %d  cor num: %zu\n", _frame_id, cor_2d_3d_ids.size());
-    if (cor_2d_3d_ids.size() < 20) return false;
+    if (cor_2d_3d_ids.size() < 20)
+        return false;
     const double max_error = 16.0 / map.cameras_[next_frame.camera_id].fx();
     std::vector<char> inlier_mask;
-    if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, tcw, inlier_mask)) {
+    if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, tcw,
+                        inlier_mask)) {
         // Continue tracks
         std::vector<std::pair<int, int>> inlier_cor_2d_3d_ids;
         for (int id = 0; id < inlier_mask.size(); ++id) {
-            if (!inlier_mask[id]) continue;
+            if (!inlier_mask[id])
+                continue;
             inlier_cor_2d_3d_ids.emplace_back(cor_2d_3d_ids[id]);
         }
-        printf("PnP %zu/%zu\n", inlier_cor_2d_3d_ids.size(), cor_2d_3d_ids.size());
+        printf("PnP %zu/%zu\n", inlier_cor_2d_3d_ids.size(),
+               cor_2d_3d_ids.size());
         cor_2d_3d_ids = inlier_cor_2d_3d_ids;
         return true;
     }
@@ -103,7 +121,8 @@ bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set, Ma
     return false;
 }
 
-bool ComputeRegisterInlierLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
+bool ComputeRegisterInlierLoop(const int _frame_id, LoopInfo &loop_info,
+                               Map &map) {
     printf("ComputeRegisterInlierLoop next frame id: %d \n", _frame_id);
     Frame &next_frame = map.frames_[_frame_id];
     for (size_t i = 0; i < loop_info.cor_frame_ids_vec.size(); ++i) {
@@ -112,17 +131,20 @@ bool ComputeRegisterInlierLoop(const int _frame_id, LoopInfo &loop_info, Map &ma
         std::vector<vector2> cor_points2ds;
         std::vector<vector3> cor_points3ds;
         std::vector<std::pair<int, int>> cor_2d_3d_ids;
-        map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
+        map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds,
+                                   cor_points3ds, cor_2d_3d_ids, true);
 
         Frame tmp;
         std::vector<char> inlier_mask;
         const double max_error = 8.0 / map.cameras_[next_frame.camera_id].fx();
-        if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, tmp.Tcw, inlier_mask)) {
+        if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, tmp.Tcw,
+                            inlier_mask)) {
             tmp.registered = true;
             // Continue tracks
             int count = 0;
             for (int id = 0; id < inlier_mask.size(); ++id) {
-                if (!inlier_mask[id]) continue;
+                if (!inlier_mask[id])
+                    continue;
                 count++;
             }
             loop_info.twc_vec.push_back(tmp.Tcw.inverse());
@@ -150,16 +172,20 @@ bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
         std::vector<vector2> cor_points2ds;
         std::vector<vector3> cor_points3ds;
         std::vector<std::pair<int, int>> cor_2d_3d_ids;
-        map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
-        printf("next frame id: %d cor number: %d\n", _frame_id, (int)cor_2d_3d_ids.size());
+        map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds,
+                                   cor_points3ds, cor_2d_3d_ids, true);
+        printf("next frame id: %d cor number: %d\n", _frame_id,
+               (int)cor_2d_3d_ids.size());
         const double max_error = 8.0 / map.cameras_[next_frame.camera_id].fx();
         std::vector<char> inlier_mask;
-        if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, tmp.Tcw, inlier_mask)) {
+        if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, tmp.Tcw,
+                            inlier_mask)) {
             tmp.registered = true;
             // Continue tracks
             int count = 0;
             for (int id = 0; id < inlier_mask.size(); ++id) {
-                if (!inlier_mask[id]) continue;
+                if (!inlier_mask[id])
+                    continue;
                 count++;
                 const auto &[p2d_id, track_id] = cor_2d_3d_ids[id];
                 if (next_frame.track_ids_[p2d_id] != -1) {
@@ -169,7 +195,8 @@ bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
                     vector3 p3d1 = tmp1.Tcw.q * track1.point3d_ + tmp1.Tcw.t;
                     vector3 p3d2 = tmp.Tcw.q * track2.point3d_ + tmp.Tcw.t;
                     depth_obs_vec.emplace_back(p3d1.z(), p3d2.z());
-                    // printf("%lf %lf %lf\n", p3d1.z(), p3d2.z(), p3d1.z() / p3d2.z());
+                    // printf("%lf %lf %lf\n", p3d1.z(), p3d2.z(), p3d1.z() /
+                    // p3d2.z());
                     gt_positions.emplace_back(track1.point3d_);
                     in_positions.emplace_back(track2.point3d_);
                 }
@@ -202,8 +229,10 @@ bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
         printf("s12: %lf %lf\n", 1.0 / (sum / depth_obs_vec.size()), srt.scale);
         std::cout << srt.t.transpose() << std::endl;
         for (size_t i = 0; i < gt_positions.size(); ++i) {
-            vector3 new_p = srt.q.inverse() * (srt.scale * gt_positions[i] - srt.t);
-            // std::cout << gt_positions[i].transpose() << " - " << in_positions[i].transpose() << " - "
+            vector3 new_p =
+                srt.q.inverse() * (srt.scale * gt_positions[i] - srt.t);
+            // std::cout << gt_positions[i].transpose() << " - " <<
+            // in_positions[i].transpose() << " - "
             //           << new_p.transpose() << std::endl;
         }
     } else {
@@ -212,26 +241,32 @@ bool RegisterNextImageLoop(const int _frame_id, LoopInfo &loop_info, Map &map) {
     return true;
 }
 
-bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set, Map &map) {
+bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set,
+                            Map &map) {
     Frame &next_frame = map.frames_[_frame_id];
     // search for 2D-3D correspondences
     std::vector<vector2> cor_points2ds;
     std::vector<vector3> cor_points3ds;
     std::vector<std::pair<int, int>> cor_2d_3d_ids;
-    map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
-    printf("next frame id: %d cor number: %d\n", _frame_id, (int)cor_2d_3d_ids.size());
-    if (cor_2d_3d_ids.size() < 20) return false;
+    map.SearchCorrespondences1(next_frame, cor_set, cor_points2ds,
+                               cor_points3ds, cor_2d_3d_ids, true);
+    printf("next frame id: %d cor number: %d\n", _frame_id,
+           (int)cor_2d_3d_ids.size());
+    if (cor_2d_3d_ids.size() < 20)
+        return false;
 
     map.tmp_frame = next_frame;
     map.tmp_frame.track_ids_.assign(map.tmp_frame.track_ids_.size(), -1);
     const double max_error = 16.0 / map.cameras_[next_frame.camera_id].fx();
     std::vector<char> inlier_mask;
-    if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, map.tmp_frame.Tcw, inlier_mask)) {
+    if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error,
+                        map.tmp_frame.Tcw, inlier_mask)) {
         map.tmp_frame.registered = true;
 
         int count = 0;
         for (int id = 0; id < inlier_mask.size(); ++id) {
-            if (!inlier_mask[id]) continue;
+            if (!inlier_mask[id])
+                continue;
             count++;
             const auto &[p2d_id, track_id] = cor_2d_3d_ids[id];
             map.tmp_frame.track_ids_[p2d_id] = track_id;
@@ -249,17 +284,22 @@ int RegisterNextImage1(const int frame_id, Map &map) {
     std::vector<vector2> cor_points2ds;
     std::vector<vector3> cor_points3ds;
     std::vector<std::pair<int, int>> cor_2d_3d_ids;
-    map.SearchCorrespondences(next_frame, cor_points2ds, cor_points3ds, cor_2d_3d_ids, true);
-    printf("next frame id: %d cor number: %d\n", frame_id, (int)cor_2d_3d_ids.size());
-    if (cor_2d_3d_ids.size() < 20) return 0;
+    map.SearchCorrespondences(next_frame, cor_points2ds, cor_points3ds,
+                              cor_2d_3d_ids, true);
+    printf("next frame id: %d cor number: %d\n", frame_id,
+           (int)cor_2d_3d_ids.size());
+    if (cor_2d_3d_ids.size() < 20)
+        return 0;
     std::vector<char> inlier_mask;
-    if (SolvePnP_colmap(cor_points2ds, cor_points3ds, 8.0 / 700, next_frame.Tcw, inlier_mask)) {
+    if (SolvePnP_colmap(cor_points2ds, cor_points3ds, 8.0 / 700, next_frame.Tcw,
+                        inlier_mask)) {
         next_frame.registered = true;
         next_frame.is_keyframe = true;
         // Continue tracks
         int count = 0;
         for (int id = 0; id < inlier_mask.size(); ++id) {
-            if (!inlier_mask[id]) continue;
+            if (!inlier_mask[id])
+                continue;
             count++;
             const auto &[p2d_id, track_id] = cor_2d_3d_ids[id];
             next_frame.track_ids_[p2d_id] = track_id;
@@ -272,8 +312,9 @@ int RegisterNextImage1(const int frame_id, Map &map) {
     return 0;
 }
 
-bool SolvePnP(Camera cam, std::vector<vector2> cor_points2ds, std::vector<vector3> cor_points3ds,
-              Frame &frame, std::vector<int> &inlier) {
+bool SolvePnP(Camera cam, std::vector<vector2> cor_points2ds,
+              std::vector<vector3> cor_points3ds, Frame &frame,
+              std::vector<int> &inlier) {
     size_t cor_num = cor_points2ds.size();
     if (cor_num < 20) {
         printf("there are no enough correspondence\n");
@@ -283,7 +324,8 @@ bool SolvePnP(Camera cam, std::vector<vector2> cor_points2ds, std::vector<vector
     std::vector<cv::Point2d> cvpt2d(cor_num);
     for (int i = 0; i < cor_num; ++i) {
         cvpt2d[i] = cv::Point2d(cor_points2ds[i](0), cor_points2ds[i](1));
-        cvpt3d[i] = cv::Point3d(cor_points3ds[i](0), cor_points3ds[i](1), cor_points3ds[i](2));
+        cvpt3d[i] = cv::Point3d(cor_points3ds[i](0), cor_points3ds[i](1),
+                                cor_points3ds[i](2));
     }
     cv::Mat camera_matrix = cv::Mat(3, 3, CV_64FC1, cv::Scalar::all(0));
     camera_matrix.ptr<double>(0)[0] = cam.fx();
@@ -297,13 +339,16 @@ bool SolvePnP(Camera cam, std::vector<vector2> cor_points2ds, std::vector<vector
 
     // there are randomness in cv::solvePnPRansac
     srand(0);
-    bool success = solvePnPRansac(cvpt3d, cvpt2d, camera_matrix, distortion_coeffs, rvec, tvec, false, 50, 3.5, 0.99,
-                                  inlier, cv::SOLVEPNP_EPNP);
+    bool success =
+        solvePnPRansac(cvpt3d, cvpt2d, camera_matrix, distortion_coeffs, rvec,
+                       tvec, false, 50, 3.5, 0.99, inlier, cv::SOLVEPNP_EPNP);
     if (success) {
         Rodrigues(rvec, rmat);
         matrix3 rmatrix;
-        rmatrix << rmat.ptr<double>(0)[0], rmat.ptr<double>(0)[1], rmat.ptr<double>(0)[2], rmat.ptr<double>(1)[0],
-            rmat.ptr<double>(1)[1], rmat.ptr<double>(1)[2], rmat.ptr<double>(2)[0], rmat.ptr<double>(2)[1],
+        rmatrix << rmat.ptr<double>(0)[0], rmat.ptr<double>(0)[1],
+            rmat.ptr<double>(0)[2], rmat.ptr<double>(1)[0],
+            rmat.ptr<double>(1)[1], rmat.ptr<double>(1)[2],
+            rmat.ptr<double>(2)[0], rmat.ptr<double>(2)[1],
             rmat.ptr<double>(2)[2];
         vector3 t(tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2));
         frame.Tcw = Pose(quaternion(rmatrix), t);
@@ -345,11 +390,14 @@ struct AbsolutePoseEstimationOptions {
     }
 };
 
-bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options, const std::vector<vector2> &points2D,
-                          const std::vector<vector3> &points3D, Pose &pose, std::vector<char> *inlier_mask);
+bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options,
+                          const std::vector<vector2> &points2D,
+                          const std::vector<vector3> &points3D, Pose &pose,
+                          std::vector<char> *inlier_mask);
 
 bool SolvePnP_colmap(const std::vector<vector2> &cor_points2ds,
-                     const std::vector<vector3> &cor_points3ds, const double max_error, Pose &tcw,
+                     const std::vector<vector3> &cor_points3ds,
+                     const double max_error, Pose &tcw,
                      std::vector<char> &inlier_mask) {
     AbsolutePoseEstimationOptions abs_pose_options;
     abs_pose_options.num_threads = 1;
@@ -362,7 +410,8 @@ bool SolvePnP_colmap(const std::vector<vector2> &cor_points2ds,
     abs_pose_options.ransac_options.confidence = 0.9999;
     abs_pose_options.estimate_focal_length = false;
 
-    bool success = EstimateAbsolutePose(abs_pose_options, cor_points2ds, cor_points3ds, tcw, &inlier_mask);
+    bool success = EstimateAbsolutePose(abs_pose_options, cor_points2ds,
+                                        cor_points3ds, tcw, &inlier_mask);
 
     return success;
 }
@@ -370,7 +419,8 @@ bool SolvePnP_colmap(const std::vector<vector2> &cor_points2ds,
 typedef LORANSAC<P3PEstimator, EPNPEstimator> AbsolutePoseRANSAC;
 
 void EstimateAbsolutePoseKernel(const std::vector<vector2> &points2D,
-                                const std::vector<vector3> &points3D, const RANSACOptions &options,
+                                const std::vector<vector3> &points3D,
+                                const RANSACOptions &options,
                                 AbsolutePoseRANSAC::Report *report) {
     // Estimate pose for given focal length.
     AbsolutePoseRANSAC ransac(options);
@@ -383,11 +433,14 @@ void EstimateAbsolutePoseKernel(const std::vector<vector2> &points2D,
     *report = ransac.Estimate(points2D_N, points3D);
 }
 
-bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options, const std::vector<vector2> &points2D,
-                          const std::vector<vector3> &points3D, Pose &tcw, std::vector<char> *inlier_mask) {
+bool EstimateAbsolutePose(const AbsolutePoseEstimationOptions &options,
+                          const std::vector<vector2> &points2D,
+                          const std::vector<vector3> &points3D, Pose &tcw,
+                          std::vector<char> *inlier_mask) {
     AbsolutePoseRANSAC::Report report;
 
-    EstimateAbsolutePoseKernel(points2D, points3D, options.ransac_options, &report);
+    EstimateAbsolutePoseKernel(points2D, points3D, options.ransac_options,
+                               &report);
 
     if (!report.success || report.support.num_inliers == 0) {
         return false;

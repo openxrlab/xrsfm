@@ -13,11 +13,12 @@ namespace xrsfm {
 
 class ProjectionCost : public ceres::SizedCostFunction<2, 4, 3, 3> {
   public:
-    ProjectionCost(const vector2 _obs, const double _sigma = 5.99 / 700, const double _weight = 1.0) :
-        obs(_obs), sigma(_sigma), weight(_weight) {
-    }
+    ProjectionCost(const vector2 _obs, const double _sigma = 5.99 / 700,
+                   const double _weight = 1.0)
+        : obs(_obs), sigma(_sigma), weight(_weight) {}
 
-    virtual bool Evaluate(double const *const *parameters, double *residuals, double **jacobians) const {
+    virtual bool Evaluate(double const *const *parameters, double *residuals,
+                          double **jacobians) const {
         const_map<quaternion> Q(parameters[0]);
         const_map<vector3> P(parameters[1]);
         const_map<vector3> P_w(parameters[2]);
@@ -29,12 +30,14 @@ class ProjectionCost : public ceres::SizedCostFunction<2, 4, 3, 3> {
 
         residual = p_c.head<2>() / z - obs;
         const double r2 = residual.squaredNorm();
-        const double huber_factor = r2 > sigma * sigma ? sqrt(sigma / sqrt(r2)) : 1;
+        const double huber_factor =
+            r2 > sigma * sigma ? sqrt(sigma / sqrt(r2)) : 1;
         residual = weight * huber_factor * residual;
 
         if (jacobians) {
             matrix<2, 3> dr_dpc;
-            dr_dpc << 1.0 / z, 0.0, -p_c.x() / (z * z), 0.0, 1.0 / z, -p_c.y() / (z * z);
+            dr_dpc << 1.0 / z, 0.0, -p_c.x() / (z * z), 0.0, 1.0 / z,
+                -p_c.y() / (z * z);
             dr_dpc = weight * huber_factor * dr_dpc;
 
             if (jacobians[0]) {
@@ -61,7 +64,8 @@ class ProjectionCost : public ceres::SizedCostFunction<2, 4, 3, 3> {
 
 class QuatParam : public ceres::LocalParameterization {
   public:
-    bool Plus(const double *x, const double *delta, double *x_plus_delta) const override {
+    bool Plus(const double *x, const double *delta,
+              double *x_plus_delta) const override {
         map<quaternion> q(x_plus_delta);
         const_map<quaternion> _q(x);
         const_map<vector3> theta(delta);
@@ -76,21 +80,18 @@ class QuatParam : public ceres::LocalParameterization {
         return true;
     }
 
-    int GlobalSize() const override {
-        return 4;
-    };
+    int GlobalSize() const override { return 4; };
 
-    int LocalSize() const override {
-        return 3;
-    };
+    int LocalSize() const override { return 3; };
 };
 
 class PoseGraphCost : public ceres::SizedCostFunction<8, 4, 3, 4, 3, 1, 1> {
   public:
-    PoseGraphCost(quaternion _q_mea, vector3 _p_mea, double _weight_o = 0) :
-        q_mea(_q_mea), p_mea(_p_mea), weight_o(_weight_o){};
+    PoseGraphCost(quaternion _q_mea, vector3 _p_mea, double _weight_o = 0)
+        : q_mea(_q_mea), p_mea(_p_mea), weight_o(_weight_o){};
 
-    virtual bool Evaluate(double const *const *parameters, double *residuals, double **jacobians) const {
+    virtual bool Evaluate(double const *const *parameters, double *residuals,
+                          double **jacobians) const {
         quaternion q1(parameters[0]);
         vector3 p1(parameters[1]);
         quaternion q2(parameters[2]);
@@ -127,7 +128,8 @@ class PoseGraphCost : public ceres::SizedCostFunction<8, 4, 3, 4, 3, 1, 1> {
                 map<matrix<8, 4, true>> j_q1(jacobians[0]);
                 j_q1.setZero();
                 j_q1.topLeftCorner<3, 3>() = weight_q * JRI;
-                j_q1.bottomLeftCorner<3, 3>() = weight_p * skewSymmetric(p12_estimated);
+                j_q1.bottomLeftCorner<3, 3>() =
+                    weight_p * skewSymmetric(p12_estimated);
             }
             if (jacobians[1]) {
                 map<matrix<8, 3, true>> j_p1(jacobians[1]);
@@ -137,7 +139,8 @@ class PoseGraphCost : public ceres::SizedCostFunction<8, 4, 3, 4, 3, 1, 1> {
             if (jacobians[2]) {
                 map<matrix<8, 4, true>> j_q2(jacobians[2]);
                 j_q2.setZero();
-                j_q2.topLeftCorner<3, 3>() = -weight_q * JRI * q12_estimated.toRotationMatrix();
+                j_q2.topLeftCorner<3, 3>() =
+                    -weight_q * JRI * q12_estimated.toRotationMatrix();
             }
             if (jacobians[3]) {
                 map<matrix<8, 3, true>> j_p2(jacobians[3]);
@@ -167,10 +170,10 @@ class PoseGraphCost : public ceres::SizedCostFunction<8, 4, 3, 4, 3, 1, 1> {
 
 class ScaleCost : public ceres::SizedCostFunction<1, 1, 1> {
   public:
-    ScaleCost(double _s12) :
-        s12(_s12){};
+    ScaleCost(double _s12) : s12(_s12){};
 
-    virtual bool Evaluate(double const *const *parameters, double *residuals, double **jacobians) const {
+    virtual bool Evaluate(double const *const *parameters, double *residuals,
+                          double **jacobians) const {
         double s1 = parameters[0][0];
         double s2 = parameters[1][0];
         double weight = 10;
@@ -190,10 +193,10 @@ class ScaleCost : public ceres::SizedCostFunction<1, 1, 1> {
 
 class TagCost : public ceres::SizedCostFunction<3, 4, 3, 1, 3> {
   public:
-    TagCost(vector3 _p3d_ori, double _w) :
-        p3d_ori(_p3d_ori), w(_w){};
+    TagCost(vector3 _p3d_ori, double _w) : p3d_ori(_p3d_ori), w(_w){};
 
-    virtual bool Evaluate(double const *const *parameters, double *residuals, double **jacobians) const {
+    virtual bool Evaluate(double const *const *parameters, double *residuals,
+                          double **jacobians) const {
         const_map<quaternion> q(parameters[0]);
         const_map<vector3> t(parameters[1]);
         double s = parameters[2][0];

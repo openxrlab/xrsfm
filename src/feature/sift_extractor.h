@@ -13,18 +13,21 @@
 #include "base/types.h"
 
 namespace xrsfm {
-template <typename T1, typename T2>
-T2 TruncateCast(const T1 value) {
-    return std::min(static_cast<T1>(std::numeric_limits<T2>::max()),
-                    std::max(static_cast<T1>(std::numeric_limits<T2>::min()), value));
+template <typename T1, typename T2> T2 TruncateCast(const T1 value) {
+    return std::min(
+        static_cast<T1>(std::numeric_limits<T2>::max()),
+        std::max(static_cast<T1>(std::numeric_limits<T2>::min()), value));
 }
 
-inline UINT8Descriptors FeatureDescriptorsToUnsignedByte(const FeatureDescriptors &descriptors) {
-    UINT8Descriptors descriptors_unsigned_byte(descriptors.rows(), descriptors.cols());
+inline UINT8Descriptors
+FeatureDescriptorsToUnsignedByte(const FeatureDescriptors &descriptors) {
+    UINT8Descriptors descriptors_unsigned_byte(descriptors.rows(),
+                                               descriptors.cols());
     for (Eigen::MatrixXf::Index r = 0; r < descriptors.rows(); ++r) {
         for (Eigen::MatrixXf::Index c = 0; c < descriptors.cols(); ++c) {
             const float scaled_value = std::round(512.0f * descriptors(r, c));
-            descriptors_unsigned_byte(r, c) = TruncateCast<float, uint8_t>(scaled_value);
+            descriptors_unsigned_byte(r, c) =
+                TruncateCast<float, uint8_t>(scaled_value);
         }
     }
     return descriptors_unsigned_byte;
@@ -62,8 +65,8 @@ struct SiftExtractionOptions {
     // Edge threshold for detection.
     double edge_threshold = 10.0;
 
-    // Estimate affine shape of SIFT features in the form of oriented ellipses as
-    // opposed to original SIFT which estimates oriented disks.
+    // Estimate affine shape of SIFT features in the form of oriented ellipses
+    // as opposed to original SIFT which estimates oriented disks.
     bool estimate_affine_shape = false;
 
     // Maximum number of orientations per keypoint if not estimate_affine_shape.
@@ -77,8 +80,8 @@ struct SiftExtractionOptions {
     bool darkness_adaptivity = false;
 
     // Domain-size pooling parameters. Domain-size pooling computes an average
-    // SIFT descriptor across multiple scales around the detected scale. This was
-    // proposed in "Domain-Size Pooling in Local Descriptors and Network
+    // SIFT descriptor across multiple scales around the detected scale. This
+    // was proposed in "Domain-Size Pooling in Local Descriptors and Network
     // Architectures", J. Dong and S. Soatto, CVPR 2015. This has been shown to
     // outperform other SIFT variants and learned descriptors in "Comparative
     // Evaluation of Hand-Crafted and Learned Local Features", Schönberger,
@@ -89,7 +92,8 @@ struct SiftExtractionOptions {
     int dsp_num_scales = 10;
 
     enum class Normalization {
-        // L1-normalizes each descriptor followed by element-wise square rooting.
+        // L1-normalizes each descriptor followed by element-wise square
+        // rooting.
         // This normalization is usually better than standard L2-normalization.
         // See "Three things everyone should know to improve object retrieval",
         // Relja Arandjelovic and Andrew Zisserman, CVPR 2012.
@@ -106,9 +110,11 @@ class SiftExtractor {
   public:
     SiftExtractor(int nfeatures = 8192);
     ~SiftExtractor();
-    void ExtractFLOAT(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoints,
+    void ExtractFLOAT(const cv::Mat &image,
+                      std::vector<cv::KeyPoint> &keypoints,
                       FeatureDescriptors &descriptors);
-    void ExtractUINT8(const cv::Mat &image, std::vector<cv::KeyPoint> &keypoints,
+    void ExtractUINT8(const cv::Mat &image,
+                      std::vector<cv::KeyPoint> &keypoints,
                       UINT8Descriptors &descriptors);
     std::unique_ptr<SiftGPU> create_siftgpu();
     SiftExtractionOptions options;
