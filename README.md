@@ -55,7 +55,7 @@ Refer to [tutorial.md](docs/en/tutorial.md) for more details.
 ## Build ARDemo
 
 In addition to the reconstruction function, OpenXRLab project also provides localization function.
-Users can build a simple cloud-end combined ARDemo. For more information, please refer to [ARDemo](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#).
+Users can build a simple cloud-end combined ARDemo. For more information, please refer to [ARDemo](http://doc.openxrlab.org.cn/openxrlab_document/ARDemo/ARdemo.html#).
 
 ## License
 
