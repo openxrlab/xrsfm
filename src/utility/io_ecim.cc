@@ -94,6 +94,7 @@ void ReadImagesBinaryForTriangulation(const std::string &path,
     std::ifstream file(path, std::ios::binary);
     CHECK(file.is_open()) << path;
     const uint64_t num_frame = read_data2<uint64_t>(file);
+    const uint32_t num_dim = read_data2<uint32_t>(file);
 
     for (uint64_t i = 0; i < num_frame; ++i) {
         Frame frame;
@@ -110,8 +111,8 @@ void ReadImagesBinaryForTriangulation(const std::string &path,
             pt.y = read_data2<double>(file);
         }
         for (size_t i = 0; i < num_p2d; ++i) {
-            Eigen::Vector<float, 256> desc;
-            read_data_vec(file, desc.data(), 256);
+            Eigen::VectorX<float>desc(num_dim);
+            read_data_vec(file, desc.data(), num_dim);
         }
         frames[frame.id] = frame;
         // std::cout<<frame.id<<" "<<frame.name<<"
