@@ -71,12 +71,12 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrieval")和基
 ## 运行你自己的数据
 
 ### 数据采集
-我们推荐使用[采集工具](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#data-capturer-on-your-phone)拍摄图像，它会同时获取一个准确的相机内参。
+我们推荐使用[采集工具](http://doc.openxrlab.org.cn/openxrlab_document/ARDemo/ARdemo.html#data-capturer-on-your-phone)拍摄图像，它会同时获取一个准确的相机内参。
 用户也可以使用其他来源的图像，但鉴于当前版本不支持相机自标定，用户需要给出相机内参，这可以由标定得到。
 
 ### 数据准备
 除了上述的图像数据和相机内参外，还需要准备图像的检索结果，这部分功能目前被封装在XRLocation中，详细参见[XRLocalization](https://github.com/openxrlab/xrlocalization/tree/main/docs/en/tutorials/generate_image_pairs.md)。
-用户也可以直接下载[测试数据](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj)来运行程序。
+用户也可以直接下载[测试数据](https://openxrlab-share-mainland.oss-cn-hangzhou.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj)来运行程序。
 在运行重建前，你应该确保有以下数据：
 存储着图像数据的文件夹（images_path） ，
 检索文件（retrieval_path），

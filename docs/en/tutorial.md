@@ -75,7 +75,7 @@ The program will extract the apriltag from images to calculate the scale, and en
 
 ### Data capture
 
-We provide [the capture application](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#data-capturer-on-your-phone) to capture images and acquire an accurate camera intrisic parameters at the same time.
+We provide [the capture application](http://doc.openxrlab.org.cn/openxrlab_document/ARDemo/ARdemo.html#data-capturer-on-your-phone) to capture images and acquire an accurate camera intrisic parameters at the same time.
 Users can also use images from other sources.
 However, since XRSfM does not support camera self-calibration currently, users need to provide camera intrisic parameters, which can be obtained by calibration.
 
@@ -84,7 +84,7 @@ However, since XRSfM does not support camera self-calibration currently, users n
 In addition to the above image data and camera intrisic parameters,
 it is recommend to prepare the image retrieval results. .
 This image retrieval function is supported in [XRLocalization](https://github.com/openxrlab/xrlocalization/tree/main/docs/en/tutorials/generate_image_pairs.md).
-Users can also directly download [test data](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj) to run the program.
+Users can also directly download [test data](https://openxrlab-share-mainland.oss-cn-hangzhou.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj) to run the program.
 
 Before running the reconstruction, you should ensure that there are the following data:
 the input images (images_path),

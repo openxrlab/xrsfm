@@ -10,7 +10,7 @@
 ### 数据准备
 
 KITTI数据集可以从[链接](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_gray.zip)中下载。
-作为必要的输入，可以从[链接](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/KITTI.zip?versionId=CAEQQBiBgMCu.KallxgiIGM4MTk2MmJmNDU1YTQzYjBhYTJjZmIyYzQ3YzM2ODIx)下载KITTI数据集的图像检索结果。
+作为必要的输入，可以从[链接](https://openxrlab-share-mainland.oss-cn-hangzhou.aliyuncs.com/xrsfm/KITTI.zip?versionId=CAEQQBiBgMCu.KallxgiIGM4MTk2MmJmNDU1YTQzYjBhYTJjZmIyYzQ3YzM2ODIx)下载KITTI数据集的图像检索结果。
 
 ### 匹配阶段
 
@@ -54,7 +54,7 @@ python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/sequence
 ### 数据准备
 
 1DSfM数据集可以在[项目网页](https://www.cs.cornell.edu/projects/1dsfm/)中下载。
-作为必要的输入，可以从[链接](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/1DSfM.zip?versionId=CAEQQBiBgIDF.KallxgiIDcyNDJmNTM4OWJhNzRlYzdhNDhkZmNjMjQ0YWU0ODA3)下载1DSfM数据集的图像检索结果和相机内参。
+作为必要的输入，可以从[链接](https://openxrlab-share-mainland.oss-cn-hangzhou.aliyuncs.com/xrsfm/1DSfM.zip?versionId=CAEQQBiBgIDF.KallxgiIDcyNDJmNTM4OWJhNzRlYzdhNDhkZmNjMjQ0YWU0ODA3)下载1DSfM数据集的图像检索结果和相机内参。
 
 ### 匹配阶段
 
