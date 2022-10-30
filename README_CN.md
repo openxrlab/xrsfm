@@ -11,7 +11,7 @@
 
 [English](README.md) | [简体中文]
 
-XRSfM 是一个开源的运动恢复结构代码仓库，它是[OpenXRLab](https://openxrlab.com/)项目的一部分.
+XRSfM 是一个开源的运动恢复结构代码仓库，它是[OpenXRLab](https://openxrlab.org.cn/)项目的一部分.
 关于XRSfM更详细的介绍放在[introduction.md](docs/en/introduction.md).
 
 ## Citation
@@ -42,7 +42,7 @@ XRSfM 是一个开源的运动恢复结构代码仓库，它是[OpenXRLab](https
 
 1.参考[installation.md](docs/zh/installation.md)进行安装编译.
 
-2.下载提供的[测试数据](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj) 或者按照相同格式准备你自己的数据.
+2.下载提供的[测试数据](https://openxrlab-share-mainland.oss-cn-hangzhou.aliyuncs.com/xrsfm/test_data.zip?versionId=CAEQQBiBgMCi_6mllxgiIGI2ZjM1YjE1NjBmNTRmYjc5NzZlMzZkNWY1ZTk1YWFj) 或者按照相同格式准备你自己的数据.
 
 3.运行以下脚本进行重建:
 ```
@@ -53,7 +53,7 @@ python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$
 ## Build ARDemo
 
 除了重建功能, OpenXRLab 项目还提供了定位功能。
-你可以构建自己的端云定位ARDemo，更多的信息请查看[ARDemo](http://doc.openxrlab.org.cn/openxrlab_docment/ARDemo/ARdemo.html#).
+你可以构建自己的端云定位ARDemo，更多的信息请查看[ARDemo](http://doc.openxrlab.org.cn/openxrlab_document/ARDemo/ARdemo.html#).
 
 ## License
 本代码库的许可证是[Apache-2.0](LICENSE)。请注意，本许可证仅适用于我们库中的代码，这些代码的依赖项是独立的，并单独许可。我们十分感谢这些依赖项的贡献者。

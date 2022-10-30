@@ -11,7 +11,7 @@ The supported datasets include the sequential dataset [KITTI](http://www.cvlibs.
 ### Data preparation
 
 The KITTI dataset can be download in [link](https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_gray.zip).
-As a necessary input, the image retrieval results can be downloaded from  [link](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/KITTI.zip?versionId=CAEQQBiBgMCu.KallxgiIGM4MTk2MmJmNDU1YTQzYjBhYTJjZmIyYzQ3YzM2ODIx).
+As a necessary input, the image retrieval results can be downloaded from  [link](https://openxrlab-share-mainland.oss-cn-hangzhou.aliyuncs.comTTI.zip?versionId=CAEQQBiBgMCu.KallxgiIGM4MTk2MmJmNDU1YTQzYjBhYTJjZmIyYzQ3YzM2ODIx).
 
 ### Run matching stage
 
@@ -57,7 +57,7 @@ python3 ./scripts/run_kitti_reconstruction.py --data_path /path/dataset/sequence
 ### Data preparation
 
 The 1DSfM dataset can be download from [project web page](https://www.cs.cornell.edu/projects/1dsfm/).
-The image retrieval results and camera intrinsic parameters can be downloaded from the [link](https://openxrlab-share.oss-cn-hongkong.aliyuncs.com/xrsfm/1DSfM.zip?versionId=CAEQQBiBgIDF.KallxgiIDcyNDJmNTM4OWJhNzRlYzdhNDhkZmNjMjQ0YWU0ODA3).
+The image retrieval results and camera intrinsic parameters can be downloaded from the [link](https://openxrlab-share-mainland.oss-cn-hangzhou.aliyuncs.comSfM.zip?versionId=CAEQQBiBgIDF.KallxgiIDcyNDJmNTM4OWJhNzRlYzdhNDhkZmNjMjQ0YWU0ODA3).
 
 ### Run matching
 

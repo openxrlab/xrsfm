@@ -11,7 +11,7 @@
 
 English | [简体中文](README_CN.md)
 
-XRSfM is an open-source SfM codebase. It is a part of the [OpenXRLab](https://openxrlab.com/) project.
+XRSfM is an open-source SfM codebase. It is a part of the [OpenXRLab](https://openxrlab.org.cn/) project.
 A detailed introduction can be found in [introduction.md](docs/en/introduction.md).
 
 ## Citation
