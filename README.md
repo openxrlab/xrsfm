@@ -32,12 +32,22 @@ If you use the covisibility-based matching method for your research, please cite
 
 ```bibtex
 @inproceedings{ye2020efficient,
-  title={Efficient covisibility-based image matching for large-scale sfm},
+  title={Efficient Covisibility-based Image Matching for Large-Scale SfM},
   author={Ye, Zhichao and Zhang, Guofeng and Bao, Hujun},
   booktitle={IEEE International Conference on Robotics and Automation (ICRA)},
   year={2020}
 }
 ```
+```bibtex
+@misc{ecsfm,
+  title = {EC-SfM: Efficient Covisibility-based Structure-from-Motion for Both Sequential and Unordered Images},
+  author = {Ye, Zhichao and Bao, Chong and Zhou, Xin and Liu, Haomin and Bao, Hujun and Zhang, Guofeng},
+  url = {https://arxiv.org/abs/2302.10544},
+  publisher = {arXiv},
+  year = {2023}
+}
+```
+
 
 ## Getting Started
 
