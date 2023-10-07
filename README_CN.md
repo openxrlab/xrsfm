@@ -37,6 +37,15 @@ XRSfM 是一个开源的运动恢复结构代码仓库，它是[OpenXRLab](https
   year={2020}
 }
 ```
+```bibtex
+@misc{ye2023ecsfm,
+  title = {EC-SfM: Efficient Covisibility-based Structure-from-Motion for Both Sequential and Unordered Images},
+  author = {Ye, Zhichao and Bao, Chong and Zhou, Xin and Liu, Haomin and Bao, Hujun and Zhang, Guofeng},
+  journal={IEEE Transactions on Circuits and Systems for Video Technology},
+  year={2023},
+  publisher={IEEE}
+}
+```
 
 ## Getting Started
 
