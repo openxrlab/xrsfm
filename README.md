@@ -39,12 +39,12 @@ If you use the covisibility-based matching method for your research, please cite
 }
 ```
 ```bibtex
-@misc{ecsfm,
+@misc{ye2023ecsfm,
   title = {EC-SfM: Efficient Covisibility-based Structure-from-Motion for Both Sequential and Unordered Images},
   author = {Ye, Zhichao and Bao, Chong and Zhou, Xin and Liu, Haomin and Bao, Hujun and Zhang, Guofeng},
-  url = {https://arxiv.org/abs/2302.10544},
-  publisher = {arXiv},
-  year = {2023}
+  journal={IEEE Transactions on Circuits and Systems for Video Technology},
+  year={2023},
+  publisher={IEEE}
 }
 ```
 
