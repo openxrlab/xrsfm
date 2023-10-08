@@ -3,8 +3,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "types.h"
 #include "camera.hpp"
+#include "types.h"
 
 namespace xrsfm {
 constexpr int MIN_OBS_NUM_LEVEL = 20;
@@ -60,14 +60,14 @@ class Frame {
     int hierarchical_level = -1;
 
     inline void AddNumCorHavePoint3D(int p2d_id) {
-        if (num_correspondences_have_point3D_[p2d_id] == 0)
+        if (num_correspondences_have_point3D_.at(p2d_id) == 0)
             num_visible_points3D_++;
-        num_correspondences_have_point3D_[p2d_id]++;
+        num_correspondences_have_point3D_.at(p2d_id)++;
     }
 
     inline void DeleteNumCorHavePoint3D(int p2d_id) {
-        num_correspondences_have_point3D_[p2d_id]--;
-        if (num_correspondences_have_point3D_[p2d_id] == 0)
+        num_correspondences_have_point3D_.at(p2d_id)--;
+        if (num_correspondences_have_point3D_.at(p2d_id) == 0)
             num_visible_points3D_--;
     }
 
@@ -166,13 +166,8 @@ class Map {
                                std::vector<std::pair<int, int>> &cor_2d_3d_ids);
 
     int MaxPoint3dFrameId();
-    int MaxPoint3dFrameId1();
     int get_num_p3d(const int frame_id);
     std::pair<int, int> MaxPoint3dFrameIdSeq();
-
-    void LogReprojectError();
-    void LogFrameReprojectError();
-    void LogFrameReprojectError1(int frame_id);
 
     inline void AddNumCorHavePoint3D(int frame_id, int p2d_id) {
         for (const auto &[t_frame_id, t_p2d_id] :

@@ -14,16 +14,13 @@ void ReadCamerasBinary(const std::string &path, std::vector<Camera> &cameras) {
     for (auto &camera : cameras) {
         int camera_model = 2;
         uint64_t w = 2 * camera.cx(), h = 2 * camera.cy();
-        read_data(file, camera.id);
+        read_data(file, camera.id_);
         read_data(file, camera_model);
         read_data(file, w);
         read_data(file, h);
         std::array<double, 4> param;
         read_data_vec(file, param.data(), 4);
-        camera.camera_params[0] = camera.camera_params[1] = param[0];
-        camera.camera_params[2] = param[1];
-        camera.camera_params[3] = param[2];
-        camera.distort_params[0] = param[3];
+        camera.params_ = std::vector<double>(param.begin(), param.end());
     }
 }
 
@@ -149,15 +146,12 @@ void WriteCamerasBinary(const std::string &path,
     uint64_t num_camera = cameras.size();
     write_data(file, num_camera);
     for (const auto &camera : cameras) {
-        int camera_model = 2;
         uint64_t w = 2 * camera.cx(), h = 2 * camera.cy();
-        std::array<double, 4> param = {camera.fx(), camera.cx(), camera.cy(),
-                                       camera.distort_params[0]};
-        write_data(file, camera.id);
-        write_data(file, camera_model);
+        write_data(file, camera.id_);
+        write_data(file, camera.model_id_);
         write_data(file, w);
         write_data(file, h);
-        write_data_vec(file, param.data(), 4);
+        write_data_vec(file, camera.params_.data(), 4);
     }
 }
 

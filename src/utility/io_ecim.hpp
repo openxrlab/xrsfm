@@ -20,21 +20,24 @@
 namespace xrsfm {
 
 inline Camera ReadCameraIOSRecord(const std::string &file_name) {
+    Camera cam;
+    cam.id_ = 0;
+    cam.model_id_ = 2;
+    cam.params_.resize(4);
+
     std::ifstream file(file_name, std::ios::out);
     std::string line;
-    Camera cam;
     while (std::getline(file, line)) {
         if (line[0] == '#')
             continue;
         std::string image_name, model_name;
         std::stringstream ss(line);
         ss >> image_name >> model_name;
-        ss >> cam.camera_params[0] >> cam.camera_params[1] >>
-            cam.camera_params[2] >> cam.camera_params[3] >>
-            cam.distort_params[0];
-        cam.id = 0;
-        return cam;
+        ss >> cam.params_[0] >> cam.params_[0] >> cam.params_[1] >>
+            cam.params_[2] >> cam.params_[3];
+        break;
     }
+
     return cam;
 }
 
@@ -49,15 +52,16 @@ inline void ReadCameraInfo(const std::string &file_name,
         if (line.size() < 10)
             continue;
         Camera cam;
+        cam.params_.resize(4);
         int w, h;
         std::string image_name, model_name;
         std::stringstream ss(line);
         ss >> image_name >> model_name >> w >> h;
-        ss >> cam.camera_params[0] >> cam.camera_params[2] >>
-            cam.camera_params[3] >> cam.distort_params[0];
-        cam.camera_params[1] = cam.camera_params[0];
+        ss >> cam.params_[0] >> cam.params_[2] >> cam.params_[3] >>
+            cam.distort_params()[0];
+        cam.params_[1] = cam.params_[0];
         const int id = cameras.size();
-        cam.id = name2cid[image_name] = id;
+        cam.id_ = name2cid[image_name] = id;
         cameras.emplace_back(cam);
     }
 }

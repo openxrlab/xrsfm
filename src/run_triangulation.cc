@@ -1,18 +1,19 @@
 
 #include <unistd.h>
+
 #include <cctype>
 #include <regex>
 #include <unordered_set>
 
-#include "feature/feature_processing.h"
 #include "base/map.h"
+#include "feature/feature_processing.h"
+#include "geometry/epipolar_geometry.hpp"
 #include "geometry/track_processor.h"
 #include "optimization/ba_solver.h"
-#include "utility/timer.h"
 #include "utility/io_ecim.hpp"
+#include "utility/timer.h"
 #include "utility/view.h"
 #include "utility/viewer.h"
-#include "geometry/epipolar_geometry.hpp"
 
 using namespace xrsfm;
 

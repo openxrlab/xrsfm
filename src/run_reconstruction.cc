@@ -6,8 +6,6 @@
 #include "mapper/incremental_mapper.h"
 #include "utility/io_ecim.hpp"
 #include "utility/io_feature.hpp"
-#include "utility/timer.h"
-#include "utility/viewer.h"
 
 using namespace xrsfm;
 
@@ -18,17 +16,14 @@ void PreProcess(const std::string dir_path, const std::string camera_path,
     std::vector<std::string> image_names;
     ReadFeatures(dir_path + "ftr.bin", frames, true);
     ReadFramePairs(dir_path + "fp.bin", frame_pairs);
-    // LoadImageNames(images_path, image_names);
+    std::cout << "ReadFramePairs\n";
 
     // set cameras & image name
-    std::vector<Camera> cameras;
     Camera seq = ReadCameraIOSRecord(camera_path);
-    seq.log();
-    cameras.emplace_back(seq);
+
+    std::vector<Camera> cameras = {seq};
     for (auto &frame : frames) {
         frame.camera_id = 0;
-        // std::cout<<image_names.at(frame.id)<<" "<<frame.name<<std::endl;
-        // frame.name = image_names.at(frame.id);
     }
 
     // set points for reconstruction
@@ -40,9 +35,9 @@ void PreProcess(const std::string dir_path, const std::string camera_path,
         for (const auto &kpt : frame.keypoints_) {
             const auto &pt = kpt.pt;
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
-            ImageToNormalized(cameras[0], ept, eptn);
-            frame.points.emplace_back(ept);
-            frame.points_normalized.emplace_back(eptn);
+            frame.points.push_back(ept);
+            ImageToNormalized(cameras[frame.camera_id], ept, eptn);
+            frame.points_normalized.push_back(eptn);
         }
     }
 
@@ -93,7 +88,7 @@ int main(int argc, char *argv[]) {
     IncrementalMapper imapper;
     imapper.options.init_id1 = init_id1;
     imapper.options.init_id2 = init_id2;
-    imapper.options.correct_pose = true;
+    imapper.options.correct_pose = false;
     imapper.options.stop_when_register_fail = true;
     imapper.Reconstruct(map);
     std::cout << "Reconstruction Done!" << std::endl;

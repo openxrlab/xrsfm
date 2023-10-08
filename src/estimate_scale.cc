@@ -1,16 +1,16 @@
 
-#include <fstream>
 #include <unistd.h>
 
-#include "base/map.h"
+#include <fstream>
+
 #include "base/camera.h"
+#include "base/map.h"
 #include "geometry/track_processor.h"
 #include "optimization/ba_solver.h"
 #include "optimization/cost_factor_ceres.h"
-#include "utility/io_ecim.hpp"
-#include "utility/timer.h"
 #include "tag/tag_extract.hpp"
-#include "utility/viewer.h"
+#include "utility/io_ecim.hpp"
+#include "utility/timer.h" 
 
 using namespace xrsfm;
 

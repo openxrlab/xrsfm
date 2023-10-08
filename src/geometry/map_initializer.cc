@@ -3,6 +3,7 @@
 //
 
 #include "geometry/map_initializer.h"
+
 #include "geometry/colmap/base/triangulation.h"
 #include "geometry/essential.h"
 #include "geometry/triangluate_svd.h"

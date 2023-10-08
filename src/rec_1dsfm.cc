@@ -49,7 +49,7 @@ void PreProcess(const std::string bin_path, Map &map) {
         // camera.log();
         // if distortion parameters of the camera are not estimated, the camera
         // parameters is invalid.
-        if (camera.distort_params[0] == 0) {
+        if (camera.distort_params()[0] == 0) {
             camera.set_invalid();
         }
     }

@@ -32,14 +32,13 @@
 #ifndef COLMAP_SRC_ESTIMATORS_FUNDAMENTAL_MATRIX_H_
 #define COLMAP_SRC_ESTIMATORS_FUNDAMENTAL_MATRIX_H_
 
-#include <vector>
-
 #include <Eigen/Core>
+#include <vector>
 
 //#include "estimators/homography_matrix.h"
 //#include "util/alignment.h"
-#include "util/types.h"
 #include "optim/ransac.h"
+#include "util/types.h"
 
 namespace colmap {
 

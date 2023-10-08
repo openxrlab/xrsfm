@@ -11,6 +11,62 @@
 
 namespace xrsfm {
 
+void PrintSolverSummary(const ceres::Solver::Summary &summary) {
+    std::cout << std::right << std::setw(16) << "Residuals : ";
+    std::cout << std::left << summary.num_residuals_reduced << std::endl;
+
+    std::cout << std::right << std::setw(16) << "Parameters : ";
+    std::cout << std::left << summary.num_effective_parameters_reduced
+              << std::endl;
+
+    std::cout << std::right << std::setw(16) << "Iterations : ";
+    std::cout << std::left
+              << summary.num_successful_steps + summary.num_unsuccessful_steps
+              << std::endl;
+
+    std::cout << std::right << std::setw(16) << "Time : ";
+    std::cout << std::left << summary.total_time_in_seconds << " [s]"
+              << std::endl;
+
+    std::cout << std::right << std::setw(16) << "Initial cost : ";
+    std::cout << std::right << std::setprecision(6)
+              << std::sqrt(summary.initial_cost / summary.num_residuals_reduced)
+              << " [px]" << std::endl;
+
+    std::cout << std::right << std::setw(16) << "Final cost : ";
+    std::cout << std::right << std::setprecision(6)
+              << std::sqrt(summary.final_cost / summary.num_residuals_reduced)
+              << " [px]" << std::endl;
+
+    std::cout << std::right << std::setw(16) << "Termination : ";
+
+    std::string termination = "";
+
+    switch (summary.termination_type) {
+    case ceres::CONVERGENCE:
+        termination = "Convergence";
+        break;
+    case ceres::NO_CONVERGENCE:
+        termination = "No convergence";
+        break;
+    case ceres::FAILURE:
+        termination = "Failure";
+        break;
+    case ceres::USER_SUCCESS:
+        termination = "User success";
+        break;
+    case ceres::USER_FAILURE:
+        termination = "User failure";
+        break;
+    default:
+        termination = "Unknown";
+        break;
+    }
+
+    std::cout << std::right << termination << std::endl;
+    std::cout << std::endl;
+}
+
 ceres::Solver::Options BASolver::InitSolverOptions() {
     ceres::Solver::Options solver_options;
     solver_options.num_threads = 8;
@@ -263,6 +319,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
         int frame_id = track.ref_id;
         int p2d_id = track.observations_[frame_id];
         Pose tcw = map.frames_[frame_id].Tcw;
+        // TODO
         vector2 p2d = map.frames_[frame_id].points_normalized[p2d_id];
         track.point3d_ =
             tcw.q.inverse() *
@@ -271,30 +328,36 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
 }
 
 inline void BASolver::SetUp(ceres::Problem &problem, Map &map, Frame &frame) {
+    const int camera_model_id = map.cameras_[frame.camera_id].model_id_;
     const double sigma = std::sqrt(5.99) / map.cameras_[frame.camera_id].fx();
+    double *camera_param = map.cameras_[frame.camera_id].params_.data();
     int num_mea = 0;
     for (int i = 0; i < frame.track_ids_.size(); ++i) {
         if (frame.track_ids_[i] == -1)
             continue;
         Track &track = map.tracks_[frame.track_ids_[i]];
+
         ceres::CostFunction *cost_function =
-            new ProjectionCost(frame.points_normalized[i], sigma);
-        problem.AddResidualBlock(cost_function, nullptr,
-                                 frame.Tcw.q.coeffs().data(),
-                                 frame.Tcw.t.data(), track.point3d_.data());
+            ReProjectionCostCreate(camera_model_id, frame.points[i]);
+
+        problem.AddResidualBlock(
+            cost_function, nullptr, frame.Tcw.q.coeffs().data(),
+            frame.Tcw.t.data(), track.point3d_.data(), camera_param);
         num_mea++;
     }
     if (num_mea == 0) {
         LOG(ERROR) << "BA: NO Measurement In Frame " << frame.id;
     } else {
-        problem.SetParameterization(frame.Tcw.q.coeffs().data(), new QuatParam);
+        problem.SetParameterization(frame.Tcw.q.coeffs().data(),
+                                    new ceres::EigenQuaternionParameterization);
     }
 }
 
 inline void BASolver::SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame,
                                int frame_id) {
-    // const double sigma = std::sqrt(5.99) /
-    // map.cameras_[frame.camera_id].fx();
+    const int camera_model_id = map.cameras_[frame.camera_id].model_id_;
+    double *camera_param = map.cameras_[frame.camera_id].params_.data();
+
     const double sigma = 1000;
     int num_mea = 0;
     for (int i = 0; i < frame.track_ids_.size(); ++i) {
@@ -303,11 +366,13 @@ inline void BASolver::SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame,
         num_mea++;
 
         Track &track = map.tracks_[frame.track_ids_[i]];
+
         ceres::CostFunction *cost_function =
-            new ProjectionCost(frame.points_normalized[i], sigma);
-        problem.AddResidualBlock(cost_function, nullptr,
-                                 frame.Tcw.q.coeffs().data(),
-                                 frame.Tcw.t.data(), track.point3d_.data());
+            ReProjectionCostCreate(camera_model_id, frame.points[i]);
+
+        problem.AddResidualBlock(
+            cost_function, nullptr, frame.Tcw.q.coeffs().data(),
+            frame.Tcw.t.data(), track.point3d_.data(), camera_param);
 
         if (track.angle_ > 5 || track.observations_.count(frame_id) == 0) {
             problem.SetParameterBlockConstant(track.point3d_.data());
@@ -316,7 +381,9 @@ inline void BASolver::SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame,
     if (num_mea == 0) {
         LOG(ERROR) << "LBA: NO Measurement In Frame " << frame.id;
     } else {
-        problem.SetParameterization(frame.Tcw.q.coeffs().data(), new QuatParam);
+        problem.SetParameterization(frame.Tcw.q.coeffs().data(),
+                                    new ceres::EigenQuaternionParameterization);
+        problem.SetParameterBlockConstant(camera_param);
     }
 }
 
@@ -450,7 +517,7 @@ std::vector<int> CovisibilityNeibors(const int frame_id, Map &map,
     return local_bundle_image_ids;
 }
 
-void BASolver::LBA(int frame_id, Map &map) { // TODO boost
+void BASolver::LBA(int frame_id, Map &map) {
     // find local frames
     std::vector<int> local_frame_ids1 = CovisibilityNeibors(frame_id, map);
     std::vector<int> local_frame_ids2 = FindLocalBundle(frame_id, map);
@@ -472,7 +539,6 @@ void BASolver::LBA(int frame_id, Map &map) { // TODO boost
     printf("\n");
 
     // fix poses
-    // TODO here bug
     int fix_num = 0;
     if (local_frame_ids.count(map.init_id1) != 0) {
         problem.SetParameterBlockConstant(
@@ -484,6 +550,7 @@ void BASolver::LBA(int frame_id, Map &map) { // TODO boost
             map.frames_[map.init_id2].Tcw.t.data());
         fix_num++;
     }
+
     if (fix_num == 0) {
         if (local_frame_ids2.size() >= 2) {
             problem.SetParameterBlockConstant(
@@ -506,15 +573,7 @@ void BASolver::LBA(int frame_id, Map &map) { // TODO boost
         }
     }
 
-    // for (const int &id : local_frame_ids) {
-    //   if (set_all_pose_const || (num_frames_set_const_ != -1 && id <=
-    //   num_frames_set_const_)) {
-    //     auto &frame = map.frames_[id];
-    //     if (!frame.registered && !frame.is_keyframe) continue;
-    //     problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
-    //     problem.SetParameterBlockConstant(frame.Tcw.t.data());
-    //   }
-    // }
+    problem.SetParameterBlockConstant(map.cameras_[0].params_.data());
 
     ceres::Solver::Options solver_options = InitSolverOptions();
     solver_options.max_num_iterations = 5;
@@ -548,6 +607,8 @@ void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
         }
     }
 
+    problem.SetParameterBlockConstant(map.cameras_[0].params_.data());
+
     ceres::Solver::Options solver_options = InitSolverOptions();
     solver_options.minimizer_progress_to_stdout = true;
     if (accurate) {
@@ -561,7 +622,7 @@ void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
     }
     ceres::Solver::Summary summary;
     ceres::Solve(solver_options, &problem, &summary);
-    std::cout << summary.BriefReport() << "\n";
+    PrintSolverSummary(summary);
 }
 
 void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
@@ -583,25 +644,7 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
     problem.SetParameterBlockConstant(map.frames_[map.init_id1].Tcw.t.data());
     problem.SetParameterBlockConstant(map.frames_[map.init_id2].Tcw.t.data());
 
-    // if (set_all_pose_const) {
-    //   for (auto &frame : map.frames_) {
-    //     if (!frame.registered) continue;
-    //     if (!frame.is_keyframe) continue;
-    //     problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
-    //     problem.SetParameterBlockConstant(frame.Tcw.t.data());
-    //   }
-    // }
-
-    // if (num_frames_set_const_ != -1) {
-    //   for (auto &frame : map.frames_) {
-    //     if (frame.id <= num_frames_set_const_) {
-    //       if (!frame.registered) continue;
-    //       if (!frame.is_keyframe) continue;
-    //       problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
-    //       problem.SetParameterBlockConstant(frame.Tcw.t.data());
-    //     }
-    //   }
-    // }
+    problem.SetParameterBlockConstant(map.cameras_[0].params_.data());
 
     ceres::Solver::Options solver_options = InitSolverOptions();
     solver_options.minimizer_progress_to_stdout = true;
@@ -611,7 +654,9 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
     solver_options.parameter_tolerance = 1e-5;
     ceres::Solver::Summary summary;
     ceres::Solve(solver_options, &problem, &summary);
-    std::cout << summary.BriefReport() << "\n";
+    // std::cout << summary.BriefReport() << "\n";
+    PrintSolverSummary(summary);
+    map.cameras_[0].log();
 
     printf("kf: %d/%d\n", num_kf, num_rf);
     UpdateByRefFrame(map);

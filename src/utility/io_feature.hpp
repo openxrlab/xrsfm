@@ -10,9 +10,9 @@
 #include <experimental/filesystem>
 #include <string>
 
-#include "io_base.hpp"
-#include "base/map.h"
 #include "3rdparty/json/json.hpp"
+#include "base/map.h"
+#include "io_base.hpp"
 
 namespace xrsfm {
 
@@ -70,6 +70,7 @@ inline void ReadFeatures(const std::string &file_name,
         }
         read_data_vec(file, frame.uint_descs_.data(), num_points * 128);
     }
+    file.close();
 }
 
 inline void SaveFeatures(const std::string &file_name,
@@ -116,6 +117,14 @@ inline void ReadFramePairs(const std::string &file_name,
         frame_pair.inlier_mask.resize(num_matches);
         read_data_vec(file, &(frame_pair.inlier_mask[0]), num_matches);
     }
+    std::vector<FramePair> frame_pairs1;
+    for (auto &frame_pair : frame_pairs) {
+        if (frame_pair.id1 != frame_pair.id2) {
+            frame_pairs1.push_back(frame_pair);
+        }
+    }
+    frame_pairs = frame_pairs1;
+
     file.close();
 }
 

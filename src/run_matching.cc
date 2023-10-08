@@ -1,11 +1,12 @@
 
 
 #include <cctype>
+#include <experimental/filesystem>
 #include <regex>
 #include <unordered_set>
 
-#include "feature/feature_processing.h"
 #include "base/map.h"
+#include "feature/feature_processing.h"
 #include "utility/io_ecim.hpp"
 #include "utility/timer.h"
 
@@ -149,6 +150,11 @@ int main(int argc, const char *argv[]) {
         retrieval_path = config_json["retrieval_path"];
         matching_type = config_json["matching_type"];
         output_path = config_json["output_path"];
+    } else if (argc == 3) {
+        images_path = argv[1];
+        output_path = argv[2];
+        matching_type = "sequential";
+        retrieval_path = "";
     } else if (argc == 5) {
         images_path = argv[1];
         retrieval_path = argv[2];
@@ -162,7 +168,11 @@ int main(int argc, const char *argv[]) {
     const std::string fp_init_path = output_path + "fp_init.bin";
     const std::string fp_path = output_path + "fp.bin";
 
-    // 1.read images
+    // 1.read imagesstd::filesystem
+    if (!std::experimental::filesystem::exists(images_path)) {
+        std::cout << "image path not exists :" << images_path << "\n";
+        exit(-1);
+    }
     std::vector<std::string> image_names;
     LoadImageNames(images_path, image_names);
     std::vector<ImageSize> image_size_vec;

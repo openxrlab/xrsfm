@@ -1,5 +1,4 @@
 #include "geometry/error_corrector.h"
-
 #include "utility/global.h"
 
 namespace xrsfm {
@@ -111,16 +110,16 @@ void ErrorDetector::IsGoodRelativePose_Debug(
     if (image1.empty() || image2.empty()) {
         printf("%s\n", (image_dir_ + frame1.name).c_str());
     } else {
-        DrawFeatureMatches(image1, image2, frame1.points, frame2.points,
-                           fp.matches, inlier_mask);
-        DrawFeatureMatches1(image1, frame1.points, frame2.points, fp.matches,
-                            inlier_mask);
+        // DrawFeatureMatches(image1, image2, frame1.points, frame2.points,
+        //                    fp.matches, inlier_mask);
+        // DrawFeatureMatches1(image1, frame1.points, frame2.points, fp.matches,
+        //                     inlier_mask);
     }
     // frame1.flag_for_view = frame2.flag_for_view = true;
     // viewer_->Draw(map, true);
     // frame1.flag_for_view = frame2.flag_for_view = false;
     frame1.flag_for_view = frame2.flag_for_view = true;
-    viewerTh_->update_map(map);
+    // viewerTh_->update_map(map);
     frame1.flag_for_view = frame2.flag_for_view = false;
     cv::waitKey();
 }
@@ -184,21 +183,21 @@ bool ErrorDetector::CheckAllRelativePose(Map &map, int frame_id,
     return true;
 }
 
-void ErrorDetector::StoreRelativePose(Map &map, int frame_id,
-                                      std::ofstream &file) {
-    for (const auto id : map.frameid2framepairids_[frame_id]) {
-        auto &fp = map.frame_pairs_[id];
-        const auto &frame1 = map.frames_[fp.id1];
-        const auto &frame2 = map.frames_[fp.id2];
-        if (frame1.registered && frame2.registered && frame1.is_keyframe &&
-            frame2.is_keyframe) {
-            file << id << std::endl;
-            file << frame1.Tcw.q.coeffs().transpose() << " "
-                 << frame1.Tcw.t.transpose() << std::endl;
-            file << frame2.Tcw.q.coeffs().transpose() << " "
-                 << frame2.Tcw.t.transpose() << std::endl;
-        }
-    }
-    file << "-1" << std::endl;
-}
+// void ErrorDetector::StoreRelativePose(Map &map, int frame_id,
+//                                       std::ofstream &file) {
+//     for (const auto id : map.frameid2framepairids_[frame_id]) {
+//         auto &fp = map.frame_pairs_[id];
+//         const auto &frame1 = map.frames_[fp.id1];
+//         const auto &frame2 = map.frames_[fp.id2];
+//         if (frame1.registered && frame2.registered && frame1.is_keyframe &&
+//             frame2.is_keyframe) {
+//             file << id << std::endl;
+//             file << frame1.Tcw.q.coeffs().transpose() << " "
+//                  << frame1.Tcw.t.transpose() << std::endl;
+//             file << frame2.Tcw.q.coeffs().transpose() << " "
+//                  << frame2.Tcw.t.transpose() << std::endl;
+//         }
+//     }
+//     file << "-1" << std::endl;
+// }
 } // namespace xrsfm

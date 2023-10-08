@@ -6,10 +6,57 @@
 #define XRSFM_SRC_OPTIMIZATION_COST_FACTOR_CERES_H
 
 #include <ceres/ceres.h>
-#include "utility/global.h"
+
 #include "lie_algebra.h"
+#include "utility/global.h"
 
 namespace xrsfm {
+
+template <typename CameraModel> class ReProjectionCost {
+  public:
+    ReProjectionCost(Eigen::Vector2d uv) : uv_(uv) {}
+
+    template <typename T>
+    bool operator()(const T *const _qcw, const T *const _tcw,
+                    const T *const _pw, const T *const _camera_param,
+                    T *_residuals) const {
+        const_map<Eigen::Quaternion<T>> qcw(_qcw);
+        const_map<vector<3, T>> tcw(_tcw);
+        const_map<vector<3, T>> pw(_pw);
+        map<vector<2, T>> residuals(_residuals);
+
+        vector<3, T> pc = qcw * pw + tcw;
+        if (pc.z() < 0.1) {
+            residuals = vector<2, T>(12.0, 12.0);
+        } else {
+            vector<2, T> xy = pc.hnormalized();
+            vector<2, T> uv_estimated;
+            CameraModel::WorldToImage(_camera_param, xy.data(),
+                                      uv_estimated.data());
+            residuals = uv_estimated - uv_;
+        }
+        return true;
+    }
+
+    static ceres::CostFunction *Create(Eigen::Vector2d uv) {
+        return (new ceres::AutoDiffCostFunction<ReProjectionCost, 2, 4, 3, 3,
+                                                CameraModel::kNumParams>(
+            new ReProjectionCost(uv)));
+    }
+
+  private:
+    const Eigen::Vector2d uv_;
+};
+
+inline static ceres::CostFunction *ReProjectionCostCreate(const int model_id,
+                                                          Eigen::Vector2d uv) {
+    if (model_id == 2)
+        return ReProjectionCost<SimpleRadialCameraModel>::Create(uv);
+    if (model_id == 4)
+        return ReProjectionCost<OpenCVCameraModel>::Create(uv);
+
+    return ReProjectionCost<OpenCVCameraModel>::Create(uv);
+}
 
 class ProjectionCost : public ceres::SizedCostFunction<2, 4, 3, 3> {
   public:
@@ -60,29 +107,6 @@ class ProjectionCost : public ceres::SizedCostFunction<2, 4, 3, 3> {
     double sigma;
     double weight;
     vector2 obs;
-};
-
-class QuatParam : public ceres::LocalParameterization {
-  public:
-    bool Plus(const double *x, const double *delta,
-              double *x_plus_delta) const override {
-        map<quaternion> q(x_plus_delta);
-        const_map<quaternion> _q(x);
-        const_map<vector3> theta(delta);
-        quaternion dq = expmap(theta);
-        q = (_q * dq).normalized();
-        return true;
-    }
-
-    bool ComputeJacobian(const double *x, double *jacobian) const override {
-        map<matrix<4, 3, true>> j(jacobian);
-        j.setIdentity();
-        return true;
-    }
-
-    int GlobalSize() const override { return 4; };
-
-    int LocalSize() const override { return 3; };
 };
 
 class PoseGraphCost : public ceres::SizedCostFunction<8, 4, 3, 4, 3, 1, 1> {
@@ -230,6 +254,28 @@ class TagCost : public ceres::SizedCostFunction<3, 4, 3, 1, 3> {
     vector3 p3d_ori;
 };
 
+ 
+class QuatParam : public ceres::LocalParameterization {
+  public:
+    bool Plus(const double *x, const double *delta,
+              double *x_plus_delta) const override {
+        map<quaternion> q(x_plus_delta);
+        const_map<quaternion> _q(x);
+        const_map<vector3> theta(delta);
+        quaternion dq = expmap(theta);
+        q = (_q * dq).normalized();
+        return true;
+    }
+
+    bool ComputeJacobian(const double *x, double *jacobian) const override {
+        map<matrix<4, 3, true>> j(jacobian);
+        j.setIdentity();
+        return true;
+    }
+
+    int GlobalSize() const override { return 4; }
+    int LocalSize() const override { return 3; }
+};
 } // namespace xrsfm
 
 #endif // XRSFM_SRC_OPTIMIZATION_COST_FACTOR_CERES_H
