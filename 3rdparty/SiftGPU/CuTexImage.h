@@ -31,6 +31,8 @@ struct textureReference;
 
 #define SIFTGPU_ENABLE_LINEAR_TEX2D
 
+typedef unsigned int GLuint;
+
 class CuTexImage {
   protected:
     void *_cuData;

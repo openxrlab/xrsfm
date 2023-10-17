@@ -1,11 +1,12 @@
 
 
 #include <cctype>
+#include <experimental/filesystem>
 #include <regex>
 #include <unordered_set>
 
-#include "feature/feature_processing.h"
 #include "base/map.h"
+#include "feature/feature_processing.h"
 #include "utility/io_ecim.hpp"
 #include "utility/timer.h"
 
@@ -63,7 +64,6 @@ ExtractNearestImagePairs(const std::map<int, std::vector<int>> &id2rank,
         for (const auto &id2 : retrieval_results) {
             auto ret = image_pair_set.insert(
                 std::make_pair(std::min(id, id2), std::max(id, id2)));
-            // if (!ret.second)continue;
             count++;
             if (count >= num_candidates)
                 break;
@@ -115,18 +115,24 @@ std::tuple<int, int> GetInitId(const int num_image,
 
 void MatchingSeq(std::vector<Frame> &frames, const std::string &fp_path,
                  std::map<int, std::vector<int>> &id2rank) {
+    const int num_frame = frames.size();
     std::set<std::pair<int, int>> set_pairs;
-    for (int i = 0, num = frames.size(); i < num; ++i) {
-        for (int k = 0; k < 20 && i + k < num; ++k)
+    for (int i = 0; i < num_frame; ++i) {
+        for (int k = 1; k < 20 && i + k < num_frame; ++k)
             set_pairs.insert(std::pair<int, int>(i, i + k));
     }
+
     for (auto &[id1, vec] : id2rank) {
         if (id1 % 5 != 0)
             continue;
         for (auto &id2 : vec) {
-            set_pairs.insert(std::pair<int, int>(id1, id2));
+            if (id1 < id2)
+                set_pairs.insert(std::pair<int, int>(id1, id2));
+            else if (id2 < id1)
+                set_pairs.insert(std::pair<int, int>(id2, id1));
         }
     }
+
     std::vector<std::pair<int, int>> id_pairs;
     id_pairs.assign(set_pairs.begin(), set_pairs.end());
 
@@ -149,6 +155,11 @@ int main(int argc, const char *argv[]) {
         retrieval_path = config_json["retrieval_path"];
         matching_type = config_json["matching_type"];
         output_path = config_json["output_path"];
+    } else if (argc == 3) {
+        images_path = argv[1];
+        output_path = argv[2];
+        matching_type = "sequential";
+        retrieval_path = "";
     } else if (argc == 5) {
         images_path = argv[1];
         retrieval_path = argv[2];
@@ -162,7 +173,11 @@ int main(int argc, const char *argv[]) {
     const std::string fp_init_path = output_path + "fp_init.bin";
     const std::string fp_path = output_path + "fp.bin";
 
-    // 1.read images
+    // 1.read imagesstd::filesystem
+    if (!std::experimental::filesystem::exists(images_path)) {
+        std::cout << "image path not exists :" << images_path << "\n";
+        exit(-1);
+    }
     std::vector<std::string> image_names;
     LoadImageNames(images_path, image_names);
     std::vector<ImageSize> image_size_vec;

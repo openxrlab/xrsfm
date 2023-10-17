@@ -810,7 +810,7 @@ void ShaderBagGLSL::LoadKeypointShader(float threshold, float edge_threshold) {
     //...
     out << " \n"
            "	vec2 D5 = 0.5*(v1.yw-v1.xz); \n"
-           "	floatfx()= D5.x, fy = D5.y ; \n"
+           "	float fx = D5.x, fy = D5.y ; \n"
            "	float fs, fss , fxs, fys ; \n"
            "	vec2 v3; vec4 v4, v5, v6;\n"
         // read 9 pixels of upper level
@@ -869,7 +869,7 @@ void ShaderBagGLSL::LoadKeypointShader(float threshold, float edge_threshold) {
 
             //
             // let dog difference be quatratic function  of dx, dy, ds;
-            // df(dx, dy, ds) =fx()* dx + fy*dy + fs * ds +
+            // df(dx, dy, ds) = fx * dx + fy*dy + fs * ds +
             //				  + 0.5 * ( fxx * dx * dx + fyy * dy *
             // dy
             //+ fss

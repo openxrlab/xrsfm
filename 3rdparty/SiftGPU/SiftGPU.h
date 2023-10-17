@@ -187,6 +187,7 @@ class SiftGPU : public SiftParam {
     inline void SetVerboseBrief() { SetVerbose(2); };
     // parse SiftGPU parameters
     SIFTGPU_EXPORT virtual void ParseParam(const int argc, const char **argv);
+    SIFTGPU_EXPORT virtual void SetDogThreshold(float threshold);
     // run SIFT on a new image given filename
     SIFTGPU_EXPORT virtual int RunSIFT(const char *imgpath);
     // run SIFT on an image in the image list given the file index
@@ -343,7 +344,7 @@ class SiftMatchGPU {
     // 512
     SIFTGPU_EXPORT virtual void SetDescriptors(int index, int num,
                                                const unsigned char *descriptors,
-                                               int id = -1);
+                                               int id = -1, int dim = 128);
 
     // match two sets of features, the function RETURNS the number of matches.
     // Given two normalized descriptor d1,d2, the distance here is acos(d1 *d2);
@@ -353,7 +354,8 @@ class SiftMatchGPU {
                                              // feature indices
                  float distmax = 0.7,  // maximum distance of sift descriptor
                  float ratiomax = 0.8, // maximum distance ratio
-                 int mutual_best_match = 1); // mutual best match or one way
+                 int mutual_best_match = 1, // mutual best match or one way
+                 int dim = 128);            // dimension of sift features
 
     // two functions for guded matching, two constraints can be used
     // one homography and one fundamental matrix, the use is as follows
@@ -371,14 +373,16 @@ class SiftMatchGPU {
     // feature matches the function returns the number of matches.
     SIFTGPU_EXPORT virtual int GetGuidedSiftMatch(
         int max_match, uint32_t match_buffer[][2], // buffer to receive
-        float *H,                   // homography matrix,  (Set NULL to skip)
-        float *F,                   // fundamental matrix, (Set NULL to skip)
-        float distmax = 0.7,        // maximum distance of sift descriptor
-        float ratiomax = 0.8,       // maximum distance ratio
-        float hdistmax = 32,        // threshold for |H * x1 - x2|_2
-        float fdistmax = 16,        // threshold for sampson error of x2'FX1
-        int mutual_best_match = 1); // mutual best or one way
-
+        float *H,                  // homography matrix,  (Set NULL to skip)
+        float *F,                  // fundamental matrix, (Set NULL to skip)
+        float *E,                  // essential matrix, (Set NULL to skip)
+        int lengthHomo = 1,        // length of homography matrix,
+        float distmax = 0.7,       // maximum distance of sift descriptor
+        float ratiomax = 0.8,      // maximum distance ratio
+        float hdistmax = 32,       // threshold for |H * x1 - x2|_2
+        float fdistmax = 16,       // threshold for sampson error of x2'FX1
+        int mutual_best_match = 1, // mutual best or one way
+        int dim = 128);            // dimension of sift features
   public:
     // overload the new operator, the same reason as SiftGPU above
     SIFTGPU_EXPORT void *operator new(size_t size);
@@ -401,7 +405,7 @@ SIFTGPU_EXPORT_EXTERN ComboSiftGPU *CreateComboSiftGPU();
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Multi-process mode and remote mode
 SIFTGPU_EXPORT_EXTERN ComboSiftGPU *
-CreateRemoteSiftGPU(int port = 7777, char *remote_server = NULL);
+CreateRemoteSiftGPU(int port = 7777, char *remote_server = nullptr);
 // Run SiftGPU computation on a remote computer/process/thread
 // if( remote_server == NULL)
 //			a local server is created in a different process and

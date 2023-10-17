@@ -1126,6 +1126,10 @@ void SiftGPU::ParseParam(const int argc, const char **argv) {
         _outpath[0] = 0;
 }
 
+void SiftGPU::SetDogThreshold(float threshold) {
+    SiftParam::_dog_threshold = threshold;
+}
+
 void SiftGPU::SetImageList(int nimage, const char **filelist) {
     _list->resize(0);
     for (int i = 0; i < nimage; i++) {

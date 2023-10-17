@@ -4,7 +4,7 @@
 //	Description : interface for the GLTexImage class.
 //		GLTexImage:		naive texture class.
 //						sevral different quad drawing
-// functions are provide 		GLTexPacked:	packed version (four
+// functions are provided 		GLTexPacked:	packed version (four
 // value packed as four channels of a pixel) 		GLTexInput:
 // GLTexImage + some input information
 //

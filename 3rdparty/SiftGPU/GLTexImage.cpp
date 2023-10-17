@@ -72,7 +72,7 @@ int GLTexImage::CheckTexture() {
         return _texWidth == 0 && _texHeight == 0;
     }
 }
-// set a dimension that is smaller than the actually size
+// set a dimension that is smaller than the actual size
 // for drawQuad
 void GLTexImage::SetImageSize(int width, int height) {
     _drawWidth = _imgWidth = width;

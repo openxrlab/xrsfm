@@ -1,14 +1,10 @@
 #include "geometry/error_corrector.h"
-
 #include "utility/global.h"
 
 namespace xrsfm {
 bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp,
                                        std::vector<char> &inlier_mask) {
-    // if (fp.id1 == 294 && fp.id2 == 295) return false;  // seq 06
-    // if (fp.id1 <900 &&fp.id2>600) return false;  // seq 07
-
-    constexpr int num_min_matches = 100; // 100 for seq 06
+    constexpr int num_min_matches = 100;
     constexpr double ratio_th = 0.8;
     constexpr double pure_rotation_th = 0.01;
     constexpr double sin_th = std::sin(2.0 * M_PI / 180);
@@ -39,8 +35,10 @@ bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp,
                                 // double cos_theta = ray1.dot(ray2);
                                 // good_essential = cos_theta > cos_th;
         } else {
-            const vector2 p2d1 = frame1.points_normalized[fp.matches[i].id1];
-            const vector2 p2d2 = frame2.points_normalized[fp.matches[i].id2];
+            const vector2 p2d1 =
+                map.GetNormalizedPoint(fp.id1, fp.matches[i].id1);
+            const vector2 p2d2 =
+                map.GetNormalizedPoint(fp.id2, fp.matches[i].id2);
             const vector3 ray1 =
                 (frame1.qwc() * p2d1.homogeneous()).normalized();
             const vector3 ray2 =
@@ -111,16 +109,16 @@ void ErrorDetector::IsGoodRelativePose_Debug(
     if (image1.empty() || image2.empty()) {
         printf("%s\n", (image_dir_ + frame1.name).c_str());
     } else {
-        DrawFeatureMatches(image1, image2, frame1.points, frame2.points,
-                           fp.matches, inlier_mask);
-        DrawFeatureMatches1(image1, frame1.points, frame2.points, fp.matches,
-                            inlier_mask);
+        // DrawFeatureMatches(image1, image2, frame1.points, frame2.points,
+        //                    fp.matches, inlier_mask);
+        // DrawFeatureMatches1(image1, frame1.points, frame2.points, fp.matches,
+        //                     inlier_mask);
     }
     // frame1.flag_for_view = frame2.flag_for_view = true;
     // viewer_->Draw(map, true);
     // frame1.flag_for_view = frame2.flag_for_view = false;
     frame1.flag_for_view = frame2.flag_for_view = true;
-    viewerTh_->update_map(map);
+    // viewerTh_->update_map(map);
     frame1.flag_for_view = frame2.flag_for_view = false;
     cv::waitKey();
 }
@@ -184,21 +182,21 @@ bool ErrorDetector::CheckAllRelativePose(Map &map, int frame_id,
     return true;
 }
 
-void ErrorDetector::StoreRelativePose(Map &map, int frame_id,
-                                      std::ofstream &file) {
-    for (const auto id : map.frameid2framepairids_[frame_id]) {
-        auto &fp = map.frame_pairs_[id];
-        const auto &frame1 = map.frames_[fp.id1];
-        const auto &frame2 = map.frames_[fp.id2];
-        if (frame1.registered && frame2.registered && frame1.is_keyframe &&
-            frame2.is_keyframe) {
-            file << id << std::endl;
-            file << frame1.Tcw.q.coeffs().transpose() << " "
-                 << frame1.Tcw.t.transpose() << std::endl;
-            file << frame2.Tcw.q.coeffs().transpose() << " "
-                 << frame2.Tcw.t.transpose() << std::endl;
-        }
-    }
-    file << "-1" << std::endl;
-}
+// void ErrorDetector::StoreRelativePose(Map &map, int frame_id,
+//                                       std::ofstream &file) {
+//     for (const auto id : map.frameid2framepairids_[frame_id]) {
+//         auto &fp = map.frame_pairs_[id];
+//         const auto &frame1 = map.frames_[fp.id1];
+//         const auto &frame2 = map.frames_[fp.id2];
+//         if (frame1.registered && frame2.registered && frame1.is_keyframe &&
+//             frame2.is_keyframe) {
+//             file << id << std::endl;
+//             file << frame1.Tcw.q.coeffs().transpose() << " "
+//                  << frame1.Tcw.t.transpose() << std::endl;
+//             file << frame2.Tcw.q.coeffs().transpose() << " "
+//                  << frame2.Tcw.t.transpose() << std::endl;
+//         }
+//     }
+//     file << "-1" << std::endl;
+// }
 } // namespace xrsfm

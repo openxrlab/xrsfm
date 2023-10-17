@@ -38,5 +38,5 @@ jobs:
       - name: Build and install
         run: |
           mv /xrprimer ../
-          cmake -B build -D XRSLAM_TEST=ON
+          cmake -B build
           cmake --build build -j4

@@ -7,13 +7,13 @@
 #include "utility/io_ecim.hpp"
 #include "utility/io_feature.hpp"
 #include "utility/timer.h"
-#include "utility/viewer.h"
+// #include "utility/viewer.h"
 
 using namespace xrsfm;
 
 void PreProcess(const std::string bin_path, Map &map) {
     std::vector<Frame> frames;
-    std::vector<Camera> cameras;
+    std::map<int, Camera> cameras;
     std::vector<FramePair> frame_pairs;
     std::map<std::string, int> name2cid;
     ReadFeatures(bin_path + "/ftr.bin", frames, true);
@@ -31,7 +31,7 @@ void PreProcess(const std::string bin_path, Map &map) {
         const auto &camera = cameras.at(frame.camera_id);
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
-        frame.points_normalized.clear();
+        // frame.points_normalized.clear();
         frame.uint_descs_.resize(0, 0);
         frame.track_ids_.assign(num_points, -1);
         for (const auto &kpt : frame.keypoints_) {
@@ -39,7 +39,7 @@ void PreProcess(const std::string bin_path, Map &map) {
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
             ImageToNormalized(camera, ept, eptn);
             frame.points.emplace_back(ept);
-            frame.points_normalized.emplace_back(eptn);
+            // frame.points_normalized.emplace_back(eptn);
         }
     }
 
@@ -49,13 +49,13 @@ void PreProcess(const std::string bin_path, Map &map) {
         // camera.log();
         // if distortion parameters of the camera are not estimated, the camera
         // parameters is invalid.
-        if (camera.distort_params[0] == 0) {
+        if (camera.distort_params()[0] == 0) {
             camera.set_invalid();
         }
     }
 
     map.frames_ = frames;
-    map.cameras_ = cameras;
+    map.camera_map_ = cameras;
     map.frame_pairs_ = frame_pairs;
     map.RemoveRedundancyPoints();
     map.Init();

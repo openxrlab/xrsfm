@@ -7,14 +7,14 @@
 #include "utility/io_ecim.hpp"
 #include "utility/io_feature.hpp"
 #include "utility/timer.h"
-#include "utility/viewer.h"
+// #include "utility/viewer.h"
 
 using namespace xrsfm;
 
 void PreProcess(const std::string dir_path, const int camera_param_id,
                 Map &map) {
     std::vector<Frame> frames;
-    std::vector<Camera> cameras;
+    std::map<int, Camera> cameras;
     std::vector<FramePair> frame_pairs;
     ReadFeatures(dir_path + "ftr.bin", frames, true);
     ReadFramePairs(dir_path + "fp.bin", frame_pairs);
@@ -28,7 +28,7 @@ void PreProcess(const std::string dir_path, const int camera_param_id,
     } else if (camera_param_id == 2) {
         seq = Camera(0, 707.0912, 707.0912, 601.8873, 183.1104, 0.0); // 04-12
     }
-    cameras.emplace_back(seq);
+    cameras[seq.id_] = seq;
     for (auto &frame : frames) {
         frame.camera_id = 0;
     }
@@ -37,19 +37,19 @@ void PreProcess(const std::string dir_path, const int camera_param_id,
     for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
-        frame.points_normalized.clear();
+        // frame.points_normalized.clear();
         frame.track_ids_.assign(num_points, -1);
         for (const auto &kpt : frame.keypoints_) {
             const auto &pt = kpt.pt;
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
-            ImageToNormalized(cameras[0], ept, eptn);
+            // ImageToNormalized(cameras[0], ept, eptn);
             frame.points.emplace_back(ept);
-            frame.points_normalized.emplace_back(eptn);
+            // frame.points_normalized.emplace_back(eptn);
         }
     }
 
     map.frames_ = frames;
-    map.cameras_ = cameras;
+    map.camera_map_ = cameras;
     map.frame_pairs_ = frame_pairs;
     map.RemoveRedundancyPoints();
     map.Init();
@@ -109,6 +109,7 @@ int main(int argc, char *argv[]) {
     LoadTimeStamp(seq_path + "times.txt", timestamp_vec);
     UpdateFrameTimeStamp(map.frames_, timestamp_vec);
     WriteTrajectory(map, output_path + seq_name + "_test.tum");
+    WriteColMapDataBinary(output_path, map);
 
     return 0;
 }

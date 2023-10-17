@@ -181,18 +181,6 @@ inline void MergeTrackLoop(Map &map, Frame &frame1, Frame &frame2) {
             track.observations_[frame1.id] = i;
             map.AddNumCorHavePoint3D(frame1.id, i);
         }
-        // {
-        //   printf("%d %d %d\n", track_id, track_id1, frame1.track_ids_[i]);
-        //   for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
-        //     printf("%d %d -- ", t_frame_id, t_p2d_id);
-        //     auto &frame = map.frames_[t_frame_id];
-        //     vector3 p3d = frame.tcw.q * track.point3d_ + frame.tcw.t;
-        //     std::cout << p3d.transpose() << "|" << (p3d.head<2>() /
-        //     p3d.z()).transpose()
-        //               << frame.points_normalized[t_p2d_id].transpose() <<
-        //               std::endl;
-        //   }
-        // }
     }
 }
 

@@ -2,6 +2,7 @@
 #define XRSFM_SRC_BASE_TYPES_H
 
 #include <Eigen/Eigen>
+
 #include "utility/global.h"
 
 namespace xrsfm {

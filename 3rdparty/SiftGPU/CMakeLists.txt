@@ -50,4 +50,5 @@ message(STATUS " CUDA Module : ${SIFT_GPU_LIBRARIES} | ${GLEW_LIBRARIES}")
 
 target_link_libraries(sift_gpu
     ${GLEW_LIBRARIES}
+    ${OPENGL_gl_LIBRARY}
 )

@@ -1,18 +1,19 @@
 
 #include <unistd.h>
+
 #include <cctype>
 #include <regex>
 #include <unordered_set>
 
-#include "feature/feature_processing.h"
 #include "base/map.h"
+#include "feature/feature_processing.h"
+#include "geometry/epipolar_geometry.hpp"
 #include "geometry/track_processor.h"
 #include "optimization/ba_solver.h"
-#include "utility/timer.h"
 #include "utility/io_ecim.hpp"
-#include "utility/view.h"
-#include "utility/viewer.h"
-#include "geometry/epipolar_geometry.hpp"
+#include "utility/timer.h"
+// #include "utility/view.h"
+// #include "utility/viewer.h"
 
 using namespace xrsfm;
 
@@ -24,44 +25,47 @@ void PreProcess(const std::string bin_path, const std::string feature_path,
     std::map<int, Frame> frames_pose, frames_pt;
     ReadImagesBinary(bin_path + "images.bin", frames_pose);
     ReadImagesBinaryForTriangulation(feature_path, frames_pt);
-    std::cout << frames_pose.size() << " " << frames_pt.size() << std::endl;
+    printf("frame number(reconstruction): %zu frame number(matching): %zu\n",
+           frames_pose.size(), frames_pt.size());
 
+    std::map<std::string, int> name2id_recon;
+    std::map<std::string, int> name2id_feature;
+
+    // set frames(TODO change vector to map)
     int max_id = -1;
-    for (auto &[id, frame] : frames_pt) {
+    for (const auto &[id, frame] : frames_pt) {
+        CHECK(frame.id == id);
+        CHECK(frames_pose.count(id) != 0) << "Missing corresponding frame id";
+        CHECK(frames_pose.at(id).name == frame.name)
+            << "inconsistent frame name";
         max_id = std::max(max_id, id);
     }
     frames.resize(max_id + 1);
+
     for (int id = 0; id < frames.size(); ++id) {
         auto &frame = frames[id];
-        if (frames_pose.count(id) == 0) {
-            frame.id = id;
-            frame.registered = false;
-        } else {
-            frame = frames_pt[id];
-            frame.Tcw = frames_pose[id].Tcw;
+        frame.id = id;
+        frame.registered = false;
+        if (frames_pt.count(id) != 0) {
+            frame = frames_pt.at(id);
+            frame.camera_id = frames_pose.at(id).camera_id;
+            frame.Tcw = frames_pose.at(id).Tcw;
             frame.registered = true;
         }
     }
 
     // set cameras & image name
-    std::vector<Camera> cameras;
+    std::map<int, Camera> cameras;
     ReadCamerasBinary(bin_path + "cameras.bin", cameras);
-    for (auto &frame : frames) {
-        frame.camera_id = 0;
-    }
 
     // set points for reconstruction
     for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
-        frame.points_normalized.clear();
         frame.track_ids_.assign(num_points, -1);
         for (const auto &kpt : frame.keypoints_) {
             const auto &pt = kpt.pt;
-            Eigen::Vector2d ept(pt.x, pt.y), eptn;
-            ImageToNormalized(cameras[0], ept, eptn);
-            frame.points.emplace_back(ept);
-            frame.points_normalized.emplace_back(eptn);
+            frame.points.emplace_back(Eigen::Vector2d(pt.x, pt.y));
         }
     }
 
@@ -100,9 +104,8 @@ void PreProcess(const std::string bin_path, const std::string feature_path,
     frame_pairs = filtered_frame_pairs;
 
     map.frames_ = frames;
-    map.cameras_ = cameras;
+    map.camera_map_ = cameras;
     map.frame_pairs_ = frame_pairs;
-    // map.RemoveRedundancyPoints();
     map.Init();
 }
 
@@ -136,12 +139,14 @@ int main(int argc, const char *argv[]) {
     Point3dProcessor p3d_processor;
     // TriangulateImage
     for (auto &frame : map.frames_) {
+        printf("current frame: %d\n", frame.id);
         if (frame.registered) {
             p3d_processor.TriangulateFramePoint(map, frame.id, 8.0);
         } else {
             std::cout << frame.id << " not registered\n";
         }
     }
+    std::cout << "Triangulate Done\n";
 
     // Complete Tracks
     const int num_track = map.tracks_.size();

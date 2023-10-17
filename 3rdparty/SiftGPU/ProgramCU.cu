@@ -21,18 +21,17 @@
 
 #if defined(CUDA_SIFTGPU_ENABLED)
 
-#include "GL/glew.h"
-#include "stdio.h"
-
 #include "CuTexImage.h"
-#include "ProgramCU.h"
+#include "GL/glew.h"
 #include "GlobalUtil.h"
+#include "ProgramCU.h"
+#include "stdio.h"
 
 //----------------------------------------------------------------
 // Begin SiftGPU setting section.
 //////////////////////////////////////////////////////////
 #define IMUL(X, Y) __mul24(X, Y)
-//#define FDIV(X,Y) ((X)/(Y))
+// #define FDIV(X,Y) ((X)/(Y))
 #define FDIV(X, Y) __fdividef(X, Y)
 
 /////////////////////////////////////////////////////////
@@ -64,9 +63,9 @@
 #define KEY_BLOCK_LOG_DIMY 3
 #define KEY_BLOCK_DIMX (1 << KEY_BLOCK_LOG_DIMX)
 #define KEY_BLOCK_DIMY (1 << KEY_BLOCK_LOG_DIMY)
-//#define KEY_OFFSET_ONE
-// make KEY_BLOCK_LOG_DIMX 4 will make the write coalesced..
-// but it seems uncoalesced writes don't affect the speed
+// #define KEY_OFFSET_ONE
+//  make KEY_BLOCK_LOG_DIMX 4 will make the write coalesced..
+//  but it seems uncoalesced writes don't affect the speed
 
 //////////////////////////////////////////////////////////
 // thread block size for initializing list generation (64, 128, 256, 512 ...)
@@ -107,7 +106,6 @@ texture<int4, 1, cudaReadModeElementType> texDataList;
 
 //////////////////////////////////////////////////////////////
 template <int FW> __global__ void FilterH(float *d_result, int width) {
-
     const int HALF_WIDTH = FW >> 1;
     const int CACHE_WIDTH = FILTERH_TILE_WIDTH + FW - 1;
     const int CACHE_COUNT = 2 + (CACHE_WIDTH - 2) / FILTERH_TILE_WIDTH;
@@ -768,7 +766,7 @@ void ProgramCU::ReduceHistogram(CuTexImage *hist1, CuTexImage *hist2) {
     ReduceHist_Kernel<<<grid, block>>>((int4 *)hist2->_cuData, ws, wd, hd);
 }
 
-void __global__ ListGen_Kernel(int4 *d_list, int width) {
+void __global__ ListGen_Kernel(int4 *d_list, int list_len, int width) {
     int idx1 = IMUL(blockIdx.x, blockDim.x) + threadIdx.x;
     int4 pos = tex1Dfetch(texDataList, idx1);
     int idx2 = IMUL(pos.y, width) + pos.x;
@@ -786,7 +784,9 @@ void __global__ ListGen_Kernel(int4 *d_list, int width) {
         pos.x += 1;
         pos.z -= temp.x;
     }
-    d_list[idx1] = pos;
+    if (idx1 < list_len) {
+        d_list[idx1] = pos;
+    }
 }
 
 // input list (x, y) (x, y) ....
@@ -796,7 +796,8 @@ void ProgramCU::GenerateList(CuTexImage *list, CuTexImage *hist) {
     hist->BindTexture(texDataI4);
     dim3 grid((len + LISTGEN_BLOCK_DIM - 1) / LISTGEN_BLOCK_DIM);
     dim3 block(LISTGEN_BLOCK_DIM);
-    ListGen_Kernel<<<grid, block>>>((int4 *)list->_cuData, hist->GetImgWidth());
+    ListGen_Kernel<<<grid, block>>>((int4 *)list->_cuData, len,
+                                    hist->GetImgWidth());
 }
 
 void __global__ ComputeOrientation_Kernel(
@@ -1205,7 +1206,7 @@ void ProgramCU::ComputeDescriptor(CuTexImage *list, CuTexImage *got,
 }
 
 //////////////////////////////////////////////////////
-void ProgramCU::FinishCUDA() { cudaThreadSynchronize(); }
+void ProgramCU::FinishCUDA() { cudaDeviceSynchronize(); }
 
 int ProgramCU::CheckErrorCUDA(const char *location) {
     cudaError_t e = cudaGetLastError();
@@ -1271,7 +1272,6 @@ void ProgramCU::DisplayConvertGRD(CuTexImage *got, CuTexImage *out) {
 }
 
 void __global__ ConvertKEY_Kernel(float4 *d_result, int width, int height) {
-
     int row = (blockIdx.y << BLOCK_LOG_DIM) + threadIdx.y;
     int col = (blockIdx.x << BLOCK_LOG_DIM) + threadIdx.x;
     if (col < width && row < height) {
@@ -1410,15 +1410,34 @@ texture<uint4, 1, cudaReadModeElementType> texDes1;
 texture<uint4, 1, cudaReadModeElementType> texDes2;
 
 void __global__ MultiplyDescriptor_Kernel(int *d_result, int num1, int num2,
-                                          int3 *d_temp) {
+                                          int3 *d_temp, int dim) {
     int idx01 = (blockIdx.y * MULT_BLOCK_DIMY),
         idx02 = (blockIdx.x * MULT_BLOCK_DIMX);
 
     int idx1 = idx01 + threadIdx.y, idx2 = idx02 + threadIdx.x;
+
     __shared__ int data1[17 * 2 * MULT_BLOCK_DIMY];
-    int read_idx1 = idx01 * 8 + threadIdx.x, read_idx2 = idx2 * 8;
-    int col4 = threadIdx.x & 0x3, row4 = threadIdx.x >> 2;
-    int cache_idx1 = IMUL(row4, 17) + (col4 << 2);
+    int read_idx1, read_idx2, row4, col4, cache_idx1;
+
+    if (dim == 128) {
+        read_idx1 = idx01 * 8 + threadIdx.x;
+        read_idx2 = idx2 * 8;
+        col4 = threadIdx.x & 0x3;
+        row4 = threadIdx.x >> 2;
+        cache_idx1 = IMUL(row4, 17) + (col4 << 2);
+    } else if (dim == 64) {
+        read_idx1 = idx01 * 4 + threadIdx.x;
+        read_idx2 = idx2 * 4;
+        row4 = threadIdx.x >> 2;
+        col4 = threadIdx.x & 0x3;
+        cache_idx1 = IMUL(row4, 16) + (col4 << 2);
+    } else if (dim == 32) {
+        read_idx1 = idx01 * 2 + threadIdx.x;
+        read_idx2 = idx2 * 2;
+        col4 = threadIdx.x & 0x1;
+        row4 = threadIdx.x >> 1;
+        cache_idx1 = IMUL(row4, 8) + (col4 << 2);
+    }
 
     ///////////////////////////////////////////////////////////////
     // Load feature descriptors
@@ -1430,7 +1449,17 @@ void __global__ MultiplyDescriptor_Kernel(int *d_result, int num1, int num2,
     data1[cache_idx1 + 2] = v.z;
     data1[cache_idx1 + 3] = v.w;
 #elif MULT_BLOCK_DIMY == 8
-    if (threadIdx.x < 64) {
+
+    int max_thread;
+    if (dim == 128) {
+        max_thread = 64;
+    } else if (dim == 64) {
+        max_thread = 32;
+    } else if (dim == 32) {
+        max_thread = 16;
+    }
+
+    if (threadIdx.x < max_thread) {
         uint4 v = tex1Dfetch(texDes1, read_idx1);
         data1[cache_idx1] = v.x;
         data1[cache_idx1 + 1] = v.y;
@@ -1453,22 +1482,57 @@ void __global__ MultiplyDescriptor_Kernel(int *d_result, int num1, int num2,
     for (int i = 0; i < MULT_BLOCK_DIMY; ++i)
         results[i] = 0;
 
+    int num_int4;
+    if (dim == 128) {
+        num_int4 = 8;
+    } else if (dim == 64) {
+        num_int4 = 4;
+    } else if (dim == 32) {
+        num_int4 = 2;
+    }
+
+    if (dim == 128) {
 #pragma unroll
-    for (int i = 0; i < 8; ++i) {
-        uint4 v = tex1Dfetch(texDes2, read_idx2 + i);
-        unsigned char *p2 = (unsigned char *)(&v);
+        for (int i = 0; i < num_int4; ++i) {
+            uint4 v = tex1Dfetch(texDes2, read_idx2 + i);
+            unsigned char *p2 = (unsigned char *)(&v);
 #pragma unroll
-        for (int k = 0; k < MULT_BLOCK_DIMY; ++k) {
-            unsigned char *p1 =
-                (unsigned char *)(data1 + k * 34 + i * 4 + (i / 4));
-            results[k] +=
-                (IMUL(p1[0], p2[0]) + IMUL(p1[1], p2[1]) + IMUL(p1[2], p2[2]) +
-                 IMUL(p1[3], p2[3]) + IMUL(p1[4], p2[4]) + IMUL(p1[5], p2[5]) +
-                 IMUL(p1[6], p2[6]) + IMUL(p1[7], p2[7]) + IMUL(p1[8], p2[8]) +
-                 IMUL(p1[9], p2[9]) + IMUL(p1[10], p2[10]) +
-                 IMUL(p1[11], p2[11]) + IMUL(p1[12], p2[12]) +
-                 IMUL(p1[13], p2[13]) + IMUL(p1[14], p2[14]) +
-                 IMUL(p1[15], p2[15]));
+            for (int k = 0; k < MULT_BLOCK_DIMY; ++k) {
+                unsigned char *p1 =
+                    (unsigned char *)(data1 + k * 34 + i * 4 + (i / 4));
+                results[k] += (IMUL(p1[0], p2[0]) + IMUL(p1[1], p2[1]) +
+                               IMUL(p1[2], p2[2]) + IMUL(p1[3], p2[3]) +
+                               IMUL(p1[4], p2[4]) + IMUL(p1[5], p2[5]) +
+                               IMUL(p1[6], p2[6]) + IMUL(p1[7], p2[7]) +
+                               IMUL(p1[8], p2[8]) + IMUL(p1[9], p2[9]) +
+                               IMUL(p1[10], p2[10]) + IMUL(p1[11], p2[11]) +
+                               IMUL(p1[12], p2[12]) + IMUL(p1[13], p2[13]) +
+                               IMUL(p1[14], p2[14]) + IMUL(p1[15], p2[15]));
+            }
+        }
+    } else {
+#pragma unroll
+        for (int i = 0; i < num_int4; ++i) {
+            uint4 v = tex1Dfetch(texDes2, read_idx2 + i);
+
+            char *p2 = (char *)(&v);
+#pragma unroll
+            for (int k = 0; k < MULT_BLOCK_DIMY; ++k) {
+                char *p1;
+                if (dim == 64) {
+                    p1 = (char *)(data1 + k * 16 + i * 4);
+                } else if (dim == 32) {
+                    p1 = (char *)(data1 + k * 8 + i * 4);
+                }
+                results[k] += (IMUL(p1[0], p2[0]) + IMUL(p1[1], p2[1]) +
+                               IMUL(p1[2], p2[2]) + IMUL(p1[3], p2[3]) +
+                               IMUL(p1[4], p2[4]) + IMUL(p1[5], p2[5]) +
+                               IMUL(p1[6], p2[6]) + IMUL(p1[7], p2[7]) +
+                               IMUL(p1[8], p2[8]) + IMUL(p1[9], p2[9]) +
+                               IMUL(p1[10], p2[10]) + IMUL(p1[11], p2[11]) +
+                               IMUL(p1[12], p2[12]) + IMUL(p1[13], p2[13]) +
+                               IMUL(p1[14], p2[14]) + IMUL(p1[15], p2[15]));
+            }
         }
     }
 
@@ -1497,9 +1561,20 @@ void __global__ MultiplyDescriptor_Kernel(int *d_result, int num1, int num2,
 }
 
 void ProgramCU::MultiplyDescriptor(CuTexImage *des1, CuTexImage *des2,
-                                   CuTexImage *texDot, CuTexImage *texCRT) {
-    int num1 = des1->GetImgWidth() / 8;
-    int num2 = des2->GetImgWidth() / 8;
+                                   CuTexImage *texDot, CuTexImage *texCRT,
+                                   int dim) {
+    int num1, num2;
+    if (dim == 128) {
+        num1 = des1->GetImgWidth() / 8;
+        num2 = des2->GetImgWidth() / 8;
+    } else if (dim == 64) {
+        num1 = des1->GetImgWidth() / 4;
+        num2 = des2->GetImgWidth() / 4;
+    } else if (dim == 32) {
+        num1 = des1->GetImgWidth() / 2;
+        num2 = des2->GetImgWidth() / 2;
+    }
+
     dim3 grid((num2 + MULT_BLOCK_DIMX - 1) / MULT_BLOCK_DIMX,
               (num1 + MULT_BLOCK_DIMY - 1) / MULT_BLOCK_DIMY);
     dim3 block(MULT_TBLOCK_DIMX, MULT_TBLOCK_DIMY);
@@ -1512,30 +1587,55 @@ void ProgramCU::MultiplyDescriptor(CuTexImage *des1, CuTexImage *des2,
 
     MultiplyDescriptor_Kernel<<<grid, block>>>(
         (int *)texDot->_cuData, num1, num2,
-        (texCRT ? (int3 *)texCRT->_cuData : NULL));
+        (texCRT ? (int3 *)texCRT->_cuData : NULL), dim);
 }
 
 texture<float, 1, cudaReadModeElementType> texLoc1;
 texture<float2, 1, cudaReadModeElementType> texLoc2;
-struct Matrix33 {
-    float mat[3][3];
+struct Array2D1x9 {
+    float arr[9];
 };
+struct Array2D9x9 {
+    float arr[81];
+};
+#define RAD2DEG(rad) (rad) * 57.29577951308232286464772187173366546630859375
 
-void __global__ MultiplyDescriptorG_Kernel(int *d_result, int num1, int num2,
-                                           int3 *d_temp, Matrix33 H,
-                                           float hdistmax, Matrix33 F,
-                                           float fdistmax) {
+void __global__ MultiplyDescriptorG_Kernel_E(int *d_result, int num1, int num2,
+                                             int3 *d_temp, Array2D9x9 Hs,
+                                             int lengthHomo, float hdistmax,
+                                             Array2D1x9 E, float fdistmax,
+                                             int dim) {
     int idx01 = (blockIdx.y * MULT_BLOCK_DIMY);
     int idx02 = (blockIdx.x * MULT_BLOCK_DIMX);
 
     int idx1 = idx01 + threadIdx.y;
     int idx2 = idx02 + threadIdx.x;
+
     __shared__ int data1[17 * 2 * MULT_BLOCK_DIMY];
+    int read_idx1, read_idx2, row4, col4, cache_idx1;
+
+    if (dim == 128) {
+        read_idx1 = idx01 * 8 + threadIdx.x;
+        read_idx2 = idx2 * 8;
+        col4 = threadIdx.x & 0x3;
+        row4 = threadIdx.x >> 2;
+        cache_idx1 = IMUL(row4, 17) + (col4 << 2);
+    } else if (dim == 64) {
+        read_idx1 = idx01 * 4 + threadIdx.x;
+        read_idx2 = idx2 * 4;
+        row4 = threadIdx.x >> 2;
+        col4 = threadIdx.x & 0x3;
+        cache_idx1 = IMUL(row4, 16) + (col4 << 2);
+    } else if (dim == 32) {
+        read_idx1 = idx01 * 2 + threadIdx.x;
+        read_idx2 = idx2 * 2;
+        col4 = threadIdx.x & 0x1;
+        row4 = threadIdx.x >> 1;
+        cache_idx1 = IMUL(row4, 8) + (col4 << 2);
+    }
+
     __shared__ float loc1[MULT_BLOCK_DIMY * 2];
-    int read_idx1 = idx01 * 8 + threadIdx.x;
-    int read_idx2 = idx2 * 8;
-    int col4 = threadIdx.x & 0x3, row4 = threadIdx.x >> 2;
-    int cache_idx1 = IMUL(row4, 17) + (col4 << 2);
+
 #if MULT_BLOCK_DIMY == 16
     uint4 v = tex1Dfetch(texDes1, read_idx1);
     data1[cache_idx1] = v.x;
@@ -1543,7 +1643,251 @@ void __global__ MultiplyDescriptorG_Kernel(int *d_result, int num1, int num2,
     data1[cache_idx1 + 2] = v.z;
     data1[cache_idx1 + 3] = v.w;
 #elif MULT_BLOCK_DIMY == 8
-    if (threadIdx.x < 64) {
+
+    int max_thread;
+    if (dim == 128) {
+        max_thread = 64;
+    } else if (dim == 64) {
+        max_thread = 32;
+    } else if (dim == 32) {
+        max_thread = 16;
+    }
+
+    if (threadIdx.x < max_thread) {
+        uint4 v = tex1Dfetch(texDes1, read_idx1);
+        data1[cache_idx1] = v.x;
+        data1[cache_idx1 + 1] = v.y;
+        data1[cache_idx1 + 2] = v.z;
+        data1[cache_idx1 + 3] = v.w;
+    }
+#else
+#error
+#endif
+    __syncthreads();
+
+    if (threadIdx.x < MULT_BLOCK_DIMY * 2) {
+        loc1[threadIdx.x] = tex1Dfetch(texLoc1, 2 * idx01 + threadIdx.x);
+    }
+    __syncthreads();
+    if (idx2 >= num2)
+        return;
+    int results[MULT_BLOCK_DIMY];
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // geometric verification
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    int good_count = 0;
+    float2 loc2 = tex1Dfetch(texLoc2, idx2);
+#pragma unroll
+    for (int i = 0; i < MULT_BLOCK_DIMY; ++i) {
+        if (idx1 + i < num1) {
+            float *loci = loc1 + i * 2;
+            float locx = loci[0], locy = loci[1];
+            // homography
+            float x[3], diff[2];
+            bool check_H = false;
+            for (int k = 0; k < lengthHomo; ++k) {
+                x[0] = Hs.arr[k * 9] * locx + Hs.arr[k * 9 + 1] * locy +
+                       Hs.arr[k * 9 + 2];
+                x[1] = Hs.arr[k * 9 + 3] * locx + Hs.arr[k * 9 + 4] * locy +
+                       Hs.arr[k * 9 + 5];
+                x[2] = Hs.arr[k * 9 + 6] * locx + Hs.arr[k * 9 + 7] * locy +
+                       Hs.arr[k * 9 + 8];
+                diff[0] = FDIV(x[0], x[2]) - loc2.x;
+                diff[1] = FDIV(x[1], x[2]) - loc2.y;
+                float hdist = diff[0] * diff[0] + diff[1] * diff[1];
+                if (hdist < hdistmax) {
+                    check_H = true;
+                    break;
+                }
+            }
+            if (check_H) {
+                // check fundamental matrix
+                float fx1[3], ftx2[3], x2fx1, x1fx2, se;
+
+                fx1[0] = E.arr[0] * locx + E.arr[1] * locy + E.arr[2];
+                fx1[1] = E.arr[3] * locx + E.arr[4] * locy + E.arr[5];
+                fx1[2] = E.arr[6] * locx + E.arr[7] * locy + E.arr[8];
+
+                ftx2[0] = E.arr[0] * loc2.x + E.arr[3] * loc2.y + E.arr[6];
+                ftx2[1] = E.arr[1] * loc2.x + E.arr[4] * loc2.y + E.arr[7];
+                ftx2[2] = E.arr[2] * loc2.x + E.arr[5] * loc2.y + E.arr[8];
+
+                float loc1_norm = sqrt(locx * locx + locy * locy + 1.0f);
+                float loc2_norm =
+                    sqrt(loc2.x * loc2.x + loc2.y * loc2.y + 1.0f);
+                float fx1_norm =
+                    sqrt((fx1[0] * fx1[0] + fx1[1] * fx1[1] + fx1[2] * fx1[2]));
+                float ftx2_norm = sqrt((ftx2[0] * ftx2[0] + ftx2[1] * ftx2[1] +
+                                        ftx2[2] * ftx2[2]));
+
+                x2fx1 = loc2.x * fx1[0] + loc2.y * fx1[1] + fx1[2];
+                x1fx2 = locx * ftx2[0] + locy * ftx2[1] + ftx2[2];
+
+                float theta1 = RAD2DEG(asin(x2fx1 / (loc2_norm * fx1_norm)));
+                float theta2 = RAD2DEG(asin(x1fx2 / (loc1_norm * ftx2_norm)));
+
+                se = max(theta1 * theta1, theta2 * theta2);
+                if (dim == 128) {
+                    results[i] = se < fdistmax ? 0 : -262144;
+                } else {
+                    results[i] = se < fdistmax ? 0 : -16384;
+                }
+            } else {
+                if (dim == 128) {
+                    results[i] = -262144;
+                } else {
+                    results[i] = -16384;
+                }
+            }
+        } else {
+            if (dim == 128) {
+                results[i] = -262144;
+            } else {
+                results[i] = -16384;
+            }
+        }
+        good_count += (results[i] >= 0);
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /// compare feature descriptors anyway
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    if (good_count > 0) {
+        int num_int4;
+        if (dim == 128) {
+            num_int4 = 8;
+        } else if (dim == 64) {
+            num_int4 = 4;
+        } else if (dim == 32) {
+            num_int4 = 2;
+        }
+
+        if (dim == 128) {
+#pragma unroll
+            for (int i = 0; i < num_int4; ++i) {
+                uint4 v = tex1Dfetch(texDes2, read_idx2 + i);
+                unsigned char *p2 = (unsigned char *)(&v);
+#pragma unroll
+                for (int k = 0; k < MULT_BLOCK_DIMY; ++k) {
+                    unsigned char *p1 =
+                        (unsigned char *)(data1 + k * 34 + i * 4 + (i / 4));
+                    results[k] += (IMUL(p1[0], p2[0]) + IMUL(p1[1], p2[1]) +
+                                   IMUL(p1[2], p2[2]) + IMUL(p1[3], p2[3]) +
+                                   IMUL(p1[4], p2[4]) + IMUL(p1[5], p2[5]) +
+                                   IMUL(p1[6], p2[6]) + IMUL(p1[7], p2[7]) +
+                                   IMUL(p1[8], p2[8]) + IMUL(p1[9], p2[9]) +
+                                   IMUL(p1[10], p2[10]) + IMUL(p1[11], p2[11]) +
+                                   IMUL(p1[12], p2[12]) + IMUL(p1[13], p2[13]) +
+                                   IMUL(p1[14], p2[14]) + IMUL(p1[15], p2[15]));
+                }
+            }
+        } else {
+#pragma unroll
+            for (int i = 0; i < num_int4; ++i) {
+                uint4 v = tex1Dfetch(texDes2, read_idx2 + i);
+                char *p2 = (char *)(&v);
+#pragma unroll
+                for (int k = 0; k < MULT_BLOCK_DIMY; ++k) {
+                    char *p1;
+                    if (dim == 64) {
+                        p1 = (char *)(data1 + k * 16 + i * 4);
+                    } else if (dim == 32) {
+                        p1 = (char *)(data1 + k * 8 + i * 4);
+                    }
+                    results[k] += (IMUL(p1[0], p2[0]) + IMUL(p1[1], p2[1]) +
+                                   IMUL(p1[2], p2[2]) + IMUL(p1[3], p2[3]) +
+                                   IMUL(p1[4], p2[4]) + IMUL(p1[5], p2[5]) +
+                                   IMUL(p1[6], p2[6]) + IMUL(p1[7], p2[7]) +
+                                   IMUL(p1[8], p2[8]) + IMUL(p1[9], p2[9]) +
+                                   IMUL(p1[10], p2[10]) + IMUL(p1[11], p2[11]) +
+                                   IMUL(p1[12], p2[12]) + IMUL(p1[13], p2[13]) +
+                                   IMUL(p1[14], p2[14]) + IMUL(p1[15], p2[15]));
+                }
+            }
+        }
+    }
+
+    int dst_idx = IMUL(idx1, num2) + idx2;
+    if (d_temp) {
+        int3 cmp_result = make_int3(0, -1, 0);
+#pragma unroll
+        for (int i = 0; i < MULT_BLOCK_DIMY; ++i) {
+            if (idx1 + i < num1) {
+                cmp_result = results[i] > cmp_result.x
+                                 ? make_int3(results[i], idx1 + i, cmp_result.x)
+                                 : make_int3(cmp_result.x, cmp_result.y,
+                                             max(cmp_result.z, results[i]));
+                d_result[dst_idx + IMUL(i, num2)] = max(results[i], 0);
+            } else {
+                break;
+            }
+        }
+        d_temp[IMUL(blockIdx.y, num2) + idx2] = cmp_result;
+    } else {
+#pragma unroll
+        for (int i = 0; i < MULT_BLOCK_DIMY; ++i) {
+            if (idx1 + i < num1)
+                d_result[dst_idx + IMUL(i, num2)] = max(results[i], 0);
+            else
+                break;
+        }
+    }
+}
+
+void __global__ MultiplyDescriptorG_Kernel_F(int *d_result, int num1, int num2,
+                                             int3 *d_temp, Array2D9x9 Hs,
+                                             int lengthHomo, float hdistmax,
+                                             Array2D1x9 F, float fdistmax,
+                                             int dim) {
+    int idx01 = (blockIdx.y * MULT_BLOCK_DIMY);
+    int idx02 = (blockIdx.x * MULT_BLOCK_DIMX);
+
+    int idx1 = idx01 + threadIdx.y;
+    int idx2 = idx02 + threadIdx.x;
+
+    __shared__ int data1[17 * 2 * MULT_BLOCK_DIMY];
+    int read_idx1, read_idx2, row4, col4, cache_idx1;
+
+    if (dim == 128) {
+        read_idx1 = idx01 * 8 + threadIdx.x;
+        read_idx2 = idx2 * 8;
+        col4 = threadIdx.x & 0x3;
+        row4 = threadIdx.x >> 2;
+        cache_idx1 = IMUL(row4, 17) + (col4 << 2);
+    } else if (dim == 64) {
+        read_idx1 = idx01 * 4 + threadIdx.x;
+        read_idx2 = idx2 * 4;
+        row4 = threadIdx.x >> 2;
+        col4 = threadIdx.x & 0x3;
+        cache_idx1 = IMUL(row4, 16) + (col4 << 2);
+    } else if (dim == 32) {
+        read_idx1 = idx01 * 2 + threadIdx.x;
+        read_idx2 = idx2 * 2;
+        col4 = threadIdx.x & 0x1;
+        row4 = threadIdx.x >> 1;
+        cache_idx1 = IMUL(row4, 8) + (col4 << 2);
+    }
+
+    __shared__ float loc1[MULT_BLOCK_DIMY * 2];
+
+#if MULT_BLOCK_DIMY == 16
+    uint4 v = tex1Dfetch(texDes1, read_idx1);
+    data1[cache_idx1] = v.x;
+    data1[cache_idx1 + 1] = v.y;
+    data1[cache_idx1 + 2] = v.z;
+    data1[cache_idx1 + 3] = v.w;
+#elif MULT_BLOCK_DIMY == 8
+
+    int max_thread;
+    if (dim == 128) {
+        max_thread = 64;
+    } else if (dim == 64) {
+        max_thread = 32;
+    } else if (dim == 32) {
+        max_thread = 16;
+    }
+
+    if (threadIdx.x < max_thread) {
         uint4 v = tex1Dfetch(texDes1, read_idx1);
         data1[cache_idx1] = v.x;
         data1[cache_idx1 + 1] = v.y;
@@ -1568,42 +1912,62 @@ void __global__ MultiplyDescriptorG_Kernel(int *d_result, int num1, int num2,
     float2 loc2 = tex1Dfetch(texLoc2, idx2);
 #pragma unroll
     for (int i = 0; i < MULT_BLOCK_DIMY; ++i) {
-
         if (idx1 + i < num1) {
             float *loci = loc1 + i * 2;
             float locx = loci[0], locy = loci[1];
             // homography
             float x[3], diff[2];
-            x[0] = H.mat[0][0] * locx + H.mat[0][1] * locy + H.mat[0][2];
-            x[1] = H.mat[1][0] * locx + H.mat[1][1] * locy + H.mat[1][2];
-            x[2] = H.mat[2][0] * locx + H.mat[2][1] * locy + H.mat[2][2];
-            diff[0] = FDIV(x[0], x[2]) - loc2.x;
-            diff[1] = FDIV(x[1], x[2]) - loc2.y;
-            float hdist = diff[0] * diff[0] + diff[1] * diff[1];
-            if (hdist < hdistmax) {
+            bool check_H = false;
+            for (int k = 0; k < lengthHomo; ++k) {
+                x[0] = Hs.arr[k * 9] * locx + Hs.arr[k * 9 + 1] * locy +
+                       Hs.arr[k * 9 + 2];
+                x[1] = Hs.arr[k * 9 + 3] * locx + Hs.arr[k * 9 + 4] * locy +
+                       Hs.arr[k * 9 + 5];
+                x[2] = Hs.arr[k * 9 + 6] * locx + Hs.arr[k * 9 + 7] * locy +
+                       Hs.arr[k * 9 + 8];
+                diff[0] = FDIV(x[0], x[2]) - loc2.x;
+                diff[1] = FDIV(x[1], x[2]) - loc2.y;
+                float hdist = diff[0] * diff[0] + diff[1] * diff[1];
+                if (hdist < hdistmax) {
+                    check_H = true;
+                    break;
+                }
+            }
+            if (check_H) {
                 // check fundamental matrix
                 float fx1[3], ftx2[3], x2fx1, se;
-                fx1[0] = F.mat[0][0] * locx + F.mat[0][1] * locy + F.mat[0][2];
-                fx1[1] = F.mat[1][0] * locx + F.mat[1][1] * locy + F.mat[1][2];
-                fx1[2] = F.mat[2][0] * locx + F.mat[2][1] * locy + F.mat[2][2];
 
-                ftx2[0] =
-                    F.mat[0][0] * loc2.x + F.mat[1][0] * loc2.y + F.mat[2][0];
-                ftx2[1] =
-                    F.mat[0][1] * loc2.x + F.mat[1][1] * loc2.y + F.mat[2][1];
-                // ftx2[2] = F.mat[0][2] * loc2.x + F.mat[1][2] * loc2.y +
-                // F.mat[2][2];
+                fx1[0] = F.arr[0] * locx + F.arr[1] * locy + F.arr[2];
+                fx1[1] = F.arr[3] * locx + F.arr[4] * locy + F.arr[5];
+                fx1[2] = F.arr[6] * locx + F.arr[7] * locy + F.arr[8];
+
+                ftx2[0] = F.arr[0] * loc2.x + F.arr[3] * loc2.y + F.arr[6];
+                ftx2[1] = F.arr[1] * loc2.x + F.arr[4] * loc2.y + F.arr[7];
+                // ftx2[2] = F.arr[2] * loc2.x + F.arr[5] * loc2.y + F.arr[8];
 
                 x2fx1 = loc2.x * fx1[0] + loc2.y * fx1[1] + fx1[2];
                 se = FDIV(x2fx1 * x2fx1, fx1[0] * fx1[0] + fx1[1] * fx1[1] +
                                              ftx2[0] * ftx2[0] +
                                              ftx2[1] * ftx2[1]);
-                results[i] = se < fdistmax ? 0 : -262144;
+
+                if (dim == 128) {
+                    results[i] = se < fdistmax ? 0 : -262144;
+                } else {
+                    results[i] = se < fdistmax ? 0 : -16384;
+                }
             } else {
-                results[i] = -262144;
+                if (dim == 128) {
+                    results[i] = -262144;
+                } else {
+                    results[i] = -16384;
+                }
             }
         } else {
-            results[i] = -262144;
+            if (dim == 128) {
+                results[i] = -262144;
+            } else {
+                results[i] = -16384;
+            }
         }
         good_count += (results[i] >= 0);
     }
@@ -1611,22 +1975,56 @@ void __global__ MultiplyDescriptorG_Kernel(int *d_result, int num1, int num2,
     /// compare feature descriptors anyway
     /////////////////////////////////////////////////////////////////////////////////////////////
     if (good_count > 0) {
+        int num_int4;
+        if (dim == 128) {
+            num_int4 = 8;
+        } else if (dim == 64) {
+            num_int4 = 4;
+        } else if (dim == 32) {
+            num_int4 = 2;
+        }
+
+        if (dim == 128) {
 #pragma unroll
-        for (int i = 0; i < 8; ++i) {
-            uint4 v = tex1Dfetch(texDes2, read_idx2 + i);
-            unsigned char *p2 = (unsigned char *)(&v);
+            for (int i = 0; i < num_int4; ++i) {
+                uint4 v = tex1Dfetch(texDes2, read_idx2 + i);
+                unsigned char *p2 = (unsigned char *)(&v);
 #pragma unroll
-            for (int k = 0; k < MULT_BLOCK_DIMY; ++k) {
-                unsigned char *p1 =
-                    (unsigned char *)(data1 + k * 34 + i * 4 + (i / 4));
-                results[k] += (IMUL(p1[0], p2[0]) + IMUL(p1[1], p2[1]) +
-                               IMUL(p1[2], p2[2]) + IMUL(p1[3], p2[3]) +
-                               IMUL(p1[4], p2[4]) + IMUL(p1[5], p2[5]) +
-                               IMUL(p1[6], p2[6]) + IMUL(p1[7], p2[7]) +
-                               IMUL(p1[8], p2[8]) + IMUL(p1[9], p2[9]) +
-                               IMUL(p1[10], p2[10]) + IMUL(p1[11], p2[11]) +
-                               IMUL(p1[12], p2[12]) + IMUL(p1[13], p2[13]) +
-                               IMUL(p1[14], p2[14]) + IMUL(p1[15], p2[15]));
+                for (int k = 0; k < MULT_BLOCK_DIMY; ++k) {
+                    unsigned char *p1 =
+                        (unsigned char *)(data1 + k * 34 + i * 4 + (i / 4));
+                    results[k] += (IMUL(p1[0], p2[0]) + IMUL(p1[1], p2[1]) +
+                                   IMUL(p1[2], p2[2]) + IMUL(p1[3], p2[3]) +
+                                   IMUL(p1[4], p2[4]) + IMUL(p1[5], p2[5]) +
+                                   IMUL(p1[6], p2[6]) + IMUL(p1[7], p2[7]) +
+                                   IMUL(p1[8], p2[8]) + IMUL(p1[9], p2[9]) +
+                                   IMUL(p1[10], p2[10]) + IMUL(p1[11], p2[11]) +
+                                   IMUL(p1[12], p2[12]) + IMUL(p1[13], p2[13]) +
+                                   IMUL(p1[14], p2[14]) + IMUL(p1[15], p2[15]));
+                }
+            }
+        } else {
+#pragma unroll
+            for (int i = 0; i < num_int4; ++i) {
+                uint4 v = tex1Dfetch(texDes2, read_idx2 + i);
+                char *p2 = (char *)(&v);
+#pragma unroll
+                for (int k = 0; k < MULT_BLOCK_DIMY; ++k) {
+                    char *p1;
+                    if (dim == 64) {
+                        p1 = (char *)(data1 + k * 16 + i * 4);
+                    } else if (dim == 32) {
+                        p1 = (char *)(data1 + k * 8 + i * 4);
+                    }
+                    results[k] += (IMUL(p1[0], p2[0]) + IMUL(p1[1], p2[1]) +
+                                   IMUL(p1[2], p2[2]) + IMUL(p1[3], p2[3]) +
+                                   IMUL(p1[4], p2[4]) + IMUL(p1[5], p2[5]) +
+                                   IMUL(p1[6], p2[6]) + IMUL(p1[7], p2[7]) +
+                                   IMUL(p1[8], p2[8]) + IMUL(p1[9], p2[9]) +
+                                   IMUL(p1[10], p2[10]) + IMUL(p1[11], p2[11]) +
+                                   IMUL(p1[12], p2[12]) + IMUL(p1[13], p2[13]) +
+                                   IMUL(p1[14], p2[14]) + IMUL(p1[15], p2[15]));
+                }
             }
         }
     }
@@ -1660,31 +2058,83 @@ void __global__ MultiplyDescriptorG_Kernel(int *d_result, int num1, int num2,
 void ProgramCU::MultiplyDescriptorG(CuTexImage *des1, CuTexImage *des2,
                                     CuTexImage *loc1, CuTexImage *loc2,
                                     CuTexImage *texDot, CuTexImage *texCRT,
-                                    float *H, float hdistmax, float *F,
-                                    float fdistmax) {
-    int num1 = des1->GetImgWidth() / 8;
-    int num2 = des2->GetImgWidth() / 8;
-    Matrix33 MatF, MatH;
-    // copy the matrix
-    memcpy(MatF.mat, F, 9 * sizeof(float));
-    memcpy(MatH.mat, H, 9 * sizeof(float));
-    // thread blocks
-    dim3 grid((num2 + MULT_BLOCK_DIMX - 1) / MULT_BLOCK_DIMX,
-              (num1 + MULT_BLOCK_DIMY - 1) / MULT_BLOCK_DIMY);
-    dim3 block(MULT_TBLOCK_DIMX, MULT_TBLOCK_DIMY);
-    // intermediate results
-    texDot->InitTexture(num2, num1);
-    if (texCRT)
-        texCRT->InitTexture(num2,
-                            (num1 + MULT_BLOCK_DIMY - 1) / MULT_BLOCK_DIMY, 3);
-    loc1->BindTexture(texLoc1);
-    loc2->BindTexture(texLoc2);
-    des1->BindTexture(texDes1);
-    des2->BindTexture(texDes2);
-    MultiplyDescriptorG_Kernel<<<grid, block>>>(
-        (int *)texDot->_cuData, num1, num2,
-        (texCRT ? (int3 *)texCRT->_cuData : NULL), MatH, hdistmax, MatF,
-        fdistmax);
+                                    float *H, int lengthHomo, float hdistmax,
+                                    float *F, float fdistmax, float *E,
+                                    int dim) {
+    if (F != NULL) {
+        int num1, num2;
+
+        if (dim == 128) {
+            num1 = des1->GetImgWidth() / 8;
+            num2 = des2->GetImgWidth() / 8;
+        } else if (dim == 64) {
+            num1 = des1->GetImgWidth() / 4;
+            num2 = des2->GetImgWidth() / 4;
+        } else if (dim == 32) {
+            num1 = des1->GetImgWidth() / 2;
+            num2 = des2->GetImgWidth() / 2;
+        }
+
+        Array2D1x9 MatF;
+        Array2D9x9 MatHs;
+        // copy the matrix
+        lengthHomo = lengthHomo > 9 ? 9 : lengthHomo;
+        memcpy(MatF.arr, F, 9 * sizeof(float));
+        memcpy(MatHs.arr, H, 9 * lengthHomo * sizeof(float));
+        // thread blocks
+        dim3 grid((num2 + MULT_BLOCK_DIMX - 1) / MULT_BLOCK_DIMX,
+                  (num1 + MULT_BLOCK_DIMY - 1) / MULT_BLOCK_DIMY);
+        dim3 block(MULT_TBLOCK_DIMX, MULT_TBLOCK_DIMY);
+        // intermediate results
+        texDot->InitTexture(num2, num1);
+        if (texCRT)
+            texCRT->InitTexture(
+                num2, (num1 + MULT_BLOCK_DIMY - 1) / MULT_BLOCK_DIMY, 3);
+        loc1->BindTexture(texLoc1);
+        loc2->BindTexture(texLoc2);
+        des1->BindTexture(texDes1);
+        des2->BindTexture(texDes2);
+        MultiplyDescriptorG_Kernel_F<<<grid, block>>>(
+            (int *)texDot->_cuData, num1, num2,
+            (texCRT ? (int3 *)texCRT->_cuData : NULL), MatHs, lengthHomo,
+            hdistmax, MatF, fdistmax, dim);
+    } else if (E != NULL) {
+        int num1, num2;
+        if (dim == 128) {
+            num1 = des1->GetImgWidth() / 8;
+            num2 = des2->GetImgWidth() / 8;
+        } else if (dim == 64) {
+            num1 = des1->GetImgWidth() / 4;
+            num2 = des2->GetImgWidth() / 4;
+        } else if (dim == 32) {
+            num1 = des1->GetImgWidth() / 2;
+            num2 = des2->GetImgWidth() / 2;
+        }
+
+        Array2D1x9 MatE;
+        Array2D9x9 MatHs;
+        // copy the matrix
+        lengthHomo = lengthHomo > 9 ? 9 : lengthHomo;
+        memcpy(MatE.arr, E, 9 * sizeof(float));
+        memcpy(MatHs.arr, H, 9 * lengthHomo * sizeof(float));
+        // thread blocks
+        dim3 grid((num2 + MULT_BLOCK_DIMX - 1) / MULT_BLOCK_DIMX,
+                  (num1 + MULT_BLOCK_DIMY - 1) / MULT_BLOCK_DIMY);
+        dim3 block(MULT_TBLOCK_DIMX, MULT_TBLOCK_DIMY);
+        // intermediate results
+        texDot->InitTexture(num2, num1);
+        if (texCRT)
+            texCRT->InitTexture(
+                num2, (num1 + MULT_BLOCK_DIMY - 1) / MULT_BLOCK_DIMY, 3);
+        loc1->BindTexture(texLoc1);
+        loc2->BindTexture(texLoc2);
+        des1->BindTexture(texDes1);
+        des2->BindTexture(texDes2);
+        MultiplyDescriptorG_Kernel_E<<<grid, block>>>(
+            (int *)texDot->_cuData, num1, num2,
+            (texCRT ? (int3 *)texCRT->_cuData : NULL), MatHs, lengthHomo,
+            hdistmax, MatE, fdistmax, dim);
+    }
 }
 
 texture<int, 1, cudaReadModeElementType> texDOT;
@@ -1693,7 +2143,7 @@ texture<int, 1, cudaReadModeElementType> texDOT;
 #define ROWMATCH_BLOCK_HEIGHT 1
 
 void __global__ RowMatch_Kernel(int *d_dot, int *d_result, int num2,
-                                float distmax, float ratiomax) {
+                                float distmax, float ratiomax, int dim) {
 #if ROWMATCH_BLOCK_HEIGHT == 1
     __shared__ int dotmax[ROWMATCH_BLOCK_WIDTH];
     __shared__ int dotnxt[ROWMATCH_BLOCK_WIDTH];
@@ -1713,9 +2163,7 @@ void __global__ RowMatch_Kernel(int *d_dot, int *d_result, int num2,
     int t_dotmax = 0, t_dotnxt = 0, t_dotidx = -1;
     for (int i = 0; i < num2; i += ROWMATCH_BLOCK_WIDTH) {
         if (threadIdx.x + i < num2) {
-            int v =
-                d_dot[base_address + threadIdx.x +
-                      i]; // tex1Dfetch(texDOT, base_address + threadIdx.x + i);
+            int v = d_dot[base_address + threadIdx.x + i];
             bool test = v > t_dotmax;
             t_dotnxt = test ? t_dotmax : max(t_dotnxt, v);
             t_dotidx = test ? (threadIdx.x + i) : t_dotidx;
@@ -1742,8 +2190,17 @@ void __global__ RowMatch_Kernel(int *d_dot, int *d_result, int num2,
         __syncthreads();
     }
     if (threadIdx.x == 0) {
-        float dist = acos(min(dotmax[0] * 0.000003814697265625f, 1.0));
-        float distn = acos(min(dotnxt[0] * 0.000003814697265625f, 1.0));
+        float dist, distn;
+
+        if (dim == 128) {
+            //========= unsigned char descriptor =========
+            dist = acos(min(dotmax[0] * 0.000003814697265625f, 1.0));
+            distn = acos(min(dotnxt[0] * 0.000003814697265625f, 1.0));
+        } else {
+            //========= char descriptor =========
+            dist = acos(max(min(dotmax[0] * 0.000061035f, 1.0), -1.0));
+            distn = acos(max(min(dotnxt[0] * 0.000061035f, 1.0), -1.0));
+        }
         // float ratio = dist / distn;
         d_result[row] = (dist < distmax) && (dist < distn * ratiomax)
                             ? dotidx[0]
@@ -1752,7 +2209,7 @@ void __global__ RowMatch_Kernel(int *d_dot, int *d_result, int num2,
 }
 
 void ProgramCU::GetRowMatch(CuTexImage *texDot, CuTexImage *texMatch,
-                            float distmax, float ratiomax) {
+                            float distmax, float ratiomax, int dim) {
     int num1 = texDot->GetImgHeight();
     int num2 = texDot->GetImgWidth();
     dim3 grid(1, num1 / ROWMATCH_BLOCK_HEIGHT);
@@ -1760,7 +2217,7 @@ void ProgramCU::GetRowMatch(CuTexImage *texDot, CuTexImage *texMatch,
     // texDot->BindTexture(texDOT);
     RowMatch_Kernel<<<grid, block>>>((int *)texDot->_cuData,
                                      (int *)texMatch->_cuData, num2, distmax,
-                                     ratiomax);
+                                     ratiomax, dim);
 }
 
 #define COLMATCH_BLOCK_WIDTH 32
@@ -1768,7 +2225,8 @@ void ProgramCU::GetRowMatch(CuTexImage *texDot, CuTexImage *texMatch,
 // texture<int3,  1, cudaReadModeElementType> texCT;
 
 void __global__ ColMatch_Kernel(int3 *d_crt, int *d_result, int height,
-                                int num2, float distmax, float ratiomax) {
+                                int num2, float distmax, float ratiomax,
+                                int dim) {
     int col = COLMATCH_BLOCK_WIDTH * blockIdx.x + threadIdx.x;
     if (col >= num2)
         return;
@@ -1781,8 +2239,16 @@ void __global__ ColMatch_Kernel(int3 *d_crt, int *d_result, int height,
                      : make_int3(result.x, result.y, max(result.z, temp.x));
     }
 
-    float dist = acos(min(result.x * 0.000003814697265625f, 1.0));
-    float distn = acos(min(result.z * 0.000003814697265625f, 1.0));
+    float dist, distn;
+    if (dim == 128) {
+        //=========== unsigned char descriptor ==========
+        dist = acos(min(result.x * 0.000003814697265625f, 1.0));
+        distn = acos(min(result.z * 0.000003814697265625f, 1.0));
+    } else {
+        //=========== char descriptor =========
+        dist = acos(min(result.x * 0.000061035f, 1.0));
+        distn = acos(min(result.z * 0.000061035, 1.0));
+    }
     // float ratio = dist / distn;
     d_result[col] = (dist < distmax) && (dist < distn * ratiomax)
                         ? result.y
@@ -1790,7 +2256,7 @@ void __global__ ColMatch_Kernel(int3 *d_crt, int *d_result, int height,
 }
 
 void ProgramCU::GetColMatch(CuTexImage *texCRT, CuTexImage *texMatch,
-                            float distmax, float ratiomax) {
+                            float distmax, float ratiomax, int dim) {
     int height = texCRT->GetImgHeight();
     int num2 = texCRT->GetImgWidth();
     // texCRT->BindTexture(texCT);
@@ -1798,7 +2264,7 @@ void ProgramCU::GetColMatch(CuTexImage *texCRT, CuTexImage *texMatch,
     dim3 block(COLMATCH_BLOCK_WIDTH);
     ColMatch_Kernel<<<grid, block>>>((int3 *)texCRT->_cuData,
                                      (int *)texMatch->_cuData, height, num2,
-                                     distmax, ratiomax);
+                                     distmax, ratiomax, dim);
 }
 
 #endif

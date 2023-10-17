@@ -3,12 +3,13 @@
 //
 #include "view.h"
 
-#include <unistd.h>
-#include <thread>
 #include <pangolin/pangolin.h>
+#include <unistd.h>
 
-#include "viewer_handle.h"
+#include <thread>
+
 #include "utility/global.h"
+#include "viewer_handle.h"
 
 #define OPEN_VIEW
 

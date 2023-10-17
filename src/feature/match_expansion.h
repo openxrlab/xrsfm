@@ -2,10 +2,11 @@
 #ifndef XRSFM_SRC_FEATURE_MATCH_EXPANSION_H
 #define XRSFM_SRC_FEATURE_MATCH_EXPANSION_H
 
+#include <glog/logging.h>
+
 #include <fstream>
 
 #include "base/map.h"
-#include <glog/logging.h>
 
 namespace xrsfm {
 

@@ -1,11 +1,11 @@
 #ifndef XRSFM_SRC_GEOMETRY_ERROR_CORRECTOR_H
 #define XRSFM_SRC_GEOMETRY_ERROR_CORRECTOR_H
 
-#include "geometry/track_processor.h"
 #include "base/map.h"
+#include "geometry/track_processor.h"
 #include "optimization/ba_solver.h"
-#include "utility/view.h"
-#include "utility/viewer.h"
+// #include "utility/view.h"
+// #include "utility/viewer.h"
 
 namespace xrsfm {
 inline double ToDeg(double theta) { return theta * 180 / M_PI; }
@@ -23,10 +23,10 @@ class ErrorDetector {
                             std::vector<char> &inlier_mask);
     void IsGoodRelativePose_Debug(Map &map, FramePair &fp,
                                   const std::vector<char> &inlier_mask);
-    void StoreRelativePose(Map &map, int frame_id, std::ofstream &file);
+    // void StoreRelativePose(Map &map, int frame_id, std::ofstream &file);
 
     bool debug_;
-    ViewerThread *viewerTh_;
+    // ViewerThread *viewerTh_;
     std::string image_dir_;
 };
 

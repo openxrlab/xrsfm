@@ -9,8 +9,6 @@ void IncrementalMapper::Reconstruct(Map &map) {
     error_corrector.ba_solver_ = &ba_solver;
     error_corrector.p3d_processor_ = &p3d_processor;
     error_corrector.only_correct_with_sim3_ = options.only_with_sim3;
-    // ViewerThread viewer;
-    // viewer.start();
 
     timer.tot.resume();
     // 1. Map Initialization
@@ -38,7 +36,7 @@ void IncrementalMapper::Reconstruct(Map &map) {
     int num_image_reg = 2, num_image_reg_pre = 2;
     for (int iter = 0; iter < map.frames_.size(); iter++) {
         printf("-----------------------------------------------\n");
-        // 1) Frame Pose Estimation
+        // 1) Pose Estimation
         timer.reg.resume();
         const int frame_id = map.MaxPoint3dFrameId();
         if (frame_id == -1)
@@ -58,7 +56,7 @@ void IncrementalMapper::Reconstruct(Map &map) {
         if (options.correct_pose)
             error_corrector.CheckAndCorrectPose(map, frame_id, iter);
 
-        // 3) Map Point Estimation
+        // 3) Point Estimation
         TIMING(timer.tri, p3d_processor.TriangulateFramePoint(
                               map, frame_id, options.th_angle_lba));
         TIMING(timer.fil,
@@ -89,7 +87,6 @@ void IncrementalMapper::Reconstruct(Map &map) {
         }
 
         UpdateCovisiblity(map, frame_id);
-        // viewer.update_map(map);
     }
     timer.tot.stop();
 
@@ -98,7 +95,5 @@ void IncrementalMapper::Reconstruct(Map &map) {
     for (auto &timer_ptr : timer.timer_vec) {
         timer_ptr->print();
     }
-    // sleep(1000);
-    // viewer.stop();
 }
 } // namespace xrsfm

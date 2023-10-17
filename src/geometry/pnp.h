@@ -26,8 +26,6 @@ bool RegisterNextImageLocal(const int next_frame_id,
                             const std::set<int> cor_set, Map &map, Pose &tcw,
                             std::vector<std::pair<int, int>> &cor_2d_3d_ids);
 
-int RegisterNextImage1(const int next_frame_id, Map &map);
-
 bool RegisterNextImageLocal(const int next_frame_id,
                             const std::set<int> cor_set, Map &map);
 

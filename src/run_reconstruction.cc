@@ -6,8 +6,6 @@
 #include "mapper/incremental_mapper.h"
 #include "utility/io_ecim.hpp"
 #include "utility/io_feature.hpp"
-#include "utility/timer.h"
-#include "utility/viewer.h"
 
 using namespace xrsfm;
 
@@ -15,40 +13,33 @@ void PreProcess(const std::string dir_path, const std::string camera_path,
                 Map &map) {
     std::vector<Frame> frames;
     std::vector<FramePair> frame_pairs;
-    std::vector<std::string> image_names;
     ReadFeatures(dir_path + "ftr.bin", frames, true);
     ReadFramePairs(dir_path + "fp.bin", frame_pairs);
-    // LoadImageNames(images_path, image_names);
+    std::cout << "ReadFramePairs\n";
 
     // set cameras & image name
-    std::vector<Camera> cameras;
     Camera seq = ReadCameraIOSRecord(camera_path);
-    seq.log();
-    cameras.emplace_back(seq);
+
     for (auto &frame : frames) {
-        frame.camera_id = 0;
-        // std::cout<<image_names.at(frame.id)<<" "<<frame.name<<std::endl;
-        // frame.name = image_names.at(frame.id);
+        frame.camera_id = seq.id_;
     }
 
-    // set points for reconstruction
+    // convert keypoint to points(for reconstruction)
     for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
-        frame.points_normalized.clear();
         frame.track_ids_.assign(num_points, -1);
         for (const auto &kpt : frame.keypoints_) {
             const auto &pt = kpt.pt;
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
-            ImageToNormalized(cameras[0], ept, eptn);
-            frame.points.emplace_back(ept);
-            frame.points_normalized.emplace_back(eptn);
+            frame.points.push_back(ept);
         }
     }
 
+    map.camera_map_[seq.id_] = seq;
     map.frames_ = frames;
-    map.cameras_ = cameras;
     map.frame_pairs_ = frame_pairs;
+
     map.RemoveRedundancyPoints();
     map.Init();
 }
@@ -93,7 +84,7 @@ int main(int argc, char *argv[]) {
     IncrementalMapper imapper;
     imapper.options.init_id1 = init_id1;
     imapper.options.init_id2 = init_id2;
-    imapper.options.correct_pose = true;
+    imapper.options.correct_pose = false;
     imapper.options.stop_when_register_fail = true;
     imapper.Reconstruct(map);
     std::cout << "Reconstruction Done!" << std::endl;
