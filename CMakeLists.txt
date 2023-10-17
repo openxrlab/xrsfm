@@ -138,9 +138,6 @@ add_library(xrsfm
         src/utility/io_ecim.cc
         )
 
-
-message(STATUS ${OpenCV_LIBS})
-
 target_include_directories(xrsfm
         PUBLIC
         ${CMAKE_SOURCE_DIR}
