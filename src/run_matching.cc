@@ -64,7 +64,6 @@ ExtractNearestImagePairs(const std::map<int, std::vector<int>> &id2rank,
         for (const auto &id2 : retrieval_results) {
             auto ret = image_pair_set.insert(
                 std::make_pair(std::min(id, id2), std::max(id, id2)));
-            // if (!ret.second)continue;
             count++;
             if (count >= num_candidates)
                 break;
@@ -116,18 +115,24 @@ std::tuple<int, int> GetInitId(const int num_image,
 
 void MatchingSeq(std::vector<Frame> &frames, const std::string &fp_path,
                  std::map<int, std::vector<int>> &id2rank) {
+    const int num_frame = frames.size();
     std::set<std::pair<int, int>> set_pairs;
-    for (int i = 0, num = frames.size(); i < num; ++i) {
-        for (int k = 0; k < 20 && i + k < num; ++k)
+    for (int i = 0; i < num_frame; ++i) {
+        for (int k = 1; k < 20 && i + k < num_frame; ++k)
             set_pairs.insert(std::pair<int, int>(i, i + k));
     }
+
     for (auto &[id1, vec] : id2rank) {
         if (id1 % 5 != 0)
             continue;
         for (auto &id2 : vec) {
-            set_pairs.insert(std::pair<int, int>(id1, id2));
+            if (id1 < id2)
+                set_pairs.insert(std::pair<int, int>(id1, id2));
+            else if (id2 < id1)
+                set_pairs.insert(std::pair<int, int>(id2, id1));
         }
     }
+
     std::vector<std::pair<int, int>> id_pairs;
     id_pairs.assign(set_pairs.begin(), set_pairs.end());
 

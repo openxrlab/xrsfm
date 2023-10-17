@@ -319,8 +319,8 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
         int frame_id = track.ref_id;
         int p2d_id = track.observations_[frame_id];
         Pose tcw = map.frames_[frame_id].Tcw;
-        // TODO
-        vector2 p2d = map.frames_[frame_id].points_normalized[p2d_id];
+
+        vector2 p2d = map.GetNormalizedPoint(frame_id, p2d_id);
         track.point3d_ =
             tcw.q.inverse() *
             (s_vec[frame_id] * track.depth * p2d.homogeneous() - tcw.t);
@@ -328,9 +328,10 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
 }
 
 inline void BASolver::SetUp(ceres::Problem &problem, Map &map, Frame &frame) {
-    const int camera_model_id = map.cameras_[frame.camera_id].model_id_;
-    const double sigma = std::sqrt(5.99) / map.cameras_[frame.camera_id].fx();
-    double *camera_param = map.cameras_[frame.camera_id].params_.data();
+    Camera &camera = map.Camera(frame.camera_id);
+
+    const int camera_model_id = camera.model_id_;
+    double *camera_param = camera.params_.data();
     int num_mea = 0;
     for (int i = 0; i < frame.track_ids_.size(); ++i) {
         if (frame.track_ids_[i] == -1)
@@ -339,9 +340,10 @@ inline void BASolver::SetUp(ceres::Problem &problem, Map &map, Frame &frame) {
 
         ceres::CostFunction *cost_function =
             ReProjectionCostCreate(camera_model_id, frame.points[i]);
+        ceres::LossFunction *loss_function = new ceres::HuberLoss(5.99);
 
         problem.AddResidualBlock(
-            cost_function, nullptr, frame.Tcw.q.coeffs().data(),
+            cost_function, loss_function, frame.Tcw.q.coeffs().data(),
             frame.Tcw.t.data(), track.point3d_.data(), camera_param);
         num_mea++;
     }
@@ -355,10 +357,10 @@ inline void BASolver::SetUp(ceres::Problem &problem, Map &map, Frame &frame) {
 
 inline void BASolver::SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame,
                                int frame_id) {
-    const int camera_model_id = map.cameras_[frame.camera_id].model_id_;
-    double *camera_param = map.cameras_[frame.camera_id].params_.data();
+    const auto &camera = map.Camera(frame.camera_id);
+    const int camera_model_id = camera.model_id_;
+    double *camera_param = camera.params_.data();
 
-    const double sigma = 1000;
     int num_mea = 0;
     for (int i = 0; i < frame.track_ids_.size(); ++i) {
         if (frame.track_ids_[i] == -1)
@@ -369,9 +371,10 @@ inline void BASolver::SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame,
 
         ceres::CostFunction *cost_function =
             ReProjectionCostCreate(camera_model_id, frame.points[i]);
+        ceres::LossFunction *loss_function = new ceres::HuberLoss(5.99);
 
         problem.AddResidualBlock(
-            cost_function, nullptr, frame.Tcw.q.coeffs().data(),
+            cost_function, loss_function, frame.Tcw.q.coeffs().data(),
             frame.Tcw.t.data(), track.point3d_.data(), camera_param);
 
         if (track.angle_ > 5 || track.observations_.count(frame_id) == 0) {
@@ -532,9 +535,16 @@ void BASolver::LBA(int frame_id, Map &map) {
     // set up problem
     ceres::Problem problem;
     printf("LBA: ");
+    std::set<int> fixed_camera_ids;
     for (const int &id : local_frame_ids) {
         printf(" %d", id);
-        SetUpLBA(problem, map, map.frames_[id], frame_id);
+        auto &frame = map.frames_.at(id);
+        SetUpLBA(problem, map, frame, frame_id);
+        if (fixed_camera_ids.count(frame.camera_id) == 0) {
+            fixed_camera_ids.insert(frame.camera_id);
+            problem.SetParameterBlockConstant(
+                map.Camera(frame.camera_id).params_.data());
+        }
     }
     printf("\n");
 
@@ -573,8 +583,6 @@ void BASolver::LBA(int frame_id, Map &map) {
         }
     }
 
-    problem.SetParameterBlockConstant(map.cameras_[0].params_.data());
-
     ceres::Solver::Options solver_options = InitSolverOptions();
     solver_options.max_num_iterations = 5;
     solver_options.function_tolerance = 1e-4;
@@ -586,10 +594,16 @@ void BASolver::LBA(int frame_id, Map &map) {
 void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
     // set up problem
     ceres::Problem problem;
+    std::set<int> fixed_camera_ids;
     for (auto &frame : map.frames_) {
         if (!frame.registered)
             continue;
         SetUp(problem, map, frame);
+        if (fixed_camera_ids.count(frame.camera_id) == 0) {
+            fixed_camera_ids.insert(frame.camera_id);
+            problem.SetParameterBlockConstant(
+                map.Camera(frame.camera_id).params_.data());
+        }
     }
 
     // fix poses
@@ -606,8 +620,6 @@ void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
             problem.SetParameterBlockConstant(frame.Tcw.t.data());
         }
     }
-
-    problem.SetParameterBlockConstant(map.cameras_[0].params_.data());
 
     ceres::Solver::Options solver_options = InitSolverOptions();
     solver_options.minimizer_progress_to_stdout = true;
@@ -631,6 +643,7 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
     int num_rf = 0, num_kf = 0, num_mea = 0;
 
     ceres::Problem problem;
+    std::set<int> fixed_camera_ids;
     for (auto &frame : map.frames_) {
         if (!frame.registered)
             continue;
@@ -639,12 +652,15 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
             continue;
         num_kf++;
         SetUp(problem, map, frame);
+        if (fixed_camera_ids.count(frame.camera_id) == 0) {
+            fixed_camera_ids.insert(frame.camera_id);
+            problem.SetParameterBlockConstant(
+                map.Camera(frame.camera_id).params_.data());
+        }
     }
 
     problem.SetParameterBlockConstant(map.frames_[map.init_id1].Tcw.t.data());
     problem.SetParameterBlockConstant(map.frames_[map.init_id2].Tcw.t.data());
-
-    problem.SetParameterBlockConstant(map.cameras_[0].params_.data());
 
     ceres::Solver::Options solver_options = InitSolverOptions();
     solver_options.minimizer_progress_to_stdout = true;
@@ -656,7 +672,7 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
     ceres::Solve(solver_options, &problem, &summary);
     // std::cout << summary.BriefReport() << "\n";
     PrintSolverSummary(summary);
-    map.cameras_[0].log();
+    map.Camera(0).log();
 
     printf("kf: %d/%d\n", num_kf, num_rf);
     UpdateByRefFrame(map);

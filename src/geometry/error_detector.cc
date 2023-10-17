@@ -4,10 +4,7 @@
 namespace xrsfm {
 bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp,
                                        std::vector<char> &inlier_mask) {
-    // if (fp.id1 == 294 && fp.id2 == 295) return false;  // seq 06
-    // if (fp.id1 <900 &&fp.id2>600) return false;  // seq 07
-
-    constexpr int num_min_matches = 100; // 100 for seq 06
+    constexpr int num_min_matches = 100;
     constexpr double ratio_th = 0.8;
     constexpr double pure_rotation_th = 0.01;
     constexpr double sin_th = std::sin(2.0 * M_PI / 180);
@@ -38,8 +35,10 @@ bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp,
                                 // double cos_theta = ray1.dot(ray2);
                                 // good_essential = cos_theta > cos_th;
         } else {
-            const vector2 p2d1 = frame1.points_normalized[fp.matches[i].id1];
-            const vector2 p2d2 = frame2.points_normalized[fp.matches[i].id2];
+            const vector2 p2d1 =
+                map.GetNormalizedPoint(fp.id1, fp.matches[i].id1);
+            const vector2 p2d2 =
+                map.GetNormalizedPoint(fp.id2, fp.matches[i].id2);
             const vector3 ray1 =
                 (frame1.qwc() * p2d1.homogeneous()).normalized();
             const vector3 ray2 =

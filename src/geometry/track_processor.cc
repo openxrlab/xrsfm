@@ -93,7 +93,7 @@ bool CreatePoint3d(const std::vector<std::pair<int, int>> observations,
         matrix<3, 4> P;
         P << R, T;
         Ps.push_back(P);
-        vector<2> p2d_n = GetPointNormalized(map.cameras_[t_frame.camera_id],
+        vector<2> p2d_n = GetPointNormalized(map.Camera(t_frame.camera_id),
                                              t_frame.points[t_p2d_id]);
         ps.push_back(p2d_n);
     }
@@ -123,7 +123,7 @@ bool CreatePoint3d1(const std::vector<std::pair<int, int>> observations,
         P << R, T;
 
         point_data[i].point_normalized = GetPointNormalized(
-            map.cameras_[t_frame.camera_id], t_frame.points[t_p2d_id]);
+            map.Camera(t_frame.camera_id), t_frame.points[t_p2d_id]);
         pose_data[i].proj_matrix = P;
         pose_data[i].proj_center = t_frame.center();
     }
@@ -172,7 +172,7 @@ GetMaxAngle(const Map &map, const std::set<int> &observed_track_ids,
             continue;
         vector3 p3d = track.point3d_;
         vector3 ray1 = (frame.Tcw.q * p3d + frame.Tcw.t).normalized();
-        vector<2> p2d_n = GetPointNormalized(map.cameras_[frame.camera_id],
+        vector<2> p2d_n = GetPointNormalized(map.Camera(frame.camera_id),
                                              frame.points[p2d_id]);
         vector3 ray2 = (p2d_n.homogeneous()).normalized();
         const double angle_error = std::acos(ray1.dot(ray2));
@@ -285,8 +285,8 @@ inline void FilterPoint3d(const double max_re, const double min_tri_angle_rad,
     obs_to_delete.reserve(8);
     for (auto &[frame_id, p2d_id] : track.observations_) {
         const auto &frame = map.frames_[frame_id];
+        const auto &camera = map.Camera(frame.camera_id);
         // CHECK(frame.registered);
-        const auto &camera = map.cameras_[frame.camera_id];
         const double re = Reprojection_Error(
             frame.Tcw, camera, frame.points[p2d_id], track.point3d_);
         const vector3 p3d = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
@@ -358,7 +358,7 @@ void Point3dProcessor::CheckTrackDepth(const Map &map) {
             const auto &frame = map.frames_[obs_info.first];
             vector3 p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
 
-            auto &camera = map.cameras_[frame.camera_id];
+            auto &camera = map.Camera(frame.camera_id);
             double re = Reprojection_Error(frame.Tcw, camera,
                                            frame.points[obs_info.second],
                                            track.point3d_);
@@ -396,16 +396,17 @@ void Point3dProcessor::ReTriangulate(Map &map) {
         std::vector<matrix<3, 4>> Ps;
         std::vector<vector<2>> ps;
         // Prepare the data
-        for (auto &obs_info : observations) {
-            Frame &t_frame = map.frames_[obs_info.first];
+        for (auto &[frame_id, p2d_id] : observations) {
+            Frame &t_frame = map.frames_[frame_id];
             matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
             vector<3> T = t_frame.Tcw.t;
             matrix<3, 4> P;
             P << R, T;
+
+            vector<2> p2d_n = GetPointNormalized(map.Camera(t_frame.camera_id),
+                                                 t_frame.points[p2d_id]);
+
             Ps.push_back(P);
-            vector<2> p2d_n =
-                GetPointNormalized(map.cameras_[t_frame.camera_id],
-                                   t_frame.points[obs_info.second]);
             ps.push_back(p2d_n);
         }
 
@@ -443,7 +444,7 @@ void Point3dProcessor::ContinueTrack(Map &map, int track_id, double max_re) {
             visted_pair.insert(pair);
 
             // check rpe
-            const auto &c_camera = map.cameras_[c_frame.camera_id];
+            const auto &c_camera = map.Camera(c_frame.camera_id);
             double re =
                 Reprojection_Error(c_frame.Tcw, c_camera,
                                    c_frame.points[c_p2d_id], track.point3d_);
@@ -484,7 +485,7 @@ void Point3dProcessor::MergeTrack(Map &map, int track_id, double max_re) {
                 for (const auto &[t_frame_id, t_p2d_id] :
                      track_ptr->observations_) {
                     const auto &t_frame = map.frames_[t_frame_id];
-                    const auto &t_camera = map.cameras_[t_frame.camera_id];
+                    const auto &t_camera = map.Camera(t_frame.camera_id);
                     double re = Reprojection_Error(t_frame.Tcw, t_camera,
                                                    t_frame.points[t_p2d_id],
                                                    merged_p3d);
@@ -553,7 +554,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                     for (const auto &[t_frame_id, t_p2d_id] :
                          track_ptr->observations_) {
                         const auto &t_frame = map.frames_[t_frame_id];
-                        const auto &t_camera = map.cameras_[t_frame.camera_id];
+                        const auto &t_camera = map.Camera(t_frame.camera_id);
                         double re = Reprojection_Error(t_frame.Tcw, t_camera,
                                                        t_frame.points[t_p2d_id],
                                                        merged_p3d);
@@ -601,7 +602,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                 visted_pair.insert(pair);
 
                 const auto &t_frame = map.frames_[c_frame_id];
-                const auto &t_camera = map.cameras_[t_frame.camera_id];
+                const auto &t_camera = map.Camera(t_frame.camera_id);
                 double re = Reprojection_Error(t_frame.Tcw, t_camera,
                                                t_frame.points[c_p2d_id],
                                                track.point3d_);
@@ -651,13 +652,13 @@ void Point3dProcessor::ContinueFrameTracks(
     const int frame_id, const std::vector<std::pair<int, int>> &cor_2d_3d_ids,
     Map &map) {
     auto &frame = map.frames_[frame_id];
+    const auto &camera = map.Camera(frame.camera_id);
     for (const auto &[p2d_id, track_id] : cor_2d_3d_ids) {
         bool skip = false;
         auto &track = map.tracks_[track_id];
         if (track.observations_.count(frame_id) != 0) {
             // two 2D points in an image are associated with the same 3D point
             const int p2d_id1 = track.observations_[frame_id];
-            const auto &camera = map.cameras_[frame.camera_id];
             const double re0 = Reprojection_Error(
                 frame.Tcw, camera, frame.points[p2d_id], track.point3d_);
             const double re1 = Reprojection_Error(

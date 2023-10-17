@@ -37,7 +37,7 @@ void FeatureExtract(const std::string &image_dir_path,
 void FeatureMatching(const std::vector<Frame> &frames,
                      const std::vector<std::pair<int, int>> &candidate_pairs,
                      std::vector<FramePair> &frame_pairs,
-                     bool b_use_fundamental = false); // DONE(BCHO)
+                     bool b_use_fundamental = false);
 
 std::vector<Match> ExtractInlierMatches(const std::vector<Match> &matches,
                                         const size_t num_inliers,

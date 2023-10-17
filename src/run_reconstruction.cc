@@ -13,7 +13,6 @@ void PreProcess(const std::string dir_path, const std::string camera_path,
                 Map &map) {
     std::vector<Frame> frames;
     std::vector<FramePair> frame_pairs;
-    std::vector<std::string> image_names;
     ReadFeatures(dir_path + "ftr.bin", frames, true);
     ReadFramePairs(dir_path + "fp.bin", frame_pairs);
     std::cout << "ReadFramePairs\n";
@@ -21,29 +20,26 @@ void PreProcess(const std::string dir_path, const std::string camera_path,
     // set cameras & image name
     Camera seq = ReadCameraIOSRecord(camera_path);
 
-    std::vector<Camera> cameras = {seq};
     for (auto &frame : frames) {
-        frame.camera_id = 0;
+        frame.camera_id = seq.id_;
     }
 
-    // set points for reconstruction
+    // convert keypoint to points(for reconstruction)
     for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
-        frame.points_normalized.clear();
         frame.track_ids_.assign(num_points, -1);
         for (const auto &kpt : frame.keypoints_) {
             const auto &pt = kpt.pt;
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
             frame.points.push_back(ept);
-            ImageToNormalized(cameras[frame.camera_id], ept, eptn);
-            frame.points_normalized.push_back(eptn);
         }
     }
 
+    map.camera_map_[seq.id_] = seq;
     map.frames_ = frames;
-    map.cameras_ = cameras;
     map.frame_pairs_ = frame_pairs;
+
     map.RemoveRedundancyPoints();
     map.Init();
 }

@@ -6,21 +6,25 @@
 
 namespace xrsfm {
 
-void ReadCamerasBinary(const std::string &path, std::vector<Camera> &cameras) {
+void ReadCamerasBinary(const std::string &path,
+                       std::map<int, Camera> &cameras) {
     std::ifstream file(path, std::ios::binary);
     CHECK(file.is_open()) << path;
+
     const uint64_t num_camera = read_data2<uint64_t>(file);
-    cameras.resize(num_camera);
-    for (auto &camera : cameras) {
-        int camera_model = 2;
-        uint64_t w = 2 * camera.cx(), h = 2 * camera.cy();
-        read_data(file, camera.id_);
+
+    for (int i = 0; i < num_camera; ++i) {
+        uint32_t camera_id = -1, camera_model = -1;
+        read_data(file, camera_id);
         read_data(file, camera_model);
+        Camera camera(camera_id, camera_model);
+
+        uint64_t w = 0, h = 0; // TODO set w,h in camera
         read_data(file, w);
         read_data(file, h);
-        std::array<double, 4> param;
-        read_data_vec(file, param.data(), 4);
-        camera.params_ = std::vector<double>(param.begin(), param.end());
+
+        read_data_vec(file, camera.params_.data(), camera.params_.size());
+        cameras[camera_id] = camera;
     }
 }
 
@@ -42,7 +46,6 @@ void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames) {
 
         uint64_t num_p2d = read_data2<uint64_t>(file);
         frame.points.resize(num_p2d);
-        frame.points_normalized.resize(num_p2d);
         frame.track_ids_.assign(num_p2d, -1);
         for (size_t i = 0; i < num_p2d; ++i) {
             auto &p2d = frame.points[i];
@@ -81,7 +84,7 @@ void ReadPoints3DBinary(const std::string &path, std::map<int, Track> &tracks) {
 }
 
 void ReadColMapDataBinary(const std::string &output_path, Map &map) {
-    ReadCamerasBinary(output_path + "cameras.bin", map.cameras_);
+    ReadCamerasBinary(output_path + "cameras.bin", map.camera_map_);
     ReadImagesBinary(output_path + "images.bin", map.frame_map_);
     ReadPoints3DBinary(output_path + "points3D.bin", map.track_map_);
 }
@@ -140,18 +143,18 @@ void ReadFramePairBinaryForTriangulation(const std::string &path,
 }
 
 void WriteCamerasBinary(const std::string &path,
-                        const std::vector<Camera> &cameras) {
+                        const std::map<int, Camera> &cameras) {
     std::ofstream file(path, std::ios::trunc | std::ios::binary);
     CHECK(file.is_open()) << path;
     uint64_t num_camera = cameras.size();
     write_data(file, num_camera);
-    for (const auto &camera : cameras) {
+    for (const auto &[camera_id, camera] : cameras) {
         uint64_t w = 2 * camera.cx(), h = 2 * camera.cy();
         write_data(file, camera.id_);
         write_data(file, camera.model_id_);
         write_data(file, w);
         write_data(file, h);
-        write_data_vec(file, camera.params_.data(), 4);
+        write_data_vec(file, camera.params_.data(), camera.params_.size());
     }
 }
 
@@ -222,7 +225,7 @@ void WritePoints3DBinary(const std::string &path,
 }
 
 void WriteColMapDataBinary(const std::string &output_path, const Map &map) {
-    WriteCamerasBinary(output_path + "cameras.bin", map.cameras_);
+    WriteCamerasBinary(output_path + "cameras.bin", map.camera_map_);
     WriteImagesBinary(output_path + "images.bin", map.frames_);
     WritePoints3DBinary(output_path + "points3D.bin", map.tracks_);
 }
@@ -286,7 +289,7 @@ void WritePoints3DBinary2(const std::string &path,
 }
 
 void WriteColMapDataBinary2(const std::string &output_path, const Map &map) {
-    WriteCamerasBinary(output_path + "cameras.bin", map.cameras_);
+    WriteCamerasBinary(output_path + "cameras.bin", map.camera_map_);
     WriteImagesBinary2(output_path + "images.bin", map.frame_map_);
     WritePoints3DBinary2(output_path + "points3D.bin", map.track_map_);
 }

@@ -1,7 +1,7 @@
 //
 // Created by SENSETIME\yezhichao1 on 2020/10/19.
 //
-#include "viewer.h"
+// #include "viewer.h"
 
 #include <unistd.h>
 

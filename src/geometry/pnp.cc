@@ -17,6 +17,7 @@ bool RegisterImage(const int frame_id, Map &map) {
     constexpr double max_error_pixel = 8.0;
 
     Frame &frame = map.frames_[frame_id];
+    Camera &camera = map.Camera(frame.camera_id);
 
     std::vector<vector2> points2ds;
     std::vector<vector3> points3ds;
@@ -26,8 +27,7 @@ bool RegisterImage(const int frame_id, Map &map) {
         return false;
 
     // pose estimate [init]
-    const double max_error =
-        max_error_pixel / map.cameras_[frame.camera_id].fx();
+    const double max_error = max_error_pixel / camera.fx();
     std::vector<char> inlier_mask;
     if (!SolvePnP_colmap(points2ds, points3ds, max_error, frame.Tcw,
                          inlier_mask)) {
@@ -38,16 +38,17 @@ bool RegisterImage(const int frame_id, Map &map) {
     // pose estimate [refine]
     {
         ceres::Problem problem;
-        double *camera_param = map.cameras_[frame.camera_id].params_.data();
-        const int camera_model_id = map.cameras_[frame.camera_id].model_id_;
+        double *camera_param = camera.params_.data();
+        const int camera_model_id = camera.model_id_;
         for (int id = 0; id < inlier_mask.size(); ++id) {
             if (!inlier_mask[id])
                 continue;
             const auto &[p2d_id, track_id] = id_pair_vec[id];
             ceres::CostFunction *cost_function =
                 ReProjectionCostCreate(camera_model_id, frame.points[p2d_id]);
+            ceres::LossFunction *loss_function = new ceres::HuberLoss(5.99);
             problem.AddResidualBlock(
-                cost_function, nullptr, frame.Tcw.q.coeffs().data(),
+                cost_function, loss_function, frame.Tcw.q.coeffs().data(),
                 frame.Tcw.t.data(), points3ds[id].data(), camera_param);
             problem.SetParameterBlockConstant(points3ds[id].data());
         }
@@ -109,7 +110,7 @@ bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set,
     printf("frame: %d  cor num: %zu\n", _frame_id, cor_2d_3d_ids.size());
     if (cor_2d_3d_ids.size() < 20)
         return false;
-    const double max_error = 16.0 / map.cameras_[next_frame.camera_id].fx();
+    const double max_error = 16.0 / map.Camera(next_frame.camera_id).fx();
     std::vector<char> inlier_mask;
     if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error, tcw,
                         inlier_mask)) {
@@ -145,7 +146,7 @@ bool RegisterNextImageLocal(const int _frame_id, const std::set<int> cor_set,
 
     map.tmp_frame = next_frame;
     map.tmp_frame.track_ids_.assign(map.tmp_frame.track_ids_.size(), -1);
-    const double max_error = 16.0 / map.cameras_[next_frame.camera_id].fx();
+    const double max_error = 16.0 / map.Camera(next_frame.camera_id).fx();
     std::vector<char> inlier_mask;
     if (SolvePnP_colmap(cor_points2ds, cor_points3ds, max_error,
                         map.tmp_frame.Tcw, inlier_mask)) {

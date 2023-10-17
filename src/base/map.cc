@@ -109,66 +109,13 @@ void Map::RemoveRedundancyPoints() {
 
         for (int k = 0; k < nid2id.size(); ++k) {
             frame.points.at(k) = frame.points.at(nid2id.at(k));
-            frame.points_normalized.at(k) =
-                frame.points_normalized.at(nid2id.at(k));
+            // frame.points_normalized.at(k) =
+            // frame.points_normalized.at(nid2id.at(k));
         }
         frame.points.resize(nid2id.size());
-        frame.points_normalized.resize(nid2id.size());
+        // frame.points_normalized.resize(nid2id.size());
         frame.track_ids_.assign(nid2id.size(), -1);
     }
-    for (auto &fp : frame_pairs_) {
-        const auto &id2nid1 = id2nid_vec[fp.id1];
-        const auto &id2nid2 = id2nid_vec[fp.id2];
-        for (auto &m : fp.matches) {
-            m.id1 = id2nid1[m.id1];
-            m.id2 = id2nid2[m.id2];
-        }
-    }
-}
-
-void Map::RemoveRedundancyPoints(Map &tmp) {
-    Init();
-    // remove unused frame points
-    std::vector<std::vector<int>> id2nid_vec(frames_.size(),
-                                             std::vector<int>(0));
-    std::vector<std::vector<int>> nid2id_vec(frames_.size(),
-                                             std::vector<int>(0));
-    for (int i = 0; i < frames_.size(); ++i) {
-        auto &frame = frames_[i];
-        auto &id2nid = id2nid_vec[i];
-        auto &nid2id = nid2id_vec[i];
-        id2nid.assign(frame.points.size(), -1);
-        int count = 0;
-        for (int k = 0; k < frame.points.size(); ++k) {
-            if (!corr_graph_.frame_node_vec_.at(i).corrs_vector.at(k).empty()) {
-                nid2id.emplace_back(k);
-                id2nid.at(k) = count;
-                count++;
-            }
-        }
-        for (int k = 0; k < nid2id.size(); ++k) {
-            frame.points.at(k) = frame.points[nid2id.at(k)];
-            frame.points_normalized.at(k) =
-                frame.points_normalized[nid2id.at(k)];
-        }
-
-        frame.points.resize(nid2id.size());
-        frame.points_normalized.resize(nid2id.size());
-        frame.track_ids_.assign(nid2id.size(), -1);
-
-        if (tmp.frame_map_.count(i + 1)) {
-            auto &frame1 = tmp.frame_map_[i + 1];
-            frame1.points_normalized = frame1.points;
-            for (int k = 0; k < nid2id.size(); ++k) {
-                frame1.points.at(k) = frame1.points[nid2id.at(k)];
-                const int track_id = frame1.track_ids_[nid2id.at(k)];
-                frame1.track_ids_.at(k) = track_id;
-            }
-            frame1.points.resize(nid2id.size());
-            frame1.track_ids_.resize(nid2id.size());
-        }
-    }
-
     for (auto &fp : frame_pairs_) {
         const auto &id2nid1 = id2nid_vec[fp.id1];
         const auto &id2nid2 = id2nid_vec[fp.id2];
@@ -335,8 +282,7 @@ void Map::SearchCorrespondences(const Frame &frame,
     if (use_p2d_normalized) {
         for (int i = 0; i < points2d.size(); ++i) {
             Eigen::Vector2d point2d_N;
-            ImageToNormalized(cameras_[frame.camera_id], points2d[i],
-                              point2d_N);
+            ImageToNormalized(Camera(frame.camera_id), points2d[i], point2d_N);
             points2d[i] = point2d_N;
         }
     }
@@ -375,8 +321,7 @@ void Map::SearchCorrespondences1(
     if (use_p2d_normalized) {
         for (int i = 0; i < points2d.size(); ++i) {
             Eigen::Vector2d point2d_N;
-            ImageToNormalized(cameras_[frame.camera_id], points2d[i],
-                              point2d_N);
+            ImageToNormalized(Camera(frame.camera_id), points2d[i], point2d_N);
             points2d[i] = point2d_N;
         }
     }
@@ -528,7 +473,7 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
             continue;
 
         // step3: ensure connect between sequential data
-        if (is_sequential_data || frame.camera_id == map.cameras_.size() - 1) {
+        if (is_sequential_data) {
             int min_connect = INT_MAX;
             for (auto it = id_covisible_key.begin();
                  next(it) != id_covisible_key.end(); it++) {

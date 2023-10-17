@@ -20,7 +20,7 @@ find_package(OpenGL REQUIRED)
 
 find_package(GLEW REQUIRED)
 
-find_package(Pangolin REQUIRED)
+# find_package(Pangolin REQUIRED)
 
 if (CUDA_ENABLED)
     find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
@@ -132,9 +132,9 @@ add_library(xrsfm
 
         src/mapper/incremental_mapper.cc
 
-        src/utility/view.cc
-        src/utility/viewer_handler.cc
-        src/utility/viewer.cc
+        # src/utility/view.cc
+        # src/utility/viewer_handler.cc
+        # src/utility/viewer.cc
         src/utility/io_ecim.cc
         )
 
@@ -156,7 +156,7 @@ target_link_libraries(xrsfm
         XRPrimer::xrprimer
         ${OpenCV_LIBS}
         ${GTEST_LIBRARIES}
-        ${Pangolin_LIBRARIES}
+        # ${Pangolin_LIBRARIES}
         sift_gpu
         )
 

@@ -36,6 +36,6 @@ if __name__ == '__main__':
               + ' sequential ' + output_path)
     os.system('./bin/run_reconstruction ' + output_path + ' '
               + camera_path + ' ' + output_path)
-    if(args.estimate_scale):
+    if (args.estimate_scale):
         os.system('./bin/estimate_scale '+images_path+' '+output_path+' '
                   + output_refined_path)

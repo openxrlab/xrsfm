@@ -26,7 +26,8 @@ template <typename CameraModel> class ReProjectionCost {
         map<vector<2, T>> residuals(_residuals);
 
         vector<3, T> pc = qcw * pw + tcw;
-        if (pc.z() < 0.1) {
+        if (pc.z() < 1e-2) {
+            // Preventing negative depth from hindering optimization
             residuals = vector<2, T>(12.0, 12.0);
         } else {
             vector<2, T> xy = pc.hnormalized();
@@ -50,11 +51,15 @@ template <typename CameraModel> class ReProjectionCost {
 
 inline static ceres::CostFunction *ReProjectionCostCreate(const int model_id,
                                                           Eigen::Vector2d uv) {
-    if (model_id == 2)
-        return ReProjectionCost<SimpleRadialCameraModel>::Create(uv);
-    if (model_id == 4)
-        return ReProjectionCost<OpenCVCameraModel>::Create(uv);
 
+#define CAMERA_MODEL_CASE(CameraModel)                                         \
+    if (model_id == CameraModel::kModelId)                                     \
+        return ReProjectionCost<CameraModel>::Create(uv);
+
+    CAMERA_MODEL_CASES
+#undef CAMERA_MODEL_CASE
+
+    assert(false);
     return ReProjectionCost<OpenCVCameraModel>::Create(uv);
 }
 
@@ -254,7 +259,6 @@ class TagCost : public ceres::SizedCostFunction<3, 4, 3, 1, 3> {
     vector3 p3d_ori;
 };
 
- 
 class QuatParam : public ceres::LocalParameterization {
   public:
     bool Plus(const double *x, const double *delta,

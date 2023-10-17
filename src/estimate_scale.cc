@@ -10,7 +10,7 @@
 #include "optimization/cost_factor_ceres.h"
 #include "tag/tag_extract.hpp"
 #include "utility/io_ecim.hpp"
-#include "utility/timer.h" 
+#include "utility/timer.h"
 
 using namespace xrsfm;
 

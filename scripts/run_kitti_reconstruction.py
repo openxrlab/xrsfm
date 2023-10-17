@@ -38,5 +38,5 @@ if __name__ == '__main__':
 
         print('Begin '+seq_name)
         bin_path = bin_dir_path+seq_name+'/'
-        os.system(exe + ' ' + bin_path + ' ' + data_path+' ' +
-                  seq_name+' '+bin_path+' '+str(init_id1)+' '+str(init_id2))
+        os.system(
+            f"{exe} {bin_path} {data_path} {seq_name} {bin_path} {init_id1} {init_id2} > {bin_path}log_map.txt")

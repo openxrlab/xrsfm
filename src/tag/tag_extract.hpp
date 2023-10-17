@@ -26,7 +26,7 @@ extern "C" {
 #include "optimization/cost_factor_ceres.h"
 #include "utility/io_ecim.hpp"
 #include "utility/timer.h"
-#include "utility/viewer.h"
+// #include "utility/viewer.h"
 
 namespace xrsfm {
 
@@ -136,7 +136,7 @@ void tag_refine(std::string image_dir, std::string map_dir,
     // load map
     Map map;
     ReadColMapDataBinary(map_dir, map);
-    const Camera &cam_seq = map.cameras_[0];
+    const Camera &cam_seq = map.Camera(0);
     for (auto &[id, frame] : map.frame_map_) {
         if (!frame.registered)
             continue;

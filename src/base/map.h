@@ -117,11 +117,12 @@ class Map {
   public:
     std::vector<cv::Mat> images_; // for debug
 
-    std::vector<Camera> cameras_;
+    // std::vector<Camera> cameras_;
     std::vector<Track> tracks_;
     std::vector<Frame> frames_;
     std::vector<FramePair> frame_pairs_;
 
+    std::map<int, Camera> camera_map_;
     std::map<int, Frame> frame_map_;
     std::map<int, Track> track_map_;
 
@@ -141,8 +142,6 @@ class Map {
     void Init();
 
     void RemoveRedundancyPoints();
-
-    void RemoveRedundancyPoints(Map &tmp);
 
     void DeregistrationFrame(int frame_id);
 
@@ -165,6 +164,13 @@ class Map {
                                std::vector<vector3> &points3d,
                                std::vector<std::pair<int, int>> &cor_2d_3d_ids);
 
+    inline const class Camera &Camera(int camera_id) const {
+        return camera_map_.at(camera_id);
+    };
+    inline class Camera &Camera(int camera_id) {
+        return camera_map_.at(camera_id);
+    };
+
     int MaxPoint3dFrameId();
     int get_num_p3d(const int frame_id);
     std::pair<int, int> MaxPoint3dFrameIdSeq();
@@ -180,6 +186,14 @@ class Map {
              corr_graph_.frame_node_vec_[frame_id].corrs_vector[p2d_id]) {
             frames_[t_frame_id].DeleteNumCorHavePoint3D(t_p2d_id);
         }
+    }
+
+    inline vector2 GetNormalizedPoint(const int frame_id, const int p2d_id) {
+        Eigen::Vector2d ptn;
+        const auto &frame = frames_.at(frame_id);
+        ImageToNormalized(Camera(frame.camera_id), frame.points.at(p2d_id),
+                          ptn);
+        return ptn;
     }
 };
 

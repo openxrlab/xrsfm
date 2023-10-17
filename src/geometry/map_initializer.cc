@@ -12,8 +12,8 @@ namespace xrsfm {
 
 bool CheckInitFramePair(const Map &map, FramePair &frame_pair,
                         double min_angle = 16.0) {
-    auto &frame1 = map.frames_[frame_pair.id1],
-         &frame2 = map.frames_[frame_pair.id2];
+    auto &frame1 = map.frames_[frame_pair.id1];
+    auto &frame2 = map.frames_[frame_pair.id2];
 
     int inlier_num;
     std::vector<char> inlier_mask;
@@ -22,12 +22,14 @@ bool CheckInitFramePair(const Map &map, FramePair &frame_pair,
     for (int i = 0; i < num_matches; ++i) {
         if (!frame_pair.inlier_mask[i])
             continue;
-        points1.push_back(frame1.points_normalized[frame_pair.matches[i].id1]);
-        points2.push_back(frame2.points_normalized[frame_pair.matches[i].id2]);
+        points1.push_back(
+            map.GetNormalizedPoint(frame_pair.id1, frame_pair.matches[i].id1));
+        points2.push_back(
+            map.GetNormalizedPoint(frame_pair.id2, frame_pair.matches[i].id2));
     }
     if (points1.size() < 10)
         return false;
-    const double th = 10.0 / map.cameras_[frame1.camera_id].fx();
+    const double th = 10.0 / map.Camera(frame1.camera_id).fx();
     // add solve homograph
     xrsfm::solve_essential(points1, points2, th, frame_pair.E, inlier_num,
                            inlier_mask);
@@ -67,7 +69,7 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
     if (init_frame_pair.id1 == -1) {
         std::vector<std::pair<int, int>> frame_info_vec;
         for (const auto &frame : map.frames_) {
-            if (map.cameras_[frame.camera_id].valid())
+            if (map.Camera(frame.camera_id).valid())
                 frame_info_vec.emplace_back(
                     frame.id, map.frameid2matched_frameids_[frame.id].size());
         }
@@ -149,10 +151,12 @@ void InitializeMap(Map &map, FramePair &frame_pair) {
     for (int i = 0; i < num_matches; ++i) {
         if (!frame_pair.inlier_mask[i])
             continue;
-        points1.push_back(frame1.points_normalized[frame_pair.matches[i].id1]);
-        points2.push_back(frame2.points_normalized[frame_pair.matches[i].id2]);
+        points1.push_back(
+            map.GetNormalizedPoint(id1, frame_pair.matches[i].id1));
+        points2.push_back(
+            map.GetNormalizedPoint(id2, frame_pair.matches[i].id2));
     }
-    const double th = 10.0 / map.cameras_[frame1.camera_id].fx();
+    const double th = 10.0 / map.Camera(frame1.camera_id).fx();
     xrsfm::solve_essential(points1, points2, th, frame_pair.E, inlier_num,
                            inlier_mask);
     printf("Init essential %d/%zu\n", inlier_num, points1.size());

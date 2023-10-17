@@ -20,10 +20,7 @@
 namespace xrsfm {
 
 inline Camera ReadCameraIOSRecord(const std::string &file_name) {
-    Camera cam;
-    cam.id_ = 0;
-    cam.model_id_ = 2;
-    cam.params_.resize(4);
+    Camera cam(0, 2);
 
     std::ifstream file(file_name, std::ios::out);
     std::string line;
@@ -43,7 +40,7 @@ inline Camera ReadCameraIOSRecord(const std::string &file_name) {
 
 inline void ReadCameraInfo(const std::string &file_name,
                            std::map<std::string, int> &name2cid,
-                           std::vector<Camera> &cameras) {
+                           std::map<int, Camera> &cameras) {
     std::ifstream file(file_name, std::ios::out | std::ios::binary);
     std::string line;
     while (std::getline(file, line)) {
@@ -51,18 +48,21 @@ inline void ReadCameraInfo(const std::string &file_name,
             continue;
         if (line.size() < 10)
             continue;
-        Camera cam;
-        cam.params_.resize(4);
+
         int w, h;
         std::string image_name, model_name;
         std::stringstream ss(line);
         ss >> image_name >> model_name >> w >> h;
-        ss >> cam.params_[0] >> cam.params_[2] >> cam.params_[3] >>
-            cam.distort_params()[0];
-        cam.params_[1] = cam.params_[0];
-        const int id = cameras.size();
-        cam.id_ = name2cid[image_name] = id;
-        cameras.emplace_back(cam);
+        if (model_name == "SIMPLE_RADIAL") {
+            const int camera_id = cameras.size();
+            Camera cam(camera_id, 2);
+            ss >> cam.params_[0] >> cam.params_[1] >> cam.params_[2] >>
+                cam.params_[3];
+            name2cid[image_name] = camera_id;
+            cameras[camera_id] = cam;
+        } else {
+            CHECK(false);
+        }
     }
 }
 
@@ -122,7 +122,7 @@ void ReadImagesBinary(const std::string &path, std::map<int, Frame> &frames);
 void ReadImagesBinaryForTriangulation(const std::string &path,
                                       std::map<int, Frame> &frames);
 
-void ReadCamerasBinary(const std::string &path, std::vector<Camera> &cameras);
+void ReadCamerasBinary(const std::string &path, std::map<int, Camera> &cameras);
 
 void ReadFramePairBinaryForTriangulation(const std::string &path,
                                          std::vector<FramePair> &frame_pairs);
