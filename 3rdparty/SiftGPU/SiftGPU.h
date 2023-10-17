@@ -114,7 +114,7 @@ class SiftGPU : public SiftParam {
     enum {
         SIFTGPU_NOT_SUPPORTED = 0,
         SIFTGPU_PARTIAL_SUPPORTED =
-            1, // detction works, but not orientation/descriptor
+            1, // detection works, but not orientation/descriptor
         SIFTGPU_FULL_SUPPORTED = 2
     };
 
@@ -136,7 +136,7 @@ class SiftGPU : public SiftParam {
     int _image_loaded;
     // the name of current input image
     char *_imgpath;
-    //_outpath containes the name of the output file
+    //_outpath contains the name of the output file
     char *_outpath;
     // the list of image filenames
     ImageList *_list;
@@ -146,7 +146,7 @@ class SiftGPU : public SiftParam {
     SiftPyramid *_pyramid;
     // print out the command line options
     static void PrintUsage();
-    // Initialize OpenGL and SIFT paremeters, and create the shaders accordingly
+    // Initialize OpenGL and SIFT parameters, and create the shaders accordingly
     void InitSiftGPU();
     // load the image list from a file
     void LoadImageList(const char *imlist);
@@ -172,7 +172,7 @@ class SiftGPU : public SiftParam {
                                                 int keys_have_orientation = 1);
     // Enable downloading results to CPU.
     // create a new OpenGL context for processing
-    // call VerifyContextGL instead if you want to crate openGL context
+    // call VerifyContextGL instead if you want to create openGL context
     // yourself, or your are mixing mixing siftgpu with other openGL code
     SIFTGPU_EXPORT virtual int CreateContextGL();
     // verify the current opengl context..
@@ -260,7 +260,7 @@ class SiftGPUEX : public SiftGPU {
                        int i); // display all images in one octave
     // display different content of Pyramid by specifying different data and
     // display shader the first nskip1 levels and the last nskip2 levels are
-    // skiped in display
+    // skipped in display
     void DisplayPyramid(void (*UseDisplayShader)(), int dataName,
                         int nskip1 = 0, int nskip2 = 0);
     // use HSVtoRGB to generate random colors
@@ -313,7 +313,7 @@ class SiftMatchGPU {
     inline int CreateContextGL() { return _CreateContextGL(); }
     inline int VerifyContextGL() { return _VerifyContextGL(); }
 
-    // Consructor, the argument specifies the maximum number of features to
+    // Constructor, the argument specifies the maximum number of features to
     // match
     SIFTGPU_EXPORT SiftMatchGPU(int max_sift = 4096);
 
@@ -332,10 +332,10 @@ class SiftMatchGPU {
     // change the maximum of features to match whenever you want
     SIFTGPU_EXPORT virtual void SetMaxSift(int max_sift);
     SIFTGPU_EXPORT virtual int GetMaxSift() const { return __max_sift; };
-    // desctructor
+    // destructor
     SIFTGPU_EXPORT virtual ~SiftMatchGPU();
 
-    // Specifiy descriptors to match, index = [0/1] for two features sets
+    // Specify descriptors to match, index = [0/1] for two features sets
     // respectively Option1, use float descriptors, and they be already
     // normalized to 1.0
     SIFTGPU_EXPORT virtual void
@@ -372,7 +372,7 @@ class SiftMatchGPU {
     // use a guiding Homography H and a guiding Fundamental Matrix F to compute
     // feature matches the function returns the number of matches.
     SIFTGPU_EXPORT virtual int GetGuidedSiftMatch(
-        int max_match, uint32_t match_buffer[][2], // buffer to recieve
+        int max_match, uint32_t match_buffer[][2], // buffer to receive
         float *H,                  // homography matrix,  (Set NULL to skip)
         float *F,                  // fundamental matrix, (Set NULL to skip)
         float *E,                  // essential matrix, (Set NULL to skip)
@@ -419,8 +419,8 @@ CreateRemoteSiftGPU(int port = 7777, char *remote_server = nullptr);
 // combo;
 //   siftgpu->ParseParam... siftgpu->CreateContextGL..
 //   matcher->SetLanguage...matcher->VerifyContextGL...
-//   // GPU-selection is done throught siftgpu->ParseParam,
-//   // it doesn't really initialize SiftGPU untill you call
+//   // GPU-selection is done through siftgpu->ParseParam,
+//   // it doesn't really initialize SiftGPU until you call
 //   CreateContextGL/VerifyContextGL delete combo;
 
 ////////////////////////////////////////////////////////////////////////

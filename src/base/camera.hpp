@@ -67,7 +67,7 @@ inline void ImageToNormalized(const Camera &c, const Eigen::Vector2d &p2d,
     CAMERA_MODEL_CASES
 #undef CAMERA_MODEL_CASE
 
-    std::cout << "ERROR: (ImageToNormalized) unsupport model type: "
+    std::cout << "ERROR: (ImageToNormalized) unsupported model type: "
               << c.model_id_ << "\n";
     exit(-1);
 }
@@ -83,7 +83,7 @@ inline void NormalizedToImage(const Camera &c, const Eigen::Vector2d &p2d_n,
     CAMERA_MODEL_CASES
 #undef CAMERA_MODEL_CASE
 
-    std::cout << "ERROR: (NormalizedToImage) unsupport model type: "
+    std::cout << "ERROR: (NormalizedToImage) unsupported model type: "
               << c.model_id_ << "\n";
     exit(-1);
 }
