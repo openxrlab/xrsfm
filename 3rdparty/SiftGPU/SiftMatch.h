@@ -84,16 +84,15 @@ class SiftMatchGL : public SiftMatchGPU {
     void InitSiftMatch();
     void SetMaxSift(int max_sift) override;
     void SetDescriptors(int index, int num, const unsigned char *descriptor,
-                        int id = -1, int dim = 128);
+                        int id = -1);
     void SetDescriptors(int index, int num, const float *descriptor,
                         int id = -1);
     void SetFeautreLocation(int index, const float *locatoins, int gap);
     int GetSiftMatch(int max_match, uint32_t match_buffer[][2], float distmax,
-                     float ratiomax, int mbm, int dim = 128);
+                     float ratiomax, int mbm);
     int GetGuidedSiftMatch(int max_match, uint32_t match_buffer[][2], float *H,
-                           float *F, float *E, int lengthHomo, float distmax,
-                           float ratiomax, float hdistmax, float fdistmax,
-                           int mbm, int dim = 128);
+                           float *F, float distmax, float ratiomax,
+                           float hdistmax, float fdistmax, int mbm);
 };
 
 #endif

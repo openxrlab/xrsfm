@@ -98,15 +98,6 @@ SiftGPUEX::SiftGPUEX() {
     RandomizeColor();
 }
 
-void *SiftGPU::operator new(size_t size) {
-    void *p = malloc(size);
-    if (p == 0) {
-        const std::bad_alloc ba;
-        throw ba;
-    }
-    return p;
-}
-
 void SiftGPUEX::RandomizeColor() {
     float hsv[3] = {0, 0.8f, 1.0f};
     for (int i = 0; i < COLOR_NUM * 3; i += 3) {
@@ -1126,10 +1117,6 @@ void SiftGPU::ParseParam(const int argc, const char **argv) {
         _outpath[0] = 0;
 }
 
-void SiftGPU::SetDogThreshold(float threshold) {
-    SiftParam::_dog_threshold = threshold;
-}
-
 void SiftGPU::SetImageList(int nimage, const char **filelist) {
     _list->resize(0);
     for (int i = 0; i < nimage; i++) {
@@ -1376,13 +1363,5 @@ void SiftGPUEX::GetInitWindowPotition(int &x, int &y) {
 SiftGPU *CreateNewSiftGPU(int np) { return new SiftGPU(np); }
 
 /////////////////////////////////////////////////////
-void *ComboSiftGPU::operator new(size_t size) {
-    void *p = malloc(size);
-    if (p == 0) {
-        const std::bad_alloc ba;
-        throw ba;
-    }
-    return p;
-}
 
 ComboSiftGPU *CreateComboSiftGPU() { return new ComboSiftGPU(); }

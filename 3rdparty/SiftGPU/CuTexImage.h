@@ -23,15 +23,9 @@
 #ifndef CU_TEX_IMAGE_H
 #define CU_TEX_IMAGE_H
 
+#include <cuda_runtime.h>
+
 class GLTexImage;
-struct cudaArray;
-struct textureReference;
-
-// using texture2D from linear memory
-
-#define SIFTGPU_ENABLE_LINEAR_TEX2D
-
-typedef unsigned int GLuint;
 
 class CuTexImage {
   protected:
@@ -46,18 +40,22 @@ class CuTexImage {
     GLuint _fromPBO;
 
   public:
+    struct CuTexObj {
+        cudaTextureObject_t handle;
+        ~CuTexObj();
+    };
+
     virtual void SetImageSize(int width, int height);
     virtual bool InitTexture(int width, int height, int nchannel = 1);
-    void InitTexture2D();
-    inline void BindTexture(textureReference &texRef);
-    inline void BindTexture2D(textureReference &texRef);
-    void CopyToTexture2D();
+    CuTexObj BindTexture(const cudaTextureDesc &textureDesc,
+                         const cudaChannelFormatDesc &channelFmtDesc);
+    CuTexObj BindTexture2D(const cudaTextureDesc &textureDesc,
+                           const cudaChannelFormatDesc &channelFmtDesc);
     void CopyToHost(void *buf);
     void CopyToHost(void *buf, int stream);
     void CopyFromHost(const void *buf);
     int CopyToPBO(GLuint pbo);
     void CopyFromPBO(int width, int height, GLuint pbo);
-    static int DebugCopyToTexture2D();
 
   public:
     inline int GetImgWidth() { return _imgWidth; }

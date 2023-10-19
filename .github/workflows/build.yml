@@ -6,7 +6,7 @@ name: build
 on:
   push:
     branches:
-     - alpha_test
+      - alpha_test
     paths-ignore:
       - 'README.md'
       - 'README_CN.md'
