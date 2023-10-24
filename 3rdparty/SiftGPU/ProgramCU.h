@@ -72,18 +72,16 @@ class ProgramCU {
 
     // SIFTMATCH FUNCTIONS
     static void MultiplyDescriptor(CuTexImage *tex1, CuTexImage *tex2,
-                                   CuTexImage *texDot, CuTexImage *texCRT,
-                                   int dim = 128);
+                                   CuTexImage *texDot, CuTexImage *texCRT);
     static void MultiplyDescriptorG(CuTexImage *texDes1, CuTexImage *texDes2,
                                     CuTexImage *texLoc1, CuTexImage *texLoc2,
                                     CuTexImage *texDot, CuTexImage *texCRT,
-                                    float *H, int lengthHomo, float hdistmax,
-                                    float *F, float fdistmax, float *E,
-                                    int dim = 128);
+                                    float *H, float hdistmax, float *F,
+                                    float fdistmax);
     static void GetRowMatch(CuTexImage *texDot, CuTexImage *texMatch,
-                            float distmax, float ratiomax, int dim = 128);
+                            float distmax, float ratiomax);
     static void GetColMatch(CuTexImage *texCRT, CuTexImage *texMatch,
-                            float distmax, float ratiomax, int dim = 128);
+                            float distmax, float ratiomax);
 };
 
 #endif

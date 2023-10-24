@@ -61,7 +61,6 @@ typedef unsigned __int64 uint64_t;
 #endif
 #elif __GNUC__ >= 3
 #include <stdint.h>
-#include <stddef.h>
 #endif
 
 ///////////////////////////////////////////////////////////////////
@@ -186,8 +185,7 @@ class SiftGPU : public SiftParam {
     // set SiftGPU to brief display mode, which is faster
     inline void SetVerboseBrief() { SetVerbose(2); };
     // parse SiftGPU parameters
-    SIFTGPU_EXPORT virtual void ParseParam(const int argc, const char **argv);
-    SIFTGPU_EXPORT virtual void SetDogThreshold(float threshold);
+    SIFTGPU_EXPORT virtual void ParseParam(int argc, const char **argv);
     // run SIFT on a new image given filename
     SIFTGPU_EXPORT virtual int RunSIFT(const char *imgpath);
     // run SIFT on an image in the image list given the file index
@@ -208,7 +206,7 @@ class SiftGPU : public SiftParam {
     SIFTGPU_EXPORT virtual int RunSIFT(int num, const SiftKeypoint *keys,
                                        int keys_have_orientation = 1);
     // constructor, the parameter np is ignored..
-    SIFTGPU_EXPORT SiftGPU(int np = 1);
+    SIFTGPU_EXPORT explicit SiftGPU(int np = 1);
     // destructor
     SIFTGPU_EXPORT virtual ~SiftGPU();
     // set the active pyramid...dropped function
@@ -225,14 +223,6 @@ class SiftGPU : public SiftParam {
     SIFTGPU_EXPORT int GetFeatureCountThreshold();
     SIFTGPU_EXPORT int GetMaxOrientation();
     SIFTGPU_EXPORT int GetMaxDimension();
-    ///
-  public:
-    // overload the new operator because delete operator is virtual
-    // and it is operating on the heap inside the dll (due to the
-    // compiler setting of /MT and /MTd). Without the overloaded operator
-    // deleting a SiftGPU object will cause a heap corruption in the
-    // static link case (but not for the runtime dll loading).
-    SIFTGPU_EXPORT void *operator new(size_t size);
 };
 
 ////////////////////////////////////////////////////////////////
@@ -315,7 +305,7 @@ class SiftMatchGPU {
 
     // Constructor, the argument specifies the maximum number of features to
     // match
-    SIFTGPU_EXPORT SiftMatchGPU(int max_sift = 4096);
+    SIFTGPU_EXPORT explicit SiftMatchGPU(int max_sift = 4096);
 
     // change gpu_language, check the enumerants in SIFTMATCH_LANGUAGE.
     SIFTGPU_EXPORT virtual void SetLanguage(int gpu_language);
@@ -344,7 +334,7 @@ class SiftMatchGPU {
     // 512
     SIFTGPU_EXPORT virtual void SetDescriptors(int index, int num,
                                                const unsigned char *descriptors,
-                                               int id = -1, int dim = 128);
+                                               int id = -1);
 
     // match two sets of features, the function RETURNS the number of matches.
     // Given two normalized descriptor d1,d2, the distance here is acos(d1 *d2);
@@ -354,8 +344,7 @@ class SiftMatchGPU {
                                              // feature indices
                  float distmax = 0.7,  // maximum distance of sift descriptor
                  float ratiomax = 0.8, // maximum distance ratio
-                 int mutual_best_match = 1, // mutual best match or one way
-                 int dim = 128);            // dimension of sift features
+                 int mutual_best_match = 1); // mutual best match or one way
 
     // two functions for guded matching, two constraints can be used
     // one homography and one fundamental matrix, the use is as follows
@@ -373,19 +362,13 @@ class SiftMatchGPU {
     // feature matches the function returns the number of matches.
     SIFTGPU_EXPORT virtual int GetGuidedSiftMatch(
         int max_match, uint32_t match_buffer[][2], // buffer to receive
-        float *H,                  // homography matrix,  (Set NULL to skip)
-        float *F,                  // fundamental matrix, (Set NULL to skip)
-        float *E,                  // essential matrix, (Set NULL to skip)
-        int lengthHomo = 1,        // length of homography matrix,
-        float distmax = 0.7,       // maximum distance of sift descriptor
-        float ratiomax = 0.8,      // maximum distance ratio
-        float hdistmax = 32,       // threshold for |H * x1 - x2|_2
-        float fdistmax = 16,       // threshold for sampson error of x2'FX1
-        int mutual_best_match = 1, // mutual best or one way
-        int dim = 128);            // dimension of sift features
-  public:
-    // overload the new operator, the same reason as SiftGPU above
-    SIFTGPU_EXPORT void *operator new(size_t size);
+        float *H,                   // homography matrix,  (Set NULL to skip)
+        float *F,                   // fundamental matrix, (Set NULL to skip)
+        float distmax = 0.7,        // maximum distance of sift descriptor
+        float ratiomax = 0.8,       // maximum distance ratio
+        float hdistmax = 32,        // threshold for |H * x1 - x2|_2
+        float fdistmax = 16,        // threshold for sampson error of x2'FX1
+        int mutual_best_match = 1); // mutual best or one wayx
 };
 
 typedef SiftGPU::SiftKeypoint SiftKeypoint;
@@ -395,11 +378,7 @@ SIFTGPU_EXPORT_EXTERN SiftGPU *CreateNewSiftGPU(int np = 1);
 SIFTGPU_EXPORT_EXTERN SiftMatchGPU *CreateNewSiftMatchGPU(int max_sift = 4096);
 
 ////////////////////////////////////////////////////////////////////////////
-class ComboSiftGPU : public SiftGPU, public SiftMatchGPU {
-  public:
-    ///////////////////////////////////////////////
-    SIFTGPU_EXPORT void *operator new(size_t size);
-};
+class ComboSiftGPU : public SiftGPU, public SiftMatchGPU {};
 SIFTGPU_EXPORT_EXTERN ComboSiftGPU *CreateComboSiftGPU();
 
 /////////////////////////////////////////////////////////////////////////////////////////////
