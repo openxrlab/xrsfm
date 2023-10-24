@@ -312,8 +312,6 @@ void GlobalUtil::InitGLParam(int NotTargetGL) {
 
         const char *vendor = (const char *)glGetString(GL_VENDOR);
         if (vendor) {
-            if (GlobalUtil::_verbose)
-                std::cout << "[GPU VENDOR]:\t" << vendor << "\n";
             GlobalUtil::_IsNvidia = (strstr(vendor, "NVIDIA") != NULL ? 1 : 0);
 
             // Let nVidia compiler to take care of the unrolling.

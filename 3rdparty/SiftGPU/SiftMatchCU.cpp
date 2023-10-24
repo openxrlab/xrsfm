@@ -98,8 +98,7 @@ void SiftMatchCU::InitSiftMatch() {
 }
 
 void SiftMatchCU::SetDescriptors(int index, int num,
-                                 const unsigned char *descriptors, int id,
-                                 int dim) {
+                                 const unsigned char *descriptors, int id) {
     if (_initialized == 0)
         return;
     if (index > 1)
@@ -114,15 +113,7 @@ void SiftMatchCU::SetDescriptors(int index, int num,
     if (num > __max_sift)
         num = __max_sift;
     _num_sift[index] = num;
-
-    if (dim == 128) {
-        _texDes[index].InitTexture(8 * num, 1, 4);
-    } else if (dim == 64) {
-        _texDes[index].InitTexture(4 * num, 1, 4);
-    } else if (dim == 32) {
-        _texDes[index].InitTexture(2 * num, 1, 4);
-    }
-
+    _texDes[index].InitTexture(8 * num, 1, 4);
     _texDes[index].CopyFromHost((void *)descriptors);
 }
 
@@ -166,10 +157,9 @@ void SiftMatchCU::SetFeautreLocation(int index, const float *locations,
 }
 
 int SiftMatchCU::GetGuidedSiftMatch(int max_match, uint32_t match_buffer[][2],
-                                    float *H, float *F, float *E,
-                                    int lengthHomo, float distmax,
+                                    float *H, float *F, float distmax,
                                     float ratiomax, float hdistmax,
-                                    float fdistmax, int mbm, int dim) {
+                                    float fdistmax, int mbm) {
     if (_initialized == 0)
         return 0;
     if (_num_sift[0] <= 0 || _num_sift[1] <= 0)
@@ -178,32 +168,32 @@ int SiftMatchCU::GetGuidedSiftMatch(int max_match, uint32_t match_buffer[][2],
         return 0;
     ProgramCU::MultiplyDescriptorG(_texDes, _texDes + 1, _texLoc, _texLoc + 1,
                                    &_texDot, (mbm ? &_texCRT : NULL), H,
-                                   lengthHomo, hdistmax, F, fdistmax, E, dim);
-    return GetBestMatch(max_match, match_buffer, distmax, ratiomax, mbm, dim);
+                                   hdistmax, F, fdistmax);
+    return GetBestMatch(max_match, match_buffer, distmax, ratiomax, mbm);
 }
 
 int SiftMatchCU::GetSiftMatch(int max_match, uint32_t match_buffer[][2],
-                              float distmax, float ratiomax, int mbm, int dim) {
+                              float distmax, float ratiomax, int mbm) {
     if (_initialized == 0)
         return 0;
     if (_num_sift[0] <= 0 || _num_sift[1] <= 0)
         return 0;
     ProgramCU::MultiplyDescriptor(_texDes, _texDes + 1, &_texDot,
-                                  (mbm ? &_texCRT : NULL), dim);
-    return GetBestMatch(max_match, match_buffer, distmax, ratiomax, mbm, dim);
+                                  (mbm ? &_texCRT : NULL));
+    return GetBestMatch(max_match, match_buffer, distmax, ratiomax, mbm);
 }
 
 int SiftMatchCU::GetBestMatch(int max_match, uint32_t match_buffer[][2],
-                              float distmax, float ratiomax, int mbm, int dim) {
+                              float distmax, float ratiomax, int mbm) {
     sift_buffer.resize(_num_sift[0] + _num_sift[1]);
     int *buffer1 = (int *)&sift_buffer[0],
         *buffer2 = (int *)&sift_buffer[_num_sift[0]];
     _texMatch[0].InitTexture(_num_sift[0], 1);
-    ProgramCU::GetRowMatch(&_texDot, _texMatch, distmax, ratiomax, dim);
+    ProgramCU::GetRowMatch(&_texDot, _texMatch, distmax, ratiomax);
     _texMatch[0].CopyToHost(buffer1);
     if (mbm) {
         _texMatch[1].InitTexture(_num_sift[1], 1);
-        ProgramCU::GetColMatch(&_texCRT, _texMatch + 1, distmax, ratiomax, dim);
+        ProgramCU::GetColMatch(&_texCRT, _texMatch + 1, distmax, ratiomax);
         _texMatch[1].CopyToHost(buffer2);
     }
     int nmatch = 0, j;

@@ -26,8 +26,6 @@ if __name__ == '__main__':
     retrieval_path = data_path+'retrieval.txt'
 
     output_path = data_path
-    output_refined_path = data_path+'refined/'
-    os.system('mkdir '+output_refined_path)
 
     # if(args.start_from_ios_binary):
     #     ios_file = data_path+'Data.txt'
@@ -37,5 +35,8 @@ if __name__ == '__main__':
     os.system('./bin/run_reconstruction ' + output_path + ' '
               + camera_path + ' ' + output_path)
     if (args.estimate_scale):
+        output_refined_path = data_path+'refined/'
+        if not os.path.exists(output_refined_path):
+            os.system('mkdir '+output_refined_path)
         os.system('./bin/estimate_scale '+images_path+' '+output_path+' '
                   + output_refined_path)

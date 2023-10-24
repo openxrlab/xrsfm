@@ -134,8 +134,7 @@ void SiftMatchGL::InitSiftMatch() {
 }
 
 void SiftMatchGL::SetDescriptors(int index, int num,
-                                 const unsigned char *descriptors, int id,
-                                 int dim) {
+                                 const unsigned char *descriptors, int id) {
     if (_initialized == 0)
         return;
     if (index > 1)
@@ -431,10 +430,9 @@ void SiftMatchGL::LoadSiftMatchShadersGLSL() {
 }
 
 int SiftMatchGL::GetGuidedSiftMatch(int max_match, uint32_t match_buffer[][2],
-                                    float *H, float *F, float *E,
-                                    int lengthHomo, float distmax,
+                                    float *H, float *F, float distmax,
                                     float ratiomax, float hdistmax,
-                                    float fdistmax, int mbm, int dim) {
+                                    float fdistmax, int mbm) {
 
     int dw = _num_sift[1];
     int dh = _num_sift[0];
@@ -545,7 +543,7 @@ int SiftMatchGL::GetBestMatch(int max_match, uint32_t match_buffer[][2],
 }
 
 int SiftMatchGL::GetSiftMatch(int max_match, uint32_t match_buffer[][2],
-                              float distmax, float ratiomax, int mbm, int dim) {
+                              float distmax, float ratiomax, int mbm) {
     int dw = _num_sift[1];
     int dh = _num_sift[0];
     if (_initialized == 0)
@@ -643,15 +641,6 @@ int SiftMatchGPU::_VerifyContextGL() {
     return GlobalUtil::_GoodOpenGL;
 }
 
-void *SiftMatchGPU::operator new(size_t size) {
-    void *p = malloc(size);
-    if (p == 0) {
-        const std::bad_alloc ba;
-        throw ba;
-    }
-    return p;
-}
-
 SiftMatchGPU::SiftMatchGPU(int max_sift) {
     __max_sift = max(max_sift, 1024);
     __language = 0;
@@ -700,9 +689,8 @@ SiftMatchGPU::~SiftMatchGPU() {
 }
 
 void SiftMatchGPU::SetDescriptors(int index, int num,
-                                  const unsigned char *descriptors, int id,
-                                  int dim) {
-    __matcher->SetDescriptors(index, num, descriptors, id, dim);
+                                  const unsigned char *descriptors, int id) {
+    __matcher->SetDescriptors(index, num, descriptors, id);
 }
 
 void SiftMatchGPU::SetDescriptors(int index, int num, const float *descriptors,
@@ -715,47 +703,26 @@ void SiftMatchGPU::SetFeautreLocation(int index, const float *locations,
     __matcher->SetFeautreLocation(index, locations, gap);
 }
 int SiftMatchGPU::GetGuidedSiftMatch(int max_match, uint32_t match_buffer[][2],
-                                     float *H, float *F, float *E,
-                                     int lengthHomo, float distmax,
+                                     float *H, float *F, float distmax,
                                      float ratiomax, float hdistmax,
-                                     float fdistmax, int mutual_best_match,
-                                     int dim) {
-    if (H == NULL && F == NULL && E == NULL) {
+                                     float fdistmax, int mutual_best_match) {
+    if (H == NULL && F == NULL) {
         return __matcher->GetSiftMatch(max_match, match_buffer, distmax,
-                                       ratiomax, mutual_best_match, dim);
+                                       ratiomax, mutual_best_match);
     } else {
         float Z[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1}, ti = (1.0e+20F);
-        lengthHomo = H ? lengthHomo : 1;
-        if (__language == SIFTMATCH_GLSL) {
-            return __matcher->GetGuidedSiftMatch(
-                max_match, match_buffer, H ? H : Z, F ? F : Z, E ? E : Z,
-                lengthHomo, distmax, ratiomax, H ? hdistmax : ti,
-                F ? fdistmax : ti, mutual_best_match, dim);
-        } else if (__language == SIFTMATCH_CUDA) {
-            if (E == NULL) {
-                return __matcher->GetGuidedSiftMatch(
-                    max_match, match_buffer, H ? H : Z, F ? F : Z, E,
-                    lengthHomo, distmax, ratiomax, H ? hdistmax : ti,
-                    F ? fdistmax : ti, mutual_best_match, dim);
-            } else if (F == NULL) {
-                return __matcher->GetGuidedSiftMatch(
-                    max_match, match_buffer, H ? H : Z, F, E ? E : Z,
-                    lengthHomo, distmax, ratiomax, H ? hdistmax : ti,
-                    E ? fdistmax : ti, mutual_best_match, dim);
-            }
-        }
+
         return __matcher->GetGuidedSiftMatch(
-            max_match, match_buffer, H ? H : Z, F, E, lengthHomo, distmax,
-            ratiomax, H ? hdistmax : ti, F ? fdistmax : ti, mutual_best_match,
-            dim);
+            max_match, match_buffer, H ? H : Z, F ? F : Z, distmax, ratiomax,
+            H ? hdistmax : ti, F ? fdistmax : ti, mutual_best_match);
     }
 }
 
 int SiftMatchGPU::GetSiftMatch(int max_match, uint32_t match_buffer[][2],
                                float distmax, float ratiomax,
-                               int mutual_best_match, int dim) {
+                               int mutual_best_match) {
     return __matcher->GetSiftMatch(max_match, match_buffer, distmax, ratiomax,
-                                   mutual_best_match, dim);
+                                   mutual_best_match);
 }
 
 SiftMatchGPU *CreateNewSiftMatchGPU(int max_sift) {
