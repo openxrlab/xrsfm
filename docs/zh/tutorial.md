@@ -12,10 +12,10 @@
 XRSfM的尺度估计功能依赖于场景中预先放置的已知尺度的人工标志物，具有真实尺度的重建结果能够很好的支持面向AR的定位应用。
 
 
-### 1.匹配阶段
-输入:图像文件夹，检索文件，匹配策略类型
+### 1. 匹配阶段
+输入: 图像文件夹，检索文件，匹配策略类型
 
-输出:特征提取结果，特征匹配结果
+输出: 特征提取结果，特征匹配结果
 
 通过下列命令行运行匹配阶段
 ```
@@ -32,10 +32,10 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrieval")和基
 基于共视性的匹配策略在无序图像集上具有较高的匹配效率，其实现参考了ICRA2020论文“Efficient Covisibility-Based Image Matching for Large-Scale SfM”。
 
 
-### 2.重建阶段
-输入:特征提取结果，特征匹配结果，相机内参文件
+### 2. 重建阶段
+输入: 特征提取结果，特征匹配结果，相机内参文件
 
-输出:重建结果
+输出: 重建结果
 
 通过下列命令行运行重建阶段
 ```
@@ -51,22 +51,48 @@ XRSfM支持顺序匹配("sequential")、基于检索的匹配("retrieval")和基
 输出的重建结果由三部分组成“cameras.bin”,“images.bin”,"points.bin"。
 文件格式与知名的开源工作COLMAP相同，用户可以使用COLMAP的图像用户界面查看本项目的重建结果。
 
-### 3.尺度估计
-输入:图像文件夹，重建结果
+### 3. 尺度估计（可选）
+输入: 图像文件夹，重建结果
 
-输出:恢复尺度的重建结果
+输出: 恢复尺度的重建结果
 
 
-通过下列命令行运行重建阶段
+通过下列命令行运行尺度估计
 ```
-./bin/estimate_scale images_dir map_dir
+./bin/estimate_scale images_dir model_dir
 ```
 
-"map_dir" 指向重建结果的文件夹 (cameras.bin, images.bin, points.bin).
+“model_dir”存储二进制文件（camera.bin、images.bin、points.bin）。
 
 该步骤旨在恢复重建结果的真实比例。
 首先，确保输入的重建结果正确，否则整个过程无法正常运行。
 该程序将从图像中提取apriltag以计算比例，应确保每个ID的apriltag在场景中是唯一的。
+
+### 4. 生成彩色点云（可选）
+
+输入： 图像、重建结果
+
+
+
+输出： 彩色点云
+
+
+
+使用以下命令行运行彩色点云生成
+
+```
+
+python3 ./scripts/pointcloud_color_calculator.py --images_dir=/path/to/images/ --model_dir=/path/to/model/
+
+```
+
+
+
+“model_dir”存储二进制文件（camera.bin、images.bin、points.bin）。
+
+
+
+此步骤旨在计算每个3D点的颜色。为了提高效率，我们跳过了重建阶段的颜色计算，原始点云是黑色的。此步骤将基于图像颜色生成彩色点云。建议在执行此步骤之前保存原始重建结果。
 
 ## 运行你自己的数据
 

@@ -13,10 +13,10 @@ Reconstruction with monocular images will lose the real scale, XRSfM provides th
 The scale estimation function relies on the artificial markers placed in advance in the scene.
 The 3D structure with real scale can support ARDemo and other AR localization applications.
 
-### 1.Feature extraction and matching
-Input:images, retrieval file, matching strategy
+### 1. Feature extraction and matching
+Input: images, retrieval file, matching strategy
 
-Output:feature extraction result, feature matching result
+Output: feature extraction result, feature matching result
 
 Run matching stage with the following command line
 
@@ -34,14 +34,12 @@ The covisibility-based matching is a implementation of "Efficient Covisibility-B
 
 
 
-### 2.Scene reconstruction
-Input:feature extraction result, feature matching result, camera intrinsic file
-
-
+### 2. Scene reconstruction
+Input: feature extraction result, feature matching result, camera intrinsic file
 
 Output: reconsturction result
 
-Run sequential data with the following command line
+Run reconsturction stage with the following command line
 ```
 ./bin/run_reconstruction bin_path camera_path output_path init_id1 init_id2
 ```
@@ -55,21 +53,35 @@ In general, these two frames can be set to 0 and 5.
 
 The format of output binary files is is consistent with COLMAP, you can use colmap gui to view the reconstruction result.
 
-### 3.Estimate scale with apriltag
+### 3. Estimate scale with apriltag (Optional)
 Input: images, reconstruction results
 
 Output: reconstruction results of real scale
 
-Run sequential data with the following command line
+Run scale estimation with the following command line
 ```
 ./bin/estimate_scale images_dir map_dir
 ```
 
-"map_dir" store the map binary files (camera.bin, images.bin, points.bin).
+"model_dir" store the binary files (camera.bin, images.bin, points.bin).
 
 This step aims to recover the true scale of the reconstruction result.
 First, ensure that the input reconstruction results are correct, otherwise the whole process can not run normally.
 The program will extract the apriltag from images to calculate the scale, and ensure that the apriltag of each ID is unique in the scene.
+
+### 4. Generate colorful point cloud (Optional)
+Input: images, reconstruction results
+
+Output: a colorful point cloud
+
+Run this step with the following command line
+```
+python3 ./scripts/pointcloud_color_calculator.py --images_dir=/path/to/images/ --model_dir=/path/to/model/
+```
+
+"model_dir" store the binary files (camera.bin, images.bin, points.bin).
+
+This step aims to compute colors for every 3D points. For efficiency, we skip the color calculation in reconstruction stage and the original point cloud is black. This step will generate a colorful point cloud based on the image colors. It is recommended to save the original reconstruction results before performing this step.
 
 ### Run your data
 
