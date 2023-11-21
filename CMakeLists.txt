@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(xrsfm)
 
+option(XRPRIMER_ENABLED "Buinding based on XRPRIMER, if available" ON)
 option(CUDA_ENABLED "Whether to enable CUDA, if available" ON)
 set(CUDA_ARCHS "Auto" CACHE STRING "List of CUDA architectures for which to \
 generate code, e.g., Auto, All, Maxwell, Pascal, ...")
@@ -11,16 +12,21 @@ generate code, e.g., Auto, All, Maxwell, Pascal, ...")
 # Find packages
 ################################################################################
 
-set(XRPrimer_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../xrprimer/install/lib/cmake")
-find_package(XRPrimer REQUIRED)
+if(XRPRIMER_ENABLED)
+    set(XRPrimer_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../xrprimer/install/lib/cmake")
+    find_package(XRPrimer REQUIRED)
+else ()
+    find_package(Ceres REQUIRED)
+    find_package(OpenCV REQUIRED)
+    if(Ceres_VERSION VERSION_GREATER 2.1)
+        message(FATAL_ERROR "Ceres version ${Ceres_VERSION} is not supported. Please install a version less than 2.2.")
+    endif()
+endif ()
 
-# for sift gpu & view
 set(OpenGL_GL_PREFERENCE "LEGACY")#for const
 find_package(OpenGL REQUIRED)
 
 find_package(GLEW REQUIRED)
-
-# find_package(Pangolin REQUIRED)
 
 if (CUDA_ENABLED)
     find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
@@ -53,12 +59,12 @@ if (CUDA_FOUND)
         CUDA_SELECT_NVCC_ARCH_FLAGS(CUDA_ARCH_FLAGS ${CUDA_ARCHS})
 
         set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${CUDA_ARCH_FLAGS}")
-
-        # Fix for some combinations of CUDA and GCC (e.g. under Ubuntu 16.04).
         set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -D_FORCE_INLINES")
-        # Do not show warnings if the architectures are deprecated.
         set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Wno-deprecated-gpu-targets")
-        # set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --std=c++11")#need add
+        set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --use_fast_math")
+        set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --default-stream per-thread")
+
+        add_definitions("-D_MWAITXINTRIN_H_INCLUDED")
 
         message(STATUS "Enabling CUDA support (version: ${CUDA_VERSION_STRING},"
                 " archs: ${CUDA_ARCH_FLAGS_readable})")
@@ -87,18 +93,6 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 add_subdirectory(3rdparty/SiftGPU)
 add_subdirectory(3rdparty/apriltag)
-
-if (CUDA_ENABLED)
-    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --use_fast_math")
-
-    # Use a separate stream per thread to allow for concurrent kernel execution
-    # between multiple threads on the same device.
-    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --default-stream per-thread")
-
-    # Fix for Ubuntu 16.04.
-    add_definitions("-D_MWAITXINTRIN_H_INCLUDED")
-endif ()
-
 
 add_library(xrsfm
         src/base/map.cc
@@ -129,12 +123,7 @@ add_library(xrsfm
         src/geometry/colmap/optim/support_measurement.cc
 
         src/optimization/ba_solver.cc
-
         src/mapper/incremental_mapper.cc
-
-        # src/utility/view.cc
-        # src/utility/viewer_handler.cc
-        # src/utility/viewer.cc
         src/utility/io_ecim.cc
         )
 
@@ -148,14 +137,22 @@ target_include_directories(xrsfm
         ${EIGEN3_INCLUDE_DIRS}
         )
 
-target_link_libraries(xrsfm
+if(XRPRIMER_ENABLED)
+    target_link_libraries(xrsfm
         stdc++fs
         XRPrimer::xrprimer
         ${OpenCV_LIBS}
         ${GTEST_LIBRARIES}
-        # ${Pangolin_LIBRARIES}
         sift_gpu
         )
+else ()
+    target_link_libraries(xrsfm
+        stdc++fs
+        ${OpenCV_LIBS}
+        ${CERES_LIBRARIES}
+        sift_gpu
+        )
+endif()
 
 add_executable(run_matching src/run_matching.cc)
 target_link_libraries(run_matching xrsfm)

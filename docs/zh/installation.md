@@ -38,22 +38,33 @@ ln -sf /usr/share/cmake-3.21.0-linux-x86_64/bin/cmake /usr/bin/cmake
 ```shell
 git clone git@github.com:openxrlab/xrprimer.git
 cd xrprimer
-cmake -S . -Bbuild -DBUILD_EXTERNAL=ON -DCMAKE_BUILD_TYPE=Release
+git checkout xrslam-opencv3.4.7
+cmake -S. -Bbuild -DBUILD_EXTERNAL=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_PRECOMPILED_HEADERS=OFF
 cmake --build build --target install -j4
 ```
 
-安装 [Pangolin](https://github.com/stevenlovegrove/Pangolin)
-```shell
-git clone git@github.com:stevenlovegrove/Pangolin.git
-cd Pangolin && cmake -B build && cmake --build build -j4
-cd build
-sudo make install
+确保xrsfm和xrprimer的根目录保持一致。
 ```
+xrprimer
+├──
+...
+xrsfm
+├── docs
+├── scripts
+├── src
+...
+```
+
 
 编译 XRSfM
 ```shell
 git clone git@github.com:openxrlab/xrsfm.git
 cd xrsfm && cmake -B build && cmake --build build -j4
+```
+
+注意：如果您在编译xrprimer时遇到困难，可以尝试在没有xrprimer的情况下安装xrsfm。这需要OpenCV和Ceres-Solver。然后，您可以使用以下命令安装xrsfm：
+```shell
+cd xrsfm && cmake -B build -DXRPRIMER_ENABLED=OFF && cmake --build build -j4
 ```
 
 ### 通过Docker镜像运行
