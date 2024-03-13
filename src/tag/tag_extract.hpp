@@ -26,7 +26,6 @@ extern "C" {
 #include "optimization/cost_factor_ceres.h"
 #include "utility/io_ecim.hpp"
 #include "utility/timer.h"
-// #include "utility/viewer.h"
 
 namespace xrsfm {
 
@@ -48,7 +47,7 @@ tag_extract(std::string image_dir) {
     for (auto &image_name : image_vec) {
         std::string img_path = image_dir + image_name;
         cv::Mat frame, gray;
-        frame = cv::imread(img_path.c_str());
+        frame = cv::imread(img_path.c_str(), cv::IMREAD_IGNORE_ORIENTATION);
         cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
         image_u8_t im = {.width = gray.cols,
                          .height = gray.rows,
@@ -90,7 +89,7 @@ tag_extract(const std::string &image_dir,
     for (auto &image_name : image_vec) {
         std::string img_path = image_dir + image_name;
         cv::Mat frame, gray;
-        frame = cv::imread(img_path.c_str());
+        frame = cv::imread(img_path.c_str(), cv::IMREAD_IGNORE_ORIENTATION);
         cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
         image_u8_t im = {.width = gray.cols,
                          .height = gray.rows,

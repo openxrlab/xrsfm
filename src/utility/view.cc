@@ -22,8 +22,10 @@ void DrawMatchesColmap(const std::string dir_path, const FramePair &fp,
                        const Map &map) {
     auto &f1 = map.frames_[fp.id1];
     auto &f2 = map.frames_[fp.id2];
-    cv::Mat image1 = cv::imread(dir_path + f1.name);
-    cv::Mat image2 = cv::imread(dir_path + f2.name);
+    cv::Mat image1 =
+        cv::imread(dir_path + f1.name, cv::IMREAD_IGNORE_ORIENTATION);
+    cv::Mat image2 =
+        cv::imread(dir_path + f2.name, cv::IMREAD_IGNORE_ORIENTATION);
     DrawFeatureMatches(image1, image2, f1.points, f2.points, fp.matches);
     cv::waitKey();
 }

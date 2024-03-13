@@ -14,7 +14,6 @@
 #include "optim/loransac.h"
 #include "optim/ransac.h"
 #include "sift_extractor.h"
-#include "utility/io_ecim.hpp"
 #include "utility/timer.h"
 
 namespace xrsfm {
@@ -38,7 +37,8 @@ void FeatureExtract(const std::string &image_dir_path,
     for (int i = 0; i < frames.size(); i++) {
         Frame &frame = frames[i];
         frame.keypoints_.clear();
-        const cv::Mat image = cv::imread(image_dir_path + frame.name);
+        const cv::Mat image = cv::imread(image_dir_path + frame.name,
+                                         cv::IMREAD_IGNORE_ORIENTATION);
         if (image.rows == 0) {
             std::cout << "Can't read " << image_dir_path + frame.name
                       << std::endl;

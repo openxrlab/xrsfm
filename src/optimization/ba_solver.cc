@@ -672,7 +672,6 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
     ceres::Solve(solver_options, &problem, &summary);
     // std::cout << summary.BriefReport() << "\n";
     PrintSolverSummary(summary);
-    map.Camera(0).log();
 
     printf("kf: %d/%d\n", num_kf, num_rf);
     UpdateByRefFrame(map);

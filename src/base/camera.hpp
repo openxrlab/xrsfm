@@ -10,6 +10,24 @@ namespace xrsfm {
 class Camera {
   public:
     Camera() {}
+    Camera(int _id, std::string mode_name, int w, int h) {
+        id_ = _id;
+        width_ = w;
+        height_ = h;
+        if (mode_name == "SIMPLE_PINHOLE") {
+            model_id_ = 0;
+        } else if (mode_name == "PINHOLE") {
+            model_id_ = 1;
+        } else if (mode_name == "SIMPLE_RADIAL") {
+            model_id_ = 2;
+        } else if (mode_name == "RADIAL") {
+            model_id_ = 3;
+        } else if (mode_name == "OPENCV") {
+            model_id_ = 4;
+        }
+        params_.resize(camera_model_param_size(model_id_));
+        is_valid = true;
+    }
     Camera(int _id, int _model_id) {
         id_ = _id;
         model_id_ = _model_id;
@@ -26,6 +44,7 @@ class Camera {
 
     uint32_t id_ = -1;
     uint32_t model_id_ = -1;
+    int width_, height_;
     std::vector<double> params_;
     bool is_valid;
 

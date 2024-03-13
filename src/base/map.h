@@ -115,9 +115,6 @@ class CorrespondenceGraph {
 
 class Map {
   public:
-    std::vector<cv::Mat> images_; // for debug
-
-    // std::vector<Camera> cameras_;
     std::vector<Track> tracks_;
     std::vector<Frame> frames_;
     std::vector<FramePair> frame_pairs_;

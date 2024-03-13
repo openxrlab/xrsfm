@@ -12,21 +12,11 @@ inline double ToDeg(double theta) { return theta * 180 / M_PI; }
 
 class ErrorDetector {
   public:
-    Init(std::string image_dir, bool debug) {
-        debug_ = debug;
-        image_dir_ = image_dir;
-    };
-
     bool CheckAllRelativePose(Map &map, int frame_id,
                               std::set<int> &bad_matched_frame_ids);
     bool IsGoodRelativePose(const Map &map, const FramePair &fp,
                             std::vector<char> &inlier_mask);
-    void IsGoodRelativePose_Debug(Map &map, FramePair &fp,
-                                  const std::vector<char> &inlier_mask);
-    // void StoreRelativePose(Map &map, int frame_id, std::ofstream &file);
 
-    bool debug_;
-    // ViewerThread *viewerTh_;
     std::string image_dir_;
 };
 
