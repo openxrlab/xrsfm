@@ -100,29 +100,6 @@ bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp,
     return true;
 }
 
-void ErrorDetector::IsGoodRelativePose_Debug(
-    Map &map, FramePair &fp, const std::vector<char> &inlier_mask) {
-    auto &frame1 = map.frames_[fp.id1];
-    auto &frame2 = map.frames_[fp.id2];
-    cv::Mat image1 = cv::imread(image_dir_ + frame1.name);
-    cv::Mat image2 = cv::imread(image_dir_ + frame2.name);
-    if (image1.empty() || image2.empty()) {
-        printf("%s\n", (image_dir_ + frame1.name).c_str());
-    } else {
-        // DrawFeatureMatches(image1, image2, frame1.points, frame2.points,
-        //                    fp.matches, inlier_mask);
-        // DrawFeatureMatches1(image1, frame1.points, frame2.points, fp.matches,
-        //                     inlier_mask);
-    }
-    // frame1.flag_for_view = frame2.flag_for_view = true;
-    // viewer_->Draw(map, true);
-    // frame1.flag_for_view = frame2.flag_for_view = false;
-    frame1.flag_for_view = frame2.flag_for_view = true;
-    // viewerTh_->update_map(map);
-    frame1.flag_for_view = frame2.flag_for_view = false;
-    cv::waitKey();
-}
-
 bool ErrorDetector::CheckAllRelativePose(Map &map, int frame_id,
                                          std::set<int> &bad_matched_frame_ids) {
     bad_matched_frame_ids.clear();
@@ -170,7 +147,6 @@ bool ErrorDetector::CheckAllRelativePose(Map &map, int frame_id,
             } else {
                 int bad_neighbor_id = fp.id1 == frame_id ? fp.id2 : fp.id1;
                 bad_matched_frame_ids.insert(bad_neighbor_id);
-                // if (debug_) IsGoodRelativePose_Debug(map, fp, inlier_mask);
             }
         }
     }
@@ -182,21 +158,4 @@ bool ErrorDetector::CheckAllRelativePose(Map &map, int frame_id,
     return true;
 }
 
-// void ErrorDetector::StoreRelativePose(Map &map, int frame_id,
-//                                       std::ofstream &file) {
-//     for (const auto id : map.frameid2framepairids_[frame_id]) {
-//         auto &fp = map.frame_pairs_[id];
-//         const auto &frame1 = map.frames_[fp.id1];
-//         const auto &frame2 = map.frames_[fp.id2];
-//         if (frame1.registered && frame2.registered && frame1.is_keyframe &&
-//             frame2.is_keyframe) {
-//             file << id << std::endl;
-//             file << frame1.Tcw.q.coeffs().transpose() << " "
-//                  << frame1.Tcw.t.transpose() << std::endl;
-//             file << frame2.Tcw.q.coeffs().transpose() << " "
-//                  << frame2.Tcw.t.transpose() << std::endl;
-//         }
-//     }
-//     file << "-1" << std::endl;
-// }
 } // namespace xrsfm

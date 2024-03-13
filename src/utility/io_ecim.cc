@@ -225,6 +225,10 @@ void WritePoints3DBinary(const std::string &path,
 }
 
 void WriteColMapDataBinary(const std::string &output_path, const Map &map) {
+    namespace fs = std::experimental::filesystem;
+    if (!fs::is_directory(output_path)) {
+        fs::create_directories(output_path);
+    }
     WriteCamerasBinary(output_path + "cameras.bin", map.camera_map_);
     WriteImagesBinary(output_path + "images.bin", map.frames_);
     WritePoints3DBinary(output_path + "points3D.bin", map.tracks_);

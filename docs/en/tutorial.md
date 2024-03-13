@@ -126,5 +126,5 @@ workspace
 ```
 Then run the following command line to reconstruct
 ```
-python3 ./scripts/auto_reconstruction.py --workspace_path ${workspace_path}$ --estimate_scale
+python3 ./scripts/run_test_data.py --workspace_path ${workspace_path}$ --estimate_scale
 ```

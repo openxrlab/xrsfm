@@ -12,8 +12,16 @@
 
 using namespace xrsfm;
 
-void GetFeatures(const std::string &images_path, const std::string &ftr_path,
-                 std::vector<Frame> &frames) {
+void GetFeatures(const std::string &images_path,
+                 const std::vector<std::string> &image_names,
+                 const std::string &ftr_path, std::vector<Frame> &frames) {
+    const int num_image = image_names.size();
+    frames.resize(num_image);
+    for (int i = 0; i < num_image; ++i) {
+        frames[i].id = i;
+        frames[i].name = image_names[i];
+    }
+
     std::ifstream ftr_bin(ftr_path);
     if (ftr_bin.good()) {
         ReadFeatures(ftr_path, frames);
@@ -33,7 +41,8 @@ void GetImageSizeVec(const std::string &images_path,
         LoadImageSize(path, image_size);
     } else {
         for (const auto &image_name : image_names) {
-            const cv::Mat image = cv::imread(images_path + image_name);
+            const cv::Mat image = cv::imread(images_path + image_name,
+                                             cv::IMREAD_IGNORE_ORIENTATION);
             image_size.push_back(ImageSize(image.cols, image.rows));
         }
         SaveImageSize(path, image_size);
@@ -173,27 +182,25 @@ int main(int argc, const char *argv[]) {
     const std::string fp_init_path = output_path + "fp_init.bin";
     const std::string fp_path = output_path + "fp.bin";
 
-    // 1.read imagesstd::filesystem
+    // 1.read images
     if (!std::experimental::filesystem::exists(images_path)) {
         std::cout << "image path not exists :" << images_path << "\n";
         exit(-1);
     }
     std::vector<std::string> image_names;
     LoadImageNames(images_path, image_names);
-    std::vector<ImageSize> image_size_vec;
-    GetImageSizeVec(images_path, image_names, size_path, image_size_vec);
     std::map<std::string, int> name2id;
     const int num_image = image_names.size();
-    std::vector<Frame> frames(num_image);
     for (int i = 0; i < num_image; ++i) {
-        frames[i].id = i;
-        frames[i].name = image_names[i];
         name2id[image_names[i]] = i;
     }
     std::cout << "Load Image Info Done.\n";
 
     // 2.feature extraction
-    GetFeatures(images_path, ftr_path, frames);
+    std::vector<Frame> frames;
+    std::vector<ImageSize> image_size_vec;
+    GetFeatures(images_path, image_names, ftr_path, frames);
+    GetImageSizeVec(images_path, image_names, size_path, image_size_vec);
     std::cout << "Extract Features Done.\n";
 
     // 5.image matching

@@ -16,7 +16,6 @@
 #include "optim/loransac.h"
 #include "optim/ransac.h"
 #include "sift_extractor.h"
-#include "utility/io_ecim.hpp"
 #include "utility/timer.h"
 #include "match_expansion.h"
 

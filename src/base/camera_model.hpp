@@ -219,17 +219,6 @@ struct OpenCVCameraModel {
 
 #endif
 
-inline int camera_model_param_size(int model_id) {
-#define CAMERA_MODEL_CASE(CameraModel)                                         \
-    if (model_id == CameraModel::kModelId)                                     \
-        return CameraModel::kNumParams;
-
-    CAMERA_MODEL_CASES
-#undef CAMERA_MODEL_CASE
-    assert(false);
-    return -1;
-}
-
 inline int index_fx(int model_id) {
 #define CAMERA_MODEL_CASE(CameraModel)                                         \
     if (model_id == CameraModel::kModelId)                                     \
@@ -284,6 +273,17 @@ inline int index_distort(int model_id) {
     assert(false);
     return -1;
 };
+
+inline int camera_model_param_size(int model_id) {
+#define CAMERA_MODEL_CASE(CameraModel)                                         \
+    if (model_id == CameraModel::kModelId)                                     \
+        return CameraModel::kNumParams;
+
+    CAMERA_MODEL_CASES
+#undef CAMERA_MODEL_CASE
+    assert(false);
+    return -1;
+}
 
 } // namespace xrsfm
 #endif

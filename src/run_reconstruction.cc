@@ -18,10 +18,12 @@ void PreProcess(const std::string dir_path, const std::string camera_path,
     std::cout << "ReadFramePairs\n";
 
     // set cameras & image name
-    Camera seq = ReadCameraIOSRecord(camera_path);
+    std::map<int, Camera> cameras = ReadCamerasText(camera_path);
+    CHECK_EQ(cameras.size(), 1);
+    const int camera_id = cameras.begin()->first;
 
     for (auto &frame : frames) {
-        frame.camera_id = seq.id_;
+        frame.camera_id = camera_id;
     }
 
     // convert keypoint to points(for reconstruction)
@@ -36,7 +38,7 @@ void PreProcess(const std::string dir_path, const std::string camera_path,
         }
     }
 
-    map.camera_map_[seq.id_] = seq;
+    map.camera_map_ = cameras;
     map.frames_ = frames;
     map.frame_pairs_ = frame_pairs;
 

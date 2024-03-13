@@ -19,23 +19,33 @@
 
 namespace xrsfm {
 
-inline Camera ReadCameraIOSRecord(const std::string &file_name) {
-    Camera cam(0, 2);
+inline std::map<int, Camera> ReadCamerasText(const std::string &path) {
+    std::map<int, Camera> cameras;
 
-    std::ifstream file(file_name, std::ios::out);
+    std::ifstream file(path);
+    CHECK(file.is_open()) << path;
+
     std::string line;
-    while (std::getline(file, line)) {
-        if (line[0] == '#')
-            continue;
-        std::string image_name, model_name;
-        std::stringstream ss(line);
-        ss >> image_name >> model_name;
-        ss >> cam.params_[0] >> cam.params_[0] >> cam.params_[1] >>
-            cam.params_[2] >> cam.params_[3];
-        break;
-    }
+    std::string item;
 
-    return cam;
+    while (std::getline(file, line)) {
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+
+        std::stringstream ss(line);
+        int camera_id, width, height;
+        std::string model_name;
+        ss >> camera_id >> model_name >> width >> height;
+        Camera camera(camera_id, model_name, width, height);
+
+        for (int i = 0; i < camera.params_.size(); ++i) {
+            ss >> camera.params_[i];
+        }
+        cameras.emplace(camera_id, camera);
+    }
+    file.close();
+    return cameras;
 }
 
 inline void ReadCameraInfo(const std::string &file_name,
