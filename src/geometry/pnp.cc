@@ -6,7 +6,6 @@
 
 #include "colmap/estimators/absolute_pose.h"
 #include "colmap/optim/loransac.h"
-#include "optimization/ba_solver.h"
 #include "optimization/cost_factor_ceres.h"
 #include "umeyama.h"
 

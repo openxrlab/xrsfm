@@ -109,11 +109,8 @@ void Map::RemoveRedundancyPoints() {
 
         for (int k = 0; k < nid2id.size(); ++k) {
             frame.points.at(k) = frame.points.at(nid2id.at(k));
-            // frame.points_normalized.at(k) =
-            // frame.points_normalized.at(nid2id.at(k));
         }
         frame.points.resize(nid2id.size());
-        // frame.points_normalized.resize(nid2id.size());
         frame.track_ids_.assign(nid2id.size(), -1);
     }
     for (auto &fp : frame_pairs_) {

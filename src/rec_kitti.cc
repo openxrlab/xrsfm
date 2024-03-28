@@ -22,11 +22,11 @@ void PreProcess(const std::string dir_path, const int camera_param_id,
     // set cameras
     Camera seq;
     if (camera_param_id == 0) {
-        seq = Camera(0, 718.856, 718.856, 607.1928, 185.27157, 0.0); // 00-02
+        seq = Camera(0, 718.856, 607.1928, 185.27157); // 00-02
     } else if (camera_param_id == 1) {
-        seq = Camera(0, 721.5377, 721.5377, 609.5593, 172.854, 0.0); // 03
+        seq = Camera(0, 721.5377, 609.5593, 172.854); // 03
     } else if (camera_param_id == 2) {
-        seq = Camera(0, 707.0912, 707.0912, 601.8873, 183.1104, 0.0); // 04-12
+        seq = Camera(0, 707.0912, 601.8873, 183.1104); // 04-12
     }
     cameras[seq.id_] = seq;
     for (auto &frame : frames) {
@@ -37,14 +37,11 @@ void PreProcess(const std::string dir_path, const int camera_param_id,
     for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
-        // frame.points_normalized.clear();
         frame.track_ids_.assign(num_points, -1);
         for (const auto &kpt : frame.keypoints_) {
             const auto &pt = kpt.pt;
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
-            // ImageToNormalized(cameras[0], ept, eptn);
             frame.points.emplace_back(ept);
-            // frame.points_normalized.emplace_back(eptn);
         }
     }
 

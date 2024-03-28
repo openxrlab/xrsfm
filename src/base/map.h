@@ -45,7 +45,7 @@ class Frame {
 
     // reconstruction
     std::vector<vector2> points;
-    std::vector<vector2> points_normalized;
+    std::vector<vector2> points_normalized; // TODO remove
     std::vector<int> track_ids_;
     Pose Tcw, tcw_old;
 

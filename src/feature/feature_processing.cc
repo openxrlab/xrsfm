@@ -41,7 +41,6 @@ void SetUpFramePoints(std::vector<Frame> &frames) {
     for (auto &frame : frames) {
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
-        frame.points_normalized.clear();
         for (const auto &kpt : frame.keypoints_) {
             const auto &pt = kpt.pt;
             frame.points.emplace_back(pt.x, pt.y);

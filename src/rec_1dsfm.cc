@@ -31,7 +31,6 @@ void PreProcess(const std::string bin_path, Map &map) {
         const auto &camera = cameras.at(frame.camera_id);
         const int num_points = frame.keypoints_.size();
         frame.points.clear();
-        // frame.points_normalized.clear();
         frame.uint_descs_.resize(0, 0);
         frame.track_ids_.assign(num_points, -1);
         for (const auto &kpt : frame.keypoints_) {
@@ -39,7 +38,6 @@ void PreProcess(const std::string bin_path, Map &map) {
             Eigen::Vector2d ept(pt.x, pt.y), eptn;
             ImageToNormalized(camera, ept, eptn);
             frame.points.emplace_back(ept);
-            // frame.points_normalized.emplace_back(eptn);
         }
     }
 

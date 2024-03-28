@@ -19,11 +19,10 @@
 namespace xrsfm {
 
 void FeatureExtract(const std::string &image_dir_path,
-                    std::vector<Frame> &frames) {
+                    std::vector<Frame> &frames,
+                    std::vector<ImageSize> &image_size) {
 #ifndef USE_ORB
     constexpr int _feature_num = 8192;
-    // std::cout << "FeatureExtract:  feature number = " << _feature_num <<
-    // "\n";
     SiftExtractor sift(_feature_num);
 #else
     const int _feature_num = 2048;
@@ -34,6 +33,7 @@ void FeatureExtract(const std::string &image_dir_path,
     ORB_SLAM2::OrbExtractor orb(_feature_num, _lever_ratio, _lever_num, _initTh,
                                 _minTh);
 #endif
+
     for (int i = 0; i < frames.size(); i++) {
         Frame &frame = frames[i];
         frame.keypoints_.clear();
@@ -44,6 +44,9 @@ void FeatureExtract(const std::string &image_dir_path,
                       << std::endl;
             exit(0);
         }
+
+        image_size.push_back(ImageSize(image.cols, image.rows));
+
 #ifndef USE_ORB
         // std::cout << image_dir_path + frame.name << std::endl;
         sift.ExtractUINT8(image, frame.keypoints_, frame.uint_descs_);

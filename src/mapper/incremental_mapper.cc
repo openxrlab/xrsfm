@@ -49,7 +49,6 @@ void IncrementalMapper::Reconstruct(Map &map) {
             map.frames_[frame_id].registered_fail = true;
             continue;
         }
-        map.current_frame_id_ = frame_id;
         timer.reg.stop();
 
         // 2) Check & Correct Frame Pose

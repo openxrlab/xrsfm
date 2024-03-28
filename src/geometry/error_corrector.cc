@@ -143,27 +143,19 @@ inline bool TryLocate(Map &map, const int frame_id,
 
 inline void MergeTrackLoop(Map &map, Frame &frame1, Frame &frame2) {
     for (size_t i = 0; i < frame1.track_ids_.size(); ++i) {
-        const int track_id =
-            frame2.track_ids_[i]; // not add num cor have point 3d
+        // merge track in two local_map
+        const int track_id = frame2.track_ids_[i];
         if (track_id == -1)
             continue;
         auto &track = map.tracks_[track_id];
         if (track.observations_.count(frame1.id) != 0)
-            continue; // may compare
+            continue;
 
-        vector3 p3d = frame2.Tcw.q * track.point3d_ + frame2.Tcw.t;
-        vector3 p3d1 = p3d.z() * frame1.points_normalized[i].homogeneous();
-        vector3 p3d2 = frame1.Tcw.q.inverse() * (p3d1 - frame1.Tcw.t);
-
-        bool merge = false;
         const int track_id1 = frame1.track_ids_[i];
-        if (track_id1 != -1) { // merge
+        if (track_id1 != -1) { //  try merge track1 into track
             auto &track1 = map.tracks_[track_id1];
-            // track.point3d_ = (track.point3d_ + track1.point3d_) / 2;
             for (const auto &[t_frame_id, t_p2d_id] : track1.observations_) {
-                if (track.observations_.count(t_frame_id) ==
-                    0) { // if track have t_frame_id obs, it map injective
-                         // injective
+                if (track.observations_.count(t_frame_id) == 0) {
                     track.observations_[t_frame_id] = t_p2d_id;
                     map.frames_[t_frame_id].track_ids_[t_p2d_id] = track_id;
                 } else {
@@ -172,15 +164,12 @@ inline void MergeTrackLoop(Map &map, Frame &frame1, Frame &frame2) {
                 }
             }
             track1.outlier = true;
-            merge = true;
+            continue;
         }
 
-        if (!merge) {
-            // track.point3d_ = (track.point3d_ + p3d2) / 2;
-            frame1.track_ids_[i] = track_id;
-            track.observations_[frame1.id] = i;
-            map.AddNumCorHavePoint3D(frame1.id, i);
-        }
+        frame1.track_ids_[i] = track_id;
+        track.observations_[frame1.id] = i;
+        map.AddNumCorHavePoint3D(frame1.id, i);
     }
 }
 

@@ -79,6 +79,7 @@ void ReadPoints3DBinary(const std::string &path, std::map<int, Track> &tracks) {
             read_data(file, p2d_id);
             track.observations_[frame_id] = p2d_id;
         }
+        track.outlier = false;
         tracks[id] = track;
     }
 }
@@ -293,6 +294,10 @@ void WritePoints3DBinary2(const std::string &path,
 }
 
 void WriteColMapDataBinary2(const std::string &output_path, const Map &map) {
+    namespace fs = std::experimental::filesystem;
+    if (!fs::is_directory(output_path)) {
+        fs::create_directories(output_path);
+    }
     WriteCamerasBinary(output_path + "cameras.bin", map.camera_map_);
     WriteImagesBinary2(output_path + "images.bin", map.frame_map_);
     WritePoints3DBinary2(output_path + "points3D.bin", map.track_map_);

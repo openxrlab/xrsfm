@@ -32,7 +32,8 @@ void OrbMatch(const cv::Mat &descs1, const cv::Mat &descs2,
               std::vector<Match> &matches);
 
 void FeatureExtract(const std::string &image_dir_path,
-                    std::vector<Frame> &frames);
+                    std::vector<Frame> &frames,
+                    std::vector<ImageSize> &image_size);
 
 void FeatureMatching(const std::vector<Frame> &frames,
                      const std::vector<std::pair<int, int>> &candidate_pairs,
