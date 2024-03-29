@@ -28,10 +28,13 @@ find_package(OpenGL REQUIRED)
 
 find_package(GLEW REQUIRED)
 
+find_package(Qt5 5.4 COMPONENTS Core OpenGL Widgets)
+
 if (CUDA_ENABLED)
     find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
     message(STATUS "found")
 endif ()
+
 
 ################################################################################
 # Compiler specific configuration
@@ -126,7 +129,13 @@ add_library(xrsfm
         src/optimization/ba_solver.cc
         src/mapper/incremental_mapper.cc
         src/utility/io_ecim.cc
+
+        src/ui/point_painter.cc
+        src/ui/project_widget.cc
+        src/ui/model_viewer_widget.cc
+        src/ui/resources.qrc
         )
+ 
 
 target_include_directories(xrsfm
         PUBLIC
@@ -136,6 +145,9 @@ target_include_directories(xrsfm
         ${CMAKE_SOURCE_DIR}/3rdparty/SiftGPU
         ${CMAKE_SOURCE_DIR}/3rdparty/apriltag
         ${EIGEN3_INCLUDE_DIRS}
+        ${Qt5Core_INCLUDE_DIRS}
+        ${Qt5OpenGL_INCLUDE_DIRS}
+        ${Qt5Widgets_INCLUDE_DIRS}
         )
 
 if(XRPRIMER_ENABLED)
@@ -152,26 +164,32 @@ else ()
         ${OpenCV_LIBS}
         ${CERES_LIBRARIES}
         sift_gpu
+        ${Qt5Core_LIBRARIES}
+        ${Qt5OpenGL_LIBRARIES}
+        ${Qt5Widgets_LIBRARIES}
         )
 endif()
 
-add_executable(run_matching src/run_matching.cc)
-target_link_libraries(run_matching xrsfm)
+# add_executable(run_matching src/run_matching.cc)
+# target_link_libraries(run_matching xrsfm)
 
-add_executable(run_reconstruction src/run_reconstruction.cc)
-target_link_libraries(run_reconstruction xrsfm)
+# add_executable(run_reconstruction src/run_reconstruction.cc)
+# target_link_libraries(run_reconstruction xrsfm)
 
-add_executable(run_triangulation src/run_triangulation.cc)
-target_link_libraries(run_triangulation xrsfm)
+# add_executable(run_triangulation src/run_triangulation.cc)
+# target_link_libraries(run_triangulation xrsfm)
 
-add_executable(unpack_collect_data src/unpack_collect_data.cc)
-target_link_libraries(unpack_collect_data xrsfm)
+# add_executable(unpack_collect_data src/unpack_collect_data.cc)
+# target_link_libraries(unpack_collect_data xrsfm)
 
-add_executable(estimate_scale src/estimate_scale.cc)
-target_link_libraries(estimate_scale xrsfm apriltag)
+# add_executable(estimate_scale src/estimate_scale.cc)
+# target_link_libraries(estimate_scale xrsfm apriltag)
 
-add_executable(rec_1dsfm src/rec_1dsfm.cc)
-target_link_libraries(rec_1dsfm xrsfm)
+# add_executable(rec_1dsfm src/rec_1dsfm.cc)
+# target_link_libraries(rec_1dsfm xrsfm)
 
-add_executable(rec_kitti src/rec_kitti.cc)
-target_link_libraries(rec_kitti xrsfm)
+# add_executable(rec_kitti src/rec_kitti.cc)
+# target_link_libraries(rec_kitti xrsfm)
+
+add_executable(test_gui src/test_gui.cc)
+target_link_libraries(test_gui xrsfm)

@@ -117,11 +117,11 @@ class Map {
   public:
     std::vector<Track> tracks_;
     std::vector<Frame> frames_;
-    std::vector<FramePair> frame_pairs_;
 
     std::map<int, Camera> camera_map_;
     std::map<int, Frame> frame_map_;
     std::map<int, Track> track_map_;
+    std::vector<FramePair> frame_pairs_;
 
     // for build
     std::unordered_map<int, int> frameid2pairid_;
@@ -215,6 +215,6 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
 
 void UpdateByRefFrame(Map &map);
 
-bool CheckMeaNumber(Map &map, int frame_id);
 } // namespace xrsfm
+
 #endif // XRSFM_SRC_BASE_MAP_H

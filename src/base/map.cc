@@ -141,63 +141,6 @@ int Map::MaxPoint3dFrameId() {
         }
     }
 
-    // bool exit_good_neibor = false;
-    // for (const auto id : frameid2framepairids_[best_id]) {
-    //   auto &fp = frame_pairs_[id];
-    //   const auto &frame1 = frames_[fp.id1];
-    //   const auto &frame2 = frames_[fp.id2];
-    //   if (fp.matches.size() < 100) continue;
-    //   if ((fp.id1 == best_id && frame2.registered) || (fp.id2 == best_id &&
-    //   frame1.registered)) {
-    //     exit_good_neibor = true;
-    //     break;
-    //   }
-    // }
-
-    // for (const auto &frame : frames_) {
-    //   if (frame.registered) continue;
-    //   int num_p3d = 0;
-    //   const auto &corrs_vector =
-    //   corr_graph_.frame_node_vec_[frame.id].corrs_vector; for (const auto
-    //   &corrs : corrs_vector) {
-    //     for (const auto &[t_frame_id, t_p2d_id] : corrs) {
-    //       const auto &t_frame = frames_[t_frame_id];
-    //       if (!t_frame.registered || t_frame.track_ids_[t_p2d_id] == -1)
-    //       continue; const auto &track =
-    //       tracks_[t_frame.track_ids_[t_p2d_id]]; if (track.outlier) continue;
-    //       num_p3d++;
-    //       break;
-    //     }
-    //   }
-    //   if (num_p3d > max_num_p3d1) {
-    //     max_num_p3d1 = num_p3d;
-    //     best_id1 = frame.id;
-    //   }
-    // }
-
-    // for (const auto &frame : frames_) {
-    //   if (frame.registered) continue;
-    //   const auto &corrs_vector =
-    //   corr_graph_.frame_node_vec_[frame.id].corrs_vector; for (int i = 0; i <
-    //   corrs_vector.size(); ++i) {
-    //     int num_p3d = 0;
-    //     const auto &corrs = corrs_vector[i];
-    //     for (const auto &[t_frame_id, t_p2d_id] : corrs) {
-    //       const auto &t_frame = frames_[t_frame_id];
-    //       if (!t_frame.registered || t_frame.track_ids_[t_p2d_id] == -1)
-    //       continue; const auto &track =
-    //       tracks_[t_frame.track_ids_[t_p2d_id]]; if (track.outlier) continue;
-    //       num_p3d++;
-    //     }
-
-    //     if (frame.num_correspondences_have_point3D_[i] != num_p3d) {
-    //       printf("error %d %d %d %d %d\n", frame.id, i,
-    //       frame.num_correspondences_have_point3D_[i], num_p3d);
-    //       CHECK(frame.num_correspondences_have_point3D_[i] == num_p3d);
-    //     }
-    //   }
-    // }
-    // CHECK(max_num_p3d1 == frames_[best_id1].num_visible_points3D_);
     printf("Frame id: %d visible point3d num: %d \n", best_id, max_num_p3d);
     if (max_num_p3d < 20)
         return -1;

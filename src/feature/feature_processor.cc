@@ -229,4 +229,5 @@ void FeatureProcessor::Run() {
     timer.stop();
     timer.print();
 }
+
 } // namespace xrsfm
