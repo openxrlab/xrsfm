@@ -135,7 +135,7 @@ add_library(xrsfm
         src/ui/model_viewer_widget.cc
         src/ui/resources.qrc
         )
- 
+
 
 target_include_directories(xrsfm
         PUBLIC
