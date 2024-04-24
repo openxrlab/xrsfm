@@ -40,8 +40,7 @@ void PreProcess(const std::string dir_path, const int camera_param_id,
         frame.track_ids_.assign(num_points, -1);
         for (const auto &kpt : frame.keypoints_) {
             const auto &pt = kpt.pt;
-            Eigen::Vector2d ept(pt.x, pt.y), eptn;
-            frame.points.emplace_back(ept);
+            frame.points.emplace_back(vector2(pt.x, pt.y));
         }
     }
 
