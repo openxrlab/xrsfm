@@ -170,8 +170,8 @@ else ()
         )
 endif()
 
-# add_executable(run_matching src/run_matching.cc)
-# target_link_libraries(run_matching xrsfm)
+add_executable(run_matching src/run_matching.cc)
+target_link_libraries(run_matching xrsfm)
 
 # add_executable(run_reconstruction src/run_reconstruction.cc)
 # target_link_libraries(run_reconstruction xrsfm)
@@ -188,8 +188,8 @@ endif()
 # add_executable(rec_1dsfm src/rec_1dsfm.cc)
 # target_link_libraries(rec_1dsfm xrsfm)
 
-# add_executable(rec_kitti src/rec_kitti.cc)
-# target_link_libraries(rec_kitti xrsfm)
+add_executable(rec_kitti src/rec_kitti.cc)
+target_link_libraries(rec_kitti xrsfm)
 
 add_executable(test_gui src/test_gui.cc)
 target_link_libraries(test_gui xrsfm)

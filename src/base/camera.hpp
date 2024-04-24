@@ -36,8 +36,10 @@ class Camera {
     }
     Camera(int _id, double fxy, double cx, double cy) {
         id_ = _id;
-        model_id_ = 0;
-        params_ = {fxy, cx, cy};
+        // model_id_ = 0;
+        // params_ = {fxy, cx, cy};
+        model_id_ = 2;
+        params_ = {fxy, cx, cy, 0};
         std::cout << params_.size() << std::endl;
         is_valid = true;
     }
