@@ -33,11 +33,7 @@ class MatchMap {
 
     void MakeTrack(const Map &map);
 
-    void MakeTrack(const std::vector<Frame> &frames);
-
-    std::vector<std::map<int, int>> MakeIdPair(); // map::
-
-    int GetMatches(int frame_id1, int frame_id2, std::vector<Match> &matches);
+    std::vector<std::map<int, int>> MakeIdPair();
 
     int GetMatcheNum(int frame_id1, int frame_id2);
 
@@ -47,8 +43,6 @@ class MatchMap {
                       const std::map<std::string, int> &name_map,
                       std::map<int, std::vector<int>> &retrieval_rank_of_frames,
                       bool skip_matches = true);
-
-    static void LoadMatch(const Map &map, std::vector<FramePair> &frame_pairs);
 
     void MakeCorrGraph(const Map &map);
 
@@ -65,16 +59,14 @@ class MatchMap {
     void PrintFramesTrack();
     void PrintPatchIdOfFeatures();
     void PrintFeaturesOfPatch();
-    void PrintImageSize();
 
-    std::vector<ImageSize> image_size;
-
-    std::vector<FramePair> m_frame_pairs;
     size_t m_num_frame;
-    CorrespondenceGraph corr_graph;
+    size_t m_track_num;
+    std::vector<ImageSize> image_size;
+    std::vector<FramePair> m_frame_pairs;
     std::vector<std::vector<int>> m_frames_track_ids;
     std::vector<TrackExpansionWrapper> m_tracks;
-    size_t m_track_num;
+    CorrespondenceGraph corr_graph;
 
     struct PatchTrack {
         std::map<int, int> m_observations;
@@ -86,10 +78,8 @@ class MatchMap {
     int row_num;
     int patch_num;
     int m_patch_track_num;
-    std::vector<PatchTrack> m_patch_tracks;
     std::vector<std::vector<int>> pt2patch_id_vec;
     std::vector<std::vector<std::vector<int>>> m_patch_kpt_ids;
-    std::vector<std::vector<int>> m_frames_patch_track_ids;
     std::vector<std::map<int, int>> id2pair_id;
 
     bool verbose;
@@ -110,8 +100,6 @@ class MatchExpansionSolver {
 
   private:
     void Print(const std::vector<int> &x_set);
-
-    void PrintRetrievalMap();
 
     std::vector<std::map<int, int>> GetId2RankVec(
         const std::map<int, std::vector<int>> &retrieval_rank_of_frames);
@@ -140,9 +128,9 @@ class MatchExpansionSolver {
     std::map<int, std::vector<int>> GetCovisibilityInfo(int frame_id);
 
     size_t m_initial_frame1, m_initial_frame2;
-    std::vector<std::map<int, int>>
-        id2rank_vec; // retrievalframepairs_map[frame_i][frame_j] = the
-                     // rank of frame_j in candidates of frame_i
+    std::vector<std::map<int, int>> id2rank_vec;
+    // retrievalframepairs_map[frame_i][frame_j] = the
+    // rank of frame_j in candidates of frame_i
     MatchMap m_matchmap;
 
     const bool verbose = false;

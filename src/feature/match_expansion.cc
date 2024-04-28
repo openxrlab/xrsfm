@@ -3,20 +3,17 @@
 namespace xrsfm {
 void MatchMap::PatchInit(const Map &map) {
     m_patch_track_num = 0;
-    m_patch_tracks.clear();
 
-    m_patch_kpt_ids.resize(map.frames_.size());
-    pt2patch_id_vec.resize(map.frames_.size());
-    m_frames_patch_track_ids.resize(map.frames_.size());
-    for (size_t i = 0; i < map.frames_.size(); ++i) {
+    m_patch_kpt_ids.resize(map.NumFrames());
+    pt2patch_id_vec.resize(map.NumFrames());
+    for (size_t i = 0; i < map.NumFrames(); ++i) {
         const int step_x = image_size[i].width / col_num;
         const int step_y = image_size[i].height / row_num;
 
-        auto &kps = map.frames_[i].keypoints_;
+        auto &kps = map.frame(i).keypoints_;
 
         m_patch_kpt_ids[i].resize(patch_num);
         pt2patch_id_vec[i].resize(kps.size());
-        m_frames_patch_track_ids[i].assign(patch_num, -1);
         for (size_t k = 0; k < patch_num; ++k) {
             m_patch_kpt_ids[i][k].clear();
         }
@@ -32,16 +29,6 @@ void MatchMap::PatchInit(const Map &map) {
             pt2patch_id_vec[i][k] = patch_id;
             m_patch_kpt_ids[i][patch_id].push_back(k);
         }
-    }
-}
-
-void MatchMap::PrintImageSize() {
-    std::cout << "Image Size:\n";
-    for (size_t i = 0; i < image_size.size(); ++i) {
-        // int step_x  =image_size[i].width / col_num;
-        // int step_y  =image_size[i].height / row_num;
-        std::cout << "(" << i << "):(" << image_size[i].width << ", "
-                  << image_size[i].height << ")\n";
     }
 }
 
@@ -64,10 +51,8 @@ void MatchMap::AddTrack(int frame_id1, int frame_id2, const Match &match,
         frame2_track[idx2] = m_track_num;
         TrackExpansionWrapper track;
         track.invalid = false;
-        // printf("%f %f %f\n", p(0), p(1), p(2));
         track.observations_.insert(std::pair<int, int>(frame_id1, idx1));
         track.observations_.insert(std::pair<int, int>(frame_id2, idx2));
-        // printf("%d\n",m_tracks.size());
         m_tracks.push_back(track);
         m_track_num++;
     } else if (frame1_track[idx1] == -1) {
@@ -107,40 +92,15 @@ void MatchMap::AddTrack(int frame_id1, int frame_id2, const Match &match,
 
 void MatchMap::MakeTrack(const Map &map) { // map::
     m_tracks.clear();
-    m_frames_track_ids.resize(map.frames_.size());
-    // for (size_t i = 0; i < map.frames_.size(); i++) {
-    //   m_frames_track_ids[i].assign(map.frames_[i].keypoints_.size(), -1);
-    // }
-    // for (auto &frame_pair : m_frame_pairs) {
-    //   const int id1 = frame_pair.id1, id2 = frame_pair.id2;
-    //   for (auto &match : frame_pair.matches) {
-    //     AddTrack(id1, id2, match, map.frames_[id1].keypoints_.size(),
-    //              map.frames_[id2].keypoints_.size());
-    //   }
-    // }
-    for (size_t i = 0; i < map.frames_.size(); i++) {
-        m_frames_track_ids[i].assign(map.frames_[i].track_ids_.size(), -1);
+    m_frames_track_ids.resize(map.NumFrames());
+    for (size_t i = 0; i < map.NumFrames(); i++) {
+        m_frames_track_ids[i].assign(map.frame(i).track_ids_.size(), -1);
     }
     for (auto &frame_pair : m_frame_pairs) {
         const int id1 = frame_pair.id1, id2 = frame_pair.id2;
         for (auto &match : frame_pair.matches) {
-            AddTrack(id1, id2, match, map.frames_[id1].track_ids_.size(),
-                     map.frames_[id2].track_ids_.size());
-        }
-    }
-}
-
-void MatchMap::MakeTrack(const std::vector<Frame> &frames) { // map::
-    m_tracks.clear();
-    m_frames_track_ids.resize(frames.size());
-    for (size_t i = 0; i < frames.size(); i++) {
-        m_frames_track_ids[i].assign(frames[i].track_ids_.size(), -1);
-    }
-    for (auto &frame_pair : m_frame_pairs) {
-        const int id1 = frame_pair.id1, id2 = frame_pair.id2;
-        for (auto &match : frame_pair.matches) {
-            AddTrack(id1, id2, match, frames[id1].track_ids_.size(),
-                     frames[id2].track_ids_.size());
+            AddTrack(id1, id2, match, map.frame(id1).track_ids_.size(),
+                     map.frame(id2).track_ids_.size());
         }
     }
 }
@@ -256,20 +216,11 @@ void MatchMap::LoadRetrievalRank(
     }
 }
 
-void MatchMap::LoadMatch(const Map &map, std::vector<FramePair> &frame_pairs) {
-    frame_pairs.reserve(map.frame_pairs_.size());
-    for (const auto &frame_pair : map.frame_pairs_) {
-        frame_pairs.emplace_back(frame_pair);
-        frame_pairs.back().inlier_num_f = frame_pair.matches.size();
-    }
-}
-
 void MatchMap::MakeCorrGraph(const Map &map) { // map::
     MatchExpansionSolver::CheckConsistenceOfFrameIdAndIndex(map);
     if (corr_graph.frame_node_vec_.size() == m_num_frame) {
         for (const auto &frame : map.frames_) {
-            corr_graph.frame_node_vec_[frame.id].num_observations =
-                0; //(TODO)Is it ok to use frame.id
+            corr_graph.frame_node_vec_[frame.id].num_observations = 0;
             corr_graph.frame_node_vec_[frame.id].num_visible_point3d = 0;
         }
     } else {
@@ -301,29 +252,6 @@ void MatchMap::MakeCorrGraph(const Map &map) { // map::
     }
 }
 
-int MatchMap::GetMatches(int frame_id1, int frame_id2,
-                         std::vector<Match> &matches) {
-    const auto &track_ids = m_frames_track_ids[frame_id1];
-    int count = 0;
-    matches.resize(0);
-    for (size_t i = 0; i < track_ids.size(); ++i) {
-        if (track_ids[i] == -1)
-            continue;
-        TrackExpansionWrapper &track = m_tracks[track_ids[i]];
-        if (track.invalid)
-            continue;
-        auto &obs_infos = track.observations_;
-        for (auto &obs_info : obs_infos) {
-            if (obs_info.first == frame_id2) {
-                count++;
-                matches.emplace_back(Match(i, obs_info.second));
-                break;
-            }
-        }
-    }
-    return count;
-}
-
 int MatchMap::GetMatcheNum(int frame_id1, int frame_id2) {
     int count = 0;
     for (const auto &track_id : m_frames_track_ids[frame_id1]) {
@@ -344,9 +272,9 @@ int MatchMap::GetMatcheNum(int frame_id1, int frame_id2) {
 ////////////////////////////////////////
 
 void MatchExpansionSolver::CheckConsistenceOfFrameIdAndIndex(const Map &map) {
-    for (int i = 0; i < map.frames_.size(); i++) {
-        CHECK(i == map.frames_[i].id)
-            << "Error: frame id" << map.frames_[i].id << " != " << i << "\n";
+    for (int i = 0; i < map.NumFrames(); i++) {
+        CHECK(i == map.frame(i).id)
+            << "Error: frame id" << map.frame(i).id << " != " << i << "\n";
     }
 }
 
@@ -358,7 +286,7 @@ void MatchExpansionSolver::SetUp(
     m_initial_frame2 = initial_frame2;
 
     m_matchmap.SetUpImageSize(image_size_vec);
-    m_matchmap.SetUpFrameSize(map.frames_.size());
+    m_matchmap.SetUpFrameSize(map.NumFrames());
     m_matchmap.m_frame_pairs = map.frame_pairs_;
     for (auto &fp : m_matchmap.m_frame_pairs) {
         fp.inlier_num_f = fp.matches.size();
@@ -437,7 +365,7 @@ void MatchExpansionSolver::Run(const Map &map,
     std::cout << "#full candidates: " << candidates.size() << "\n";
 
     // remove duplicate frame pairs
-    std::vector<std::set<int>> t_pair_list(map.frames_.size());
+    std::vector<std::set<int>> t_pair_list(map.NumFrames());
     for (const auto &fp : candidates) {
         if (fp.id1 < fp.id2)
             t_pair_list[fp.id1].insert(fp.id2);
@@ -511,15 +439,6 @@ void MatchExpansionSolver::GetConnectedFrames(const Map &map,
             }
         }
         candidate = new_candidate;
-    }
-}
-
-void MatchExpansionSolver::PrintRetrievalMap() {
-    std::cout << "retrievalframepairs_map";
-    for (size_t i = 0; i < id2rank_vec.size(); i++) {
-        for (const auto &item : id2rank_vec[i]) {
-            std::cout << i << " - " << item.first << ":" << item.second << "\n";
-        }
     }
 }
 

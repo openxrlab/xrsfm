@@ -12,8 +12,6 @@
 #include "optimization/ba_solver.h"
 #include "utility/io_ecim.hpp"
 #include "utility/timer.h"
-// #include "utility/view.h"
-// #include "utility/viewer.h"
 
 using namespace xrsfm;
 
@@ -80,7 +78,6 @@ void PreProcess(const std::string bin_path, const std::string feature_path,
         count++;
         if (count % 100 == 0)
             std::cout << 1.0 * count / num_fp << std::endl;
-        // std::cout<<frame_pair.id1<<" "<<frame_pair.id2<<std::endl;
         auto &frame1 = frames[frame_pair.id1];
         auto &frame2 = frames[frame_pair.id2];
         std::vector<Eigen::Vector2d> points1, points2;
@@ -89,7 +86,6 @@ void PreProcess(const std::string bin_path, const std::string feature_path,
             points2.push_back(frame2.points[match.id2]);
         }
         SolveFundamnetalCOLMAP(points1, points2, frame_pair);
-        // std::cout<<frame_pair.inlier_num<<" "<<num_matches<<std::endl;
         if (frame_pair.inlier_num < 30)
             continue;
         std::vector<Match> new_matches;
@@ -151,14 +147,14 @@ int main(int argc, const char *argv[]) {
     // Complete Tracks
     const int num_track = map.tracks_.size();
     for (int track_id = 0; track_id < num_track; ++track_id) {
-        if (map.tracks_[track_id].outlier)
+        if (map.track(track_id).outlier)
             continue;
         p3d_processor.ContinueTrack(map, track_id, 8.0);
     }
 
     // Merge Tracks
     for (int track_id = 0; track_id < num_track; ++track_id) {
-        if (map.tracks_[track_id].outlier)
+        if (map.track(track_id).outlier)
             continue;
         p3d_processor.MergeTrack(map, track_id, 8.0);
     }

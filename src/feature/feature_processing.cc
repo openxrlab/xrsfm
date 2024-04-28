@@ -269,16 +269,6 @@ void FeatureMatching(const std::vector<Frame> &frames,
             SolveFundamnetalCOLMAP(points1, points2, frame_pair);
         } else {
             CHECK(false); // TODO it only work with known camera parameters
-            std::vector<Eigen::Vector2d> points1_normalized, points2_normalized;
-            for (const auto &match : frame_pair.matches) {
-                points1_normalized.push_back(
-                    frame1.points_normalized[match.id1]);
-                points2_normalized.push_back(
-                    frame2.points_normalized[match.id2]);
-            }
-            solve_essential(points1_normalized, points2_normalized, 10.0 / 525,
-                            frame_pair.E, frame_pair.inlier_num,
-                            frame_pair.inlier_mask);
         }
         const int inlier_threshold =
             std::max(min_num_inlier,
@@ -332,7 +322,7 @@ void ExpansionAndMatching(Map &map,
 
     std::cout << "init: " << map.frame_pairs_.size() << " "
               << init_candidates.size() << std::endl;
-    std::vector<std::set<int>> id2matched_ids(map.frames_.size());
+    std::vector<std::set<int>> id2matched_ids(map.NumFrames());
     for (auto &[id1, id2] : init_candidates) {
         id2matched_ids[id1].insert(id2);
         id2matched_ids[id2].insert(id1);

@@ -7,7 +7,6 @@
 #include "utility/io_ecim.hpp"
 #include "utility/io_feature.hpp"
 #include "utility/timer.h"
-// #include "utility/viewer.h"
 
 using namespace xrsfm;
 

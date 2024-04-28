@@ -218,7 +218,6 @@ int getopt_parse(getopt_t *gopt, int argc, char *argv[], int showErrors) {
             }
 
             if (goo->type == GOO_STRING_TYPE) {
-                // TODO: check whether next argument is an option, denoting
                 // missing argument
                 if ((i + 1) < zarray_size(toks)) {
                     char *val = NULL;
@@ -272,7 +271,6 @@ int getopt_parse(getopt_t *gopt, int argc, char *argv[], int showErrors) {
                     if ((i + 1) < zarray_size(toks)) {
                         char *val = NULL;
                         zarray_get(toks, i + 1, &val);
-                        // TODO: allow negative numerical values for short-name
                         // options ?
                         if (val[0] == '-') {
                             okay = 0;

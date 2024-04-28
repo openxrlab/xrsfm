@@ -902,7 +902,6 @@ static void refine_edges(apriltag_detector_t *td, image_u8_t *im_orig,
         double Cxy = Mxy / N - Ex * Ey;
         double Cyy = Myy / N - Ey * Ey;
 
-        // TODO: Can replace this with same code as in fit_line.
         double normal_theta = .5 * atan2f(-2 * Cxy, (Cyy - Cxx));
         nx = cosf(normal_theta);
         ny = sinf(normal_theta);

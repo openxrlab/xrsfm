@@ -5,9 +5,9 @@
 #include "ba_solver.h"
 
 #include "cost_factor_ceres.h"
-#include "geometry/colmap/base/triangulation.h"
 #include "geometry/colmap/util/math.h"
 #include "utility/timer.h"
+#include "geometry/triangulate_light.h"
 
 namespace xrsfm {
 
@@ -80,7 +80,7 @@ void AddCovisibilityEdge(ceres::Problem &problem, Map &map,
                          std::vector<double> &s_vec, std::vector<Pose> &twc_vec,
                          std::vector<int> &num_cov, double weight_o,
                          bool use_key) {
-    num_cov.assign(map.frames_.size(), 0);
+    num_cov.assign(map.NumFrames(), 0);
     for (auto &frame : map.frames_) {
         if (!frame.registered)
             continue;
@@ -95,7 +95,7 @@ void AddCovisibilityEdge(ceres::Problem &problem, Map &map,
             // assert every key frame have at least a key frame neighbor
             if (frame.id <= cor_id)
                 continue;
-            if (use_key && !map.frames_[cor_id].is_keyframe)
+            if (use_key && !map.frame(cor_id).is_keyframe)
                 continue;
 
             auto &s2 = s_vec[cor_id];
@@ -124,7 +124,7 @@ void AddLoopEdge(ceres::Problem &problem, Map &map, const LoopInfo &loop_info,
         auto &pose1_mea = loop_info.twc_vec[i];
         int count = 0;
         for (const auto &cor_id : loop_info.cor_frame_ids_vec[i]) {
-            if (use_key && !map.frames_[cor_id].is_keyframe)
+            if (use_key && !map.frame(cor_id).is_keyframe)
                 continue;
             auto &s2 = s_vec[cor_id];
             auto &pose2 = twc_vec[cor_id];
@@ -156,7 +156,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
         for (const auto &[frame_id, p2d_id] : track.observations_) {
             if (frame_id == loop_info.frame_id)
                 continue;
-            const auto &frame = map.frames_[frame_id];
+            const auto &frame = map.frame(frame_id);
             const double depth =
                 (frame.Tcw.q * track.point3d_ + frame.Tcw.t).z();
             if (best_frame_id == -1) {
@@ -180,10 +180,10 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
         if (track.depth < 0) {
             std::cout << "!!! negative depth\n";
             const auto &it = track.observations_.begin();
-            const int track_id = map.frames_[it->first].track_ids_[it->second];
+            const int track_id = map.frame(it->first).track_ids_[it->second];
             printf("-%d %d %lf\n", track_id, track.ref_id, track.depth);
             for (const auto &[frame_id, p2d_id] : track.observations_) {
-                const auto &frame = map.frames_[frame_id];
+                const auto &frame = map.frame(frame_id);
                 const double depth =
                     (frame.Tcw.q * track.point3d_ + frame.Tcw.t).z();
                 printf("%d %d %lf\n", track_id, frame_id, depth);
@@ -194,7 +194,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
     }
 
     // prepare data
-    size_t num_frames = map.frames_.size();
+    size_t num_frames = map.NumFrames();
     std::vector<Pose> twc_vec(num_frames);
     std::vector<double> s_vec(twc_vec.size(), 1);
     std::vector<double> s_vec_loop(loop_info.cor_frame_ids_vec.size(), 1);
@@ -272,7 +272,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
                 std::cout << i << " " << s_vec[i] << std::endl;
         }
         for (size_t i = 0; i < num_frames; ++i) {
-            map.frames_[i].Tcw = twc_vec[i].inverse();
+            map.frame(i).Tcw = twc_vec[i].inverse();
         }
     } else {
         int num_keyframe = 0;
@@ -282,7 +282,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
         }
         int count = 0;
         for (size_t i = 0; i < num_frames; ++i) {
-            auto &frame = map.frames_[i];
+            auto &frame = map.frame(i);
             if (frame.registered && frame.is_keyframe) {
                 if (count % (num_keyframe / 10) == 0 || s_vec[i] < 0)
                     std::cout << i << " " << s_vec[i] << std::endl;
@@ -291,16 +291,16 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
         }
 
         for (size_t i = 0; i < num_frames; ++i) {
-            auto &frame = map.frames_[i];
+            auto &frame = map.frame(i);
             if (frame.registered && frame.is_keyframe) {
                 frame.tcw_old = frame.Tcw;
                 frame.Tcw = twc_vec[i].inverse();
             }
         }
         for (size_t i = 0; i < num_frames; ++i) {
-            auto &frame = map.frames_[i];
+            auto &frame = map.frame(i);
             if (frame.registered && !frame.is_keyframe) {
-                const auto &ref_frame = map.frames_[frame.ref_id];
+                const auto &ref_frame = map.frame(frame.ref_id);
                 CHECK(ref_frame.is_keyframe);
                 CHECK(ref_frame.id != loop_info.frame_id);
                 s_vec[i] = s_vec[frame.ref_id];
@@ -318,7 +318,7 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
             continue;
         int frame_id = track.ref_id;
         int p2d_id = track.observations_[frame_id];
-        Pose tcw = map.frames_[frame_id].Tcw;
+        Pose tcw = map.frame(frame_id).Tcw;
 
         vector2 p2d = map.GetNormalizedPoint(frame_id, p2d_id);
         track.point3d_ =
@@ -336,7 +336,7 @@ inline void BASolver::SetUp(ceres::Problem &problem, Map &map, Frame &frame) {
     for (int i = 0; i < frame.track_ids_.size(); ++i) {
         if (frame.track_ids_[i] == -1)
             continue;
-        Track &track = map.tracks_[frame.track_ids_[i]];
+        Track &track = map.track(frame.track_ids_[i]);
 
         ceres::CostFunction *cost_function =
             ReProjectionCostCreate(camera_model_id, frame.points[i]);
@@ -367,7 +367,7 @@ inline void BASolver::SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame,
             continue;
         num_mea++;
 
-        Track &track = map.tracks_[frame.track_ids_[i]];
+        Track &track = map.track(frame.track_ids_[i]);
 
         ceres::CostFunction *cost_function =
             ReProjectionCostCreate(camera_model_id, frame.points[i]);
@@ -392,13 +392,13 @@ inline void BASolver::SetUpLBA(ceres::Problem &problem, Map &map, Frame &frame,
 
 std::vector<int> FindLocalBundle(const int frame_id, Map &map,
                                  const size_t num_images = 4) {
-    Frame &frame = map.frames_[frame_id];
+    Frame &frame = map.frame(frame_id);
     int num_p3d = 0;
     std::unordered_map<int, int> covisiblity;
     for (auto &track_id : frame.track_ids_) {
         if (track_id == -1)
             continue;
-        const auto &track = map.tracks_[track_id];
+        const auto &track = map.track(track_id);
         num_p3d++;
         for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
             if (t_frame_id != frame.id) {
@@ -448,7 +448,7 @@ std::vector<int> FindLocalBundle(const int frame_id, Map &map,
             if (used_overlapping_images[frame_id])
                 continue;
 
-            const auto &frame_overlap = map.frames_[cov_vec[frame_id].first];
+            const auto &frame_overlap = map.frame(cov_vec[frame_id].first);
             const vector3 proj_center_overlap = frame_overlap.Tcw.center();
 
             // In the first iteration, compute the triangulation angle. In later
@@ -460,14 +460,14 @@ std::vector<int> FindLocalBundle(const int frame_id, Map &map,
                 for (auto &track_id : frame.track_ids_) {
                     if (track_id == -1)
                         continue;
-                    const auto &track = map.tracks_[track_id];
+                    const auto &track = map.track(track_id);
                     shared_points3D.push_back(track.point3d_);
                 }
 
                 // Calculate the triangulation angle at a certain percentile.
                 const double kTriangulationAnglePercentile = 75;
                 tri_angle = colmap::Percentile(
-                    colmap::CalculateTriangulationAngles(
+                    CalculateTriangulationAnglesLight(
                         proj_center, proj_center_overlap, shared_points3D),
                     kTriangulationAnglePercentile);
             }
@@ -494,12 +494,12 @@ std::vector<int> FindLocalBundle(const int frame_id, Map &map,
 
 std::vector<int> CovisibilityNeibors(const int frame_id, Map &map,
                                      const size_t num_images = 4) {
-    Frame &frame = map.frames_[frame_id];
+    Frame &frame = map.frame(frame_id);
     std::unordered_map<int, int> covisiblity;
     for (auto &track_id : frame.track_ids_) {
         if (track_id == -1)
             continue;
-        const auto &track = map.tracks_[track_id];
+        const auto &track = map.track(track_id);
         for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
             covisiblity[t_frame_id] += 1;
         }
@@ -538,7 +538,7 @@ void BASolver::LBA(int frame_id, Map &map) {
     std::set<int> fixed_camera_ids;
     for (const int &id : local_frame_ids) {
         printf(" %d", id);
-        auto &frame = map.frames_.at(id);
+        auto &frame = map.frame(id);
         SetUpLBA(problem, map, frame, frame_id);
         if (fixed_camera_ids.count(frame.camera_id) == 0) {
             fixed_camera_ids.insert(frame.camera_id);
@@ -551,35 +551,32 @@ void BASolver::LBA(int frame_id, Map &map) {
     // fix poses
     int fix_num = 0;
     if (local_frame_ids.count(map.init_id1) != 0) {
-        problem.SetParameterBlockConstant(
-            map.frames_[map.init_id1].Tcw.t.data());
+        problem.SetParameterBlockConstant(map.frame(map.init_id1).Tcw.t.data());
         fix_num++;
     }
     if (local_frame_ids.count(map.init_id2) != 0) {
-        problem.SetParameterBlockConstant(
-            map.frames_[map.init_id2].Tcw.t.data());
+        problem.SetParameterBlockConstant(map.frame(map.init_id2).Tcw.t.data());
         fix_num++;
     }
 
     if (fix_num == 0) {
         if (local_frame_ids2.size() >= 2) {
             problem.SetParameterBlockConstant(
-                map.frames_[local_frame_ids2[local_frame_ids2.size() - 1]]
+                map.frame(local_frame_ids2[local_frame_ids2.size() - 1])
                     .Tcw.t.data());
             problem.SetParameterBlockConstant(
-                map.frames_[local_frame_ids2[local_frame_ids2.size() - 2]]
+                map.frame(local_frame_ids2[local_frame_ids2.size() - 2])
                     .Tcw.t.data());
         } else if (local_frame_ids1.size() >= 2) {
             problem.SetParameterBlockConstant(
-                map.frames_[local_frame_ids1[local_frame_ids1.size() - 1]]
+                map.frame(local_frame_ids1[local_frame_ids1.size() - 1])
                     .Tcw.t.data());
             problem.SetParameterBlockConstant(
-                map.frames_[local_frame_ids1[local_frame_ids1.size() - 2]]
+                map.frame(local_frame_ids1[local_frame_ids1.size() - 2])
                     .Tcw.t.data());
         } else {
             printf("!!!LBA only one frame\n");
-            problem.SetParameterBlockConstant(
-                map.frames_[frame_id].Tcw.t.data());
+            problem.SetParameterBlockConstant(map.frame(frame_id).Tcw.t.data());
         }
     }
 
@@ -608,10 +605,8 @@ void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
 
     // fix poses
     if (!fix_all_frames) {
-        problem.SetParameterBlockConstant(
-            map.frames_[map.init_id1].Tcw.t.data());
-        problem.SetParameterBlockConstant(
-            map.frames_[map.init_id2].Tcw.t.data());
+        problem.SetParameterBlockConstant(map.frame(map.init_id1).Tcw.t.data());
+        problem.SetParameterBlockConstant(map.frame(map.init_id2).Tcw.t.data());
     } else {
         for (auto &frame : map.frames_) {
             if (!frame.registered)
@@ -659,8 +654,8 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
         }
     }
 
-    problem.SetParameterBlockConstant(map.frames_[map.init_id1].Tcw.t.data());
-    problem.SetParameterBlockConstant(map.frames_[map.init_id2].Tcw.t.data());
+    problem.SetParameterBlockConstant(map.frame(map.init_id1).Tcw.t.data());
+    problem.SetParameterBlockConstant(map.frame(map.init_id2).Tcw.t.data());
 
     ceres::Solver::Options solver_options = InitSolverOptions();
     solver_options.minimizer_progress_to_stdout = true;
@@ -670,7 +665,6 @@ void BASolver::KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
     solver_options.parameter_tolerance = 1e-5;
     ceres::Solver::Summary summary;
     ceres::Solve(solver_options, &problem, &summary);
-    // std::cout << summary.BriefReport() << "\n";
     PrintSolverSummary(summary);
 
     printf("kf: %d/%d\n", num_kf, num_rf);

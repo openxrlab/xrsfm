@@ -112,15 +112,12 @@ add_library(xrsfm
 
         src/geometry/pnp.cc
         src/geometry/essential.cc
-        src/geometry/triangluate_svd.cc
+        src/geometry/triangulate_light.cc
         src/geometry/track_processor.cc
 
-        src/geometry/colmap/base/triangulation.cc
         src/geometry/colmap/estimators/absolute_pose.cc
-        src/geometry/colmap/estimators/triangulation.cc
         src/geometry/colmap/estimators/polynomial.cc
         src/geometry/colmap/estimators/fundamental_matrix.cc
-        src/geometry/colmap/estimators/utils.cc
         src/geometry/colmap/util/random.cc
         src/geometry/colmap/optim/random_sampler.cc
         src/geometry/colmap/optim/combination_sampler.cc

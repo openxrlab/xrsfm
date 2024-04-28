@@ -7,7 +7,6 @@
 #include "utility/io_ecim.hpp"
 #include "utility/io_feature.hpp"
 #include "utility/timer.h"
-// #include "utility/viewer.h"
 
 using namespace xrsfm;
 
@@ -57,7 +56,7 @@ void PreProcess(const std::string bin_path, Map &map) {
     map.frame_pairs_ = frame_pairs;
     map.RemoveRedundancyPoints();
     map.Init();
-    printf("Num Frames: %d Num Pairs %d\n", map.frames_.size(),
+    printf("Num Frames: %d Num Pairs %d\n", map.NumFrames(),
            map.frame_pairs_.size());
 }
 

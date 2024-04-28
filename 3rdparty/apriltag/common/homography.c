@@ -396,8 +396,6 @@ matd_t *homography_to_model_view(const matd_t *H, double F, double G, double A,
     double R12 = R20 * R01 - R00 * R21;
     double R22 = R00 * R11 - R10 * R01;
 
-    // TODO XXX: Improve rotation matrix by applying polar decomposition.
-
     return matd_create_data(4, 4,
                             (double[]){R00, R01, R02, TX, R10, R11, R12, TY,
                                        R20, R21, R22, TZ, 0, 0, 0, 1});

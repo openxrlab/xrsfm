@@ -238,7 +238,6 @@ static inline uint32_t bd_get_offset(struct bit_decoder *bd) {
 }
 
 static int pjpeg_decode_buffer(struct pjpeg_decode_state *pjd) {
-    // XXX TODO Include sanity check that this is actually a JPG
 
     struct bit_decoder bd;
     memset(&bd, 0, sizeof(struct bit_decoder));

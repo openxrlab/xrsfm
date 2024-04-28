@@ -39,8 +39,6 @@
 #include <vector>
 
 #include "estimators/polynomial.h"
-#include "estimators/utils.h"
-//#include "util/logging.h"
 
 namespace colmap {
 

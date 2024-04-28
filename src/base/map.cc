@@ -27,15 +27,7 @@ int CorrespondenceGraph::GetMatch(int frame_id1, int frame_id2,
 };
 
 void Map::Init() {
-    // 0 0 it may bug
-    assert(frames_.size() < 32768); // 2^15 INT_MAX=2147483647=2^31
-    frameid2pairid_.clear();
-    for (int i = 0; i < frame_pairs_.size(); ++i) {
-        const auto &fp = frame_pairs_.at(i);
-        int idpair =
-            fp.id1 < fp.id2 ? fp.id1 * 32768 + fp.id2 : fp.id2 * 32768 + fp.id1;
-        frameid2pairid_[idpair] = i;
-    }
+    assert(NumFrames() < 32768); // 2^15 INT_MAX=2147483647=2^31
     frameid2framepairids_.clear();
     frameid2matched_frameids_.clear();
     frameid2covisible_frameids_.clear();
@@ -52,7 +44,7 @@ void Map::Init() {
         frameid2matched_frameids_.at(fp.id1).emplace_back(fp.id2);
         frameid2matched_frameids_.at(fp.id2).emplace_back(fp.id1);
     }
-    corr_graph_.frame_node_vec_.resize(frames_.size() + 1); // TODO here a bug
+    corr_graph_.frame_node_vec_.resize(NumFrames() + 1); // TODO here a bug
     for (const auto &frame : frames_) {
         corr_graph_.frame_node_vec_.at(frame.id).num_observations = 0;
         corr_graph_.frame_node_vec_.at(frame.id).num_visible_point3d = 0;
@@ -89,12 +81,10 @@ void Map::Init() {
 void Map::RemoveRedundancyPoints() {
     Init();
     // remove unused frame points
-    std::vector<std::vector<int>> id2nid_vec(frames_.size(),
-                                             std::vector<int>(0));
-    std::vector<std::vector<int>> nid2id_vec(frames_.size(),
-                                             std::vector<int>(0));
-    for (int i = 0; i < frames_.size(); ++i) {
-        auto &frame = frames_.at(i);
+    std::vector<std::vector<int>> id2nid_vec(NumFrames(), std::vector<int>(0));
+    std::vector<std::vector<int>> nid2id_vec(NumFrames(), std::vector<int>(0));
+    for (int i = 0; i < NumFrames(); ++i) {
+        auto &frame = this->frame(i);
         auto &id2nid = id2nid_vec.at(i);
         auto &nid2id = nid2id_vec.at(i);
         id2nid.assign(frame.points.size(), -1);
@@ -128,13 +118,7 @@ int Map::MaxPoint3dFrameId() {
     for (const auto &frame : frames_) {
         if (frame.registered || frame.registered_fail)
             continue;
-        // skip bad camera in unorder
-        // if (cameras_[frame.camera_id].distort_params[0] == 0) continue;
-        // only use sequence image
-        // if (frame.camera_id != cameras_.back().id) continue;
-
-        // if (bad_focal.count(frame.id) != 0) continue;
-        int num_p3d = frames_[frame.id].num_visible_points3D_;
+        int num_p3d = this->frame(frame.id).num_visible_points3D_;
         if (num_p3d > max_num_p3d) {
             max_num_p3d = num_p3d;
             best_id = frame.id;
@@ -145,51 +129,6 @@ int Map::MaxPoint3dFrameId() {
     if (max_num_p3d < 20)
         return -1;
     return best_id;
-}
-
-int Map::get_num_p3d(const int frame_id) {
-    int num_p3d = 0;
-    const auto &corrs_vector =
-        corr_graph_.frame_node_vec_[frame_id].corrs_vector;
-    for (const auto &corrs : corrs_vector) {
-        bool visit = false, visit_key = false;
-        for (const auto &[t_frame_id, t_p2d_id] : corrs) {
-            const auto &t_frame = frames_[t_frame_id];
-            if (!t_frame.registered)
-                continue;
-            const int track_id = t_frame.track_ids_[t_p2d_id];
-            if (track_id == -1 || tracks_[track_id].outlier)
-                continue;
-            visit = true;
-            num_p3d++;
-            break;
-        }
-    }
-    return num_p3d;
-}
-
-std::pair<int, int> Map::MaxPoint3dFrameIdSeq() {
-    // get seq head and tail
-    int best_id = -1, max_num_p3d = 0;
-    size_t num_frames = frames_.size();
-    for (int i = 0; i < num_frames; ++i) {
-        const auto &frame = frames_[i];
-        if (frame.registered || frame.registered_fail)
-            continue;
-        if ((i - 1 >= 0 && frames_[i - 1].registered &&
-             frames_[i - 1].camera_id == frame.camera_id) ||
-            (i + 1 < num_frames && frames_[i + 1].registered &&
-             frames_[i + 1].camera_id == frame.camera_id)) {
-            const int num_p3d = get_num_p3d(frame.id);
-            int num_p3d2 = frame.num_visible_points3D_;
-            CHECK(num_p3d == num_p3d2) << num_p3d << " " << num_p3d2 << "\n";
-            if (num_p3d > max_num_p3d) {
-                max_num_p3d = num_p3d;
-                best_id = frame.id;
-            }
-        }
-    }
-    return std::pair<int, int>(best_id, max_num_p3d);
 }
 
 void Map::SearchCorrespondences(const Frame &frame,
@@ -204,15 +143,13 @@ void Map::SearchCorrespondences(const Frame &frame,
     auto &corrs_vector = corr_graph_.frame_node_vec_[frame.id].corrs_vector;
     for (int p2d_id = 0; p2d_id < corrs_vector.size(); ++p2d_id) {
         auto &corrs = corrs_vector[p2d_id];
-        for (auto &corr : corrs) {
-            int t_frame_id = corr.first;
-            int t_p2d_id = corr.second;
-            if (!frames_[t_frame_id].registered)
+        for (auto &[t_frame_id, t_p2d_id] : corrs) {
+            if (!this->frame(t_frame_id).registered)
                 continue;
-            int p3d_id = frames_[t_frame_id].track_ids_[t_p2d_id];
-            if (p3d_id != -1 && !tracks_[p3d_id].outlier) {
+            int p3d_id = this->frame(t_frame_id).track_ids_[t_p2d_id];
+            if (p3d_id != -1 && !track(p3d_id).outlier) {
                 points2d.emplace_back(frame.points[p2d_id]);
-                points3d.emplace_back(tracks_[p3d_id].point3d_);
+                points3d.emplace_back(track(p3d_id).point3d_);
                 cor_2d_3d_ids.emplace_back(std::pair<int, int>(p2d_id, p3d_id));
                 break;
             }
@@ -243,15 +180,15 @@ void Map::SearchCorrespondences1(
         for (auto &corr : corrs) {
             int t_frame_id = corr.first;
             int t_p2d_id = corr.second;
-            if (!frames_[t_frame_id].registered)
+            if (!this->frame(t_frame_id).registered)
                 continue;
             if (cor_frame_id.count(t_frame_id) == 0)
                 continue;
 
-            int p3d_id = frames_[t_frame_id].track_ids_[t_p2d_id];
-            if (p3d_id != -1 && !tracks_[p3d_id].outlier) {
+            int p3d_id = this->frame(t_frame_id).track_ids_[t_p2d_id];
+            if (p3d_id != -1 && !track(p3d_id).outlier) {
                 points2d.emplace_back(frame.points[p2d_id]);
-                points3d.emplace_back(tracks_[p3d_id].point3d_);
+                points3d.emplace_back(track(p3d_id).point3d_);
                 cor_2d_3d_ids.emplace_back(std::pair<int, int>(p2d_id, p3d_id));
                 break;
             }
@@ -264,36 +201,6 @@ void Map::SearchCorrespondences1(
             ImageToNormalized(Camera(frame.camera_id), points2d[i], point2d_N);
             points2d[i] = point2d_N;
         }
-    }
-}
-
-void Map::SearchCorrespondencesOrder(
-    const Frame &frame, std::vector<vector2> &points2d,
-    std::vector<vector3> &points3d,
-    std::vector<std::pair<int, int>> &cor_2d_3d_ids) {
-    points2d.clear();
-    points3d.clear();
-    cor_2d_3d_ids.clear();
-
-    FramePair frame_pair;
-    for (auto &t_frame_pair : frame_pairs_) {
-        if (t_frame_pair.id1 == frame.id - 1 && t_frame_pair.id2 == frame.id) {
-            frame_pair = t_frame_pair;
-            break;
-        }
-    }
-
-    auto &last_frame = frames_[frame.id - 1];
-    for (int i = 0; i < frame_pair.matches.size(); ++i) {
-        if (!frame_pair.inlier_mask[i])
-            continue;
-        auto &match = frame_pair.matches[i];
-        int track_id = last_frame.track_ids_[match.id1];
-        if (track_id == -1)
-            continue;
-        points2d.emplace_back(frame.points[match.id2]);
-        points3d.emplace_back(tracks_[track_id].point3d_);
-        cor_2d_3d_ids.emplace_back(std::pair<int, int>(match.id2, track_id));
     }
 }
 
@@ -318,13 +225,13 @@ FramePair FindPair(const std::vector<FramePair> &frame_pairs, const int id1,
 }
 
 bool UpdateCovisiblity(Map &map, int frame_id) {
-    auto &frame = map.frames_[frame_id];
+    auto &frame = map.frame(frame_id);
     // add a covisible edge if two neighbor frame have 10+ covisible p3d
     std::map<int, int> id2num_covisible_pt;
     for (const auto &track_id : frame.track_ids_) {
         if (track_id == -1)
             continue;
-        const auto &track = map.tracks_[track_id];
+        const auto &track = map.track(track_id);
 
         for (const auto [t_frame_id, t_p2d_id] : track.observations_) {
             if (id2num_covisible_pt.count(t_frame_id) == 0) {
@@ -346,7 +253,7 @@ bool UpdateCovisiblity(Map &map, int frame_id) {
 
     if (count_covisibile_images == 0) {
         map.DeregistrationFrame(frame_id);
-        map.frames_[frame_id].registered_fail = true;
+        map.frame(frame_id).registered_fail = true;
         LOG(ERROR) << "Frame " << frame_id
                    << ": fail to registered , no enough covisibility\n";
         return false;
@@ -355,10 +262,10 @@ bool UpdateCovisiblity(Map &map, int frame_id) {
     // update number for registered neighbor frame
     int num_neighbors_registered = 0;
     for (const auto &id : map.frameid2matched_frameids_[frame_id]) {
-        if (!map.frames_[id].registered)
+        if (!map.frame(id).registered)
             continue;
         num_neighbors_registered++;
-        map.frames_[id].num_neighbors_registered++;
+        map.frame(id).num_neighbors_registered++;
     }
     frame.num_neighbors_registered = num_neighbors_registered;
 
@@ -386,12 +293,12 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
         for (const auto track_id : frame.track_ids_) {
             if (track_id == -1)
                 continue;
-            const auto &track = map.tracks_[track_id];
+            const auto &track = map.track(track_id);
             num_p3d++;
 
             int count = 0;
             for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
-                const auto &t_frame = map.frames_[t_frame_id];
+                const auto &t_frame = map.frame(t_frame_id);
                 if (t_frame_id != frame.id && t_frame.is_keyframe)
                     count++;
             }
@@ -406,7 +313,7 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
         std::set<int> id_covisible_key;
         const auto &id_covisibility = map.frameid2covisible_frameids_[frame.id];
         for (const auto &id : id_covisibility) {
-            if (map.frames_[id].is_keyframe && id != frame.id)
+            if (map.frame(id).is_keyframe && id != frame.id)
                 id_covisible_key.insert(id);
         }
         if (id_covisibility.empty())
@@ -420,10 +327,10 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
                 int id1 = *it, id2 = *next(it);
                 if (id1 < frame.id && id2 > frame.id) {
                     int count = 0;
-                    for (auto &track_id : map.frames_[id1].track_ids_) {
+                    for (auto &track_id : map.frame(id1).track_ids_) {
                         if (track_id == -1)
                             continue;
-                        const auto &track = map.tracks_[track_id];
+                        const auto &track = map.track(track_id);
                         if (track.observations_.count(id2) == 0)
                             continue;
                         count++;
@@ -437,67 +344,6 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
                 continue;
         }
 
-        // step4: keep hierarchical structure
-        // std::map<int, int> track2change_level;
-        // for (const auto track_id : frame.track_ids_) {
-        //   if (track_id == -1) continue;
-        //   const auto &track = map.tracks_[track_id];
-        //   if (track.hierarchical_level < frame.hierarchical_level) continue;
-
-        //   int min_level1 = -1, min_level2 = -1;
-        //   for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
-        //     const auto &t_frame = map.frames_[t_frame_id];
-        //     if (t_frame_id == frame.id || !t_frame.is_keyframe) continue;
-
-        //     int level = t_frame.hierarchical_level;
-        //     if (min_level1 == -1) {
-        //       min_level1 = level;
-        //     } else if (min_level2 == -1 || level < min_level2) {
-        //       if (level < min_level1) {
-        //         min_level2 = min_level1;
-        //         min_level1 = level;
-        //       } else {
-        //         min_level2 = level;
-        //       }
-        //       if (min_level2 <= track.hierarchical_level) break;
-        //     }
-        //   }
-        //   if (min_level2 > track.hierarchical_level)
-        //   track2change_level[track_id] = min_level2;
-        // }
-
-        // bool keep_hierarchicy = true;
-        // for (auto &id : id_covisible_key) {
-        //   auto &cov_frame = map.frames_[id];
-        //   if (cov_frame.hierarchical_level <= frame.hierarchical_level)
-        //   continue;
-
-        //   int count = 0, count1 = 0;
-        //   const int level = cov_frame.hierarchical_level;
-        //   for (auto &track_id : map.frames_[id].track_ids_) {
-        //     if (track_id == -1) continue;
-        //     const auto &track = map.tracks_[track_id];
-        //     int track_level = track.hierarchical_level;
-        //     if (track_level < level) {
-        //       count1++;
-        //     }
-        //     if (track2change_level.count(track_id) != 0) {
-        //       track_level = track2change_level[track_id];
-        //     }
-        //     if (track_level < level) {
-        //       count++;
-        //       if (count == MIN_OBS_NUM_LEVEL) break;
-        //     }
-        //   }
-        //   std::cout << frame.id << " " << cov_frame.id << " " << count << " "
-        //   << count1 << std::endl; if (count < MIN_OBS_NUM_LEVEL && count !=
-        //   count1) {
-        //     keep_hierarchicy = false;
-        //     break;
-        //   }
-        // }
-        // if (!keep_hierarchicy) continue;
-
         frame.is_keyframe = false;
         printf("!!! init remove: %d %d %d\n", frame.id, num_p3d_redundant,
                num_p3d);
@@ -505,8 +351,8 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
 
     for (auto &frame_id : loop_matched_frame_id) {
         std::cout << "|" << frame_id << std::endl;
-        map.frames_[frame_id].ref_id = -1; // fix bug
-        map.frames_[frame_id].is_keyframe = true;
+        map.frame(frame_id).ref_id = -1; // fix bug
+        map.frame(frame_id).is_keyframe = true;
     }
 
     for (auto &frame : map.frames_) {
@@ -521,11 +367,11 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
         for (const auto &track_id : frame.track_ids_) {
             if (track_id == -1)
                 continue;
-            const auto &track = map.tracks_[track_id];
+            const auto &track = map.track(track_id);
             if (track.outlier)
                 continue;
             for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
-                if (map.frames_[t_frame_id].is_keyframe &&
+                if (map.frame(t_frame_id).is_keyframe &&
                     t_frame_id != frame.id) { // DIF(ORBSLAM use scalelevel)
                     if (covisiblity.count(t_frame_id) == 0)
                         covisiblity[t_frame_id] = 1;
@@ -538,15 +384,15 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
         if (covisiblity.empty()) {
             // todo fix it
             LOG(ERROR) << "no covisiblity key frame";
-            for (int i = 1; i < map.frames_.size(); ++i) {
-                if (frame.id + i < map.frames_.size()) {
-                    if (map.frames_[frame.id + i].is_keyframe) {
+            for (int i = 1; i < map.NumFrames(); ++i) {
+                if (frame.id + i < map.NumFrames()) {
+                    if (map.frame(frame.id + i).is_keyframe) {
                         frame.ref_id = frame.id + i;
                         break;
                     }
                 }
                 if (frame.id - i > 0) {
-                    if (map.frames_[frame.id - i].is_keyframe) {
+                    if (map.frame(frame.id - i).is_keyframe) {
                         frame.ref_id = frame.id - i;
                         break;
                     }
@@ -571,7 +417,7 @@ void KeyFrameSelection(Map &map, std::vector<int> loop_matched_frame_id,
             continue;
         int count = 0;
         for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
-            if (map.frames_[t_frame_id].is_keyframe) {
+            if (map.frame(t_frame_id).is_keyframe) {
                 count++;
             }
         }
@@ -585,10 +431,10 @@ void UpdateByRefFrame(Map &map) {
             continue;
         if (frame.is_keyframe)
             continue;
-        Frame *ref_frame = &map.frames_[frame.ref_id];
+        Frame *ref_frame = &map.frame(frame.ref_id);
         int count = 0;
         while (!ref_frame->is_keyframe) {
-            ref_frame = &map.frames_[ref_frame->ref_id];
+            ref_frame = &map.frame(ref_frame->ref_id);
             count++;
             if (count > 100) {
                 LOG(ERROR) << "too many loop " << ref_frame->id << " "
@@ -603,14 +449,14 @@ void UpdateByRefFrame(Map &map) {
 }
 
 void Map::DeregistrationFrame(int frame_id) {
-    auto &frame = frames_[frame_id];
+    auto &frame = this->frame(frame_id);
     frame.registered = false;
     for (int i = 0; i < frame.track_ids_.size(); ++i) {
         auto &id = frame.track_ids_[i];
         // for (int &id : frame.track_ids_) {
         if (id == -1)
             continue;
-        auto &track = tracks_[id];
+        auto &track = this->track(id);
         if (track.outlier)
             continue;
         track.observations_.erase(frame.id);

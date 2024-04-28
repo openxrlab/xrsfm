@@ -32,7 +32,6 @@
 #include <Eigen/Eigen>
 #include "ui/model_viewer_widget.h"
 #include "src/geometry/colmap/util/math.h"
-// #include "ui/main_window.h"
 
 #define SELECTION_BUFFER_IMAGE_IDX 0
 #define SELECTION_BUFFER_POINT_IDX 1
@@ -725,8 +724,6 @@ void ModelViewerWidget::UploadPointData(const bool selection_mode) {
         painter_point.a = 1;
         data.push_back(painter_point);
     }
-
-    std::cout << data.size() << std::endl;
 
     point_painter_.Upload(data);
 }

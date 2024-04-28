@@ -31,8 +31,6 @@
 
 #include "ui/point_painter.h"
 
-// #include "util/opengl_utils.h"
-
 namespace xrsfm {
 
 PointPainter::PointPainter() : num_geoms_(0) {}
@@ -51,12 +49,10 @@ void PointPainter::Setup() {
     }
 
     // TODO
-    shader_program_.addShaderFromSourceFile(
-        QOpenGLShader::Vertex, "/home/SENSETIME/yezhichao2/Projects/xrsfm/src/"
-                               "ui/shaders/points.v.glsl");
-    shader_program_.addShaderFromSourceFile(
-        QOpenGLShader::Fragment, "/home/SENSETIME/yezhichao2/Projects/xrsfm/"
-                                 "src/ui/shaders/points.f.glsl");
+    shader_program_.addShaderFromSourceFile(QOpenGLShader::Vertex,
+                                            "/shaders/points.v.glsl");
+    shader_program_.addShaderFromSourceFile(QOpenGLShader::Fragment,
+                                            "/shaders/points.f.glsl");
 
     shader_program_.link();
     shader_program_.bind();

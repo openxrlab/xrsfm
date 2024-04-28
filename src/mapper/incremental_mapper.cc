@@ -14,13 +14,13 @@ void IncrementalMapper::Reconstruct(Map &map) {
     // 1. Map Initialization
     FramePair init_frame_pair;
     if (options.init_id1 != -1 && options.init_id2 != -1) {
-        std::cout << "Init with Given Frames " << options.init_id1 << " "
-                  << options.init_id2 << std::endl;
+        printf("Init with Given Frames %d %d\n", options.init_id1,
+               options.init_id2);
         init_frame_pair =
             FindPair(map.frame_pairs_, options.init_id1, options.init_id2);
     } else {
-        std::cout << "Found Init Frame Pair " << options.init_id1 << " "
-                  << options.init_id2 << std::endl;
+        printf("Found Init Frame Pair %d %d\n", options.init_id1,
+               options.init_id2);
         init_frame_pair.id1 = options.init_id1;
         init_frame_pair.id2 = options.init_id2;
         if (!FindInitFramePair(map, init_frame_pair)) {
@@ -34,7 +34,7 @@ void IncrementalMapper::Reconstruct(Map &map) {
 
     // 2. Map Iterative Extension
     int num_image_reg = 2, num_image_reg_pre = 2;
-    for (int iter = 0; iter < map.frames_.size(); iter++) {
+    for (int iter = 0; iter < map.NumFrames(); iter++) {
         printf("-----------------------------------------------\n");
         // 1) Pose Estimation
         timer.reg.resume();
@@ -42,11 +42,11 @@ void IncrementalMapper::Reconstruct(Map &map) {
         if (frame_id == -1)
             break;
         printf("Iter %d %d %s\n", iter, frame_id,
-               map.frames_[frame_id].name.c_str());
+               map.frame(frame_id).name.c_str());
         if (!RegisterImage(frame_id, map)) {
             if (options.stop_when_register_fail)
                 break;
-            map.frames_[frame_id].registered_fail = true;
+            map.frame(frame_id).registered_fail = true;
             continue;
         }
         timer.reg.stop();

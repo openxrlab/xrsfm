@@ -12,6 +12,5 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair);
 
 void InitializeMap(Map &map, FramePair &frame_pair);
 
-void InitializeWithGT(Map &map, FramePair &frame_pair, Pose pose1, Pose pose2);
 } // namespace xrsfm
 #endif // XRSFM_SRC_GEOMETRY_MAP_INITIALIZER_H

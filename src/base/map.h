@@ -45,7 +45,6 @@ class Frame {
 
     // reconstruction
     std::vector<vector2> points;
-    std::vector<vector2> points_normalized; // TODO remove
     std::vector<int> track_ids_;
     Pose Tcw, tcw_old;
 
@@ -123,8 +122,6 @@ class Map {
     std::map<int, Track> track_map_;
     std::vector<FramePair> frame_pairs_;
 
-    // for build
-    std::unordered_map<int, int> frameid2pairid_;
     std::unordered_map<int, std::vector<int>> frameid2framepairids_;
     std::unordered_map<int, std::vector<int>> frameid2matched_frameids_;
     std::unordered_map<int, std::vector<int>> frameid2covisible_frameids_;
@@ -155,39 +152,40 @@ class Map {
                                 std::vector<std::pair<int, int>> &cor_2d_3d_ids,
                                 const bool use_p2d_normalized);
 
-    void
-    SearchCorrespondencesOrder(const Frame &frame,
-                               std::vector<vector2> &points2d,
-                               std::vector<vector3> &points3d,
-                               std::vector<std::pair<int, int>> &cor_2d_3d_ids);
-
     inline const class Camera &Camera(int camera_id) const {
         return camera_map_.at(camera_id);
     };
     inline class Camera &Camera(int camera_id) {
         return camera_map_.at(camera_id);
     };
+    inline const class Frame &frame(int frame_id) const {
+        return frames_.at(frame_id);
+    };
+    inline class Frame &frame(int frame_id) { return frames_.at(frame_id); };
+    inline const class Track &track(int track_id) const {
+        return tracks_.at(track_id);
+    };
+    inline class Track &track(int track_id) { return tracks_.at(track_id); };
+    inline int NumFrames() { return frames_.size(); };
 
     int MaxPoint3dFrameId();
-    int get_num_p3d(const int frame_id);
-    std::pair<int, int> MaxPoint3dFrameIdSeq();
 
     inline void AddNumCorHavePoint3D(int frame_id, int p2d_id) {
         for (const auto &[t_frame_id, t_p2d_id] :
              corr_graph_.frame_node_vec_[frame_id].corrs_vector[p2d_id]) {
-            frames_[t_frame_id].AddNumCorHavePoint3D(t_p2d_id);
+            frame(t_frame_id).AddNumCorHavePoint3D(t_p2d_id);
         }
     }
     inline void DeleteNumCorHavePoint3D(int frame_id, int p2d_id) {
         for (const auto &[t_frame_id, t_p2d_id] :
              corr_graph_.frame_node_vec_[frame_id].corrs_vector[p2d_id]) {
-            frames_[t_frame_id].DeleteNumCorHavePoint3D(t_p2d_id);
+            frame(t_frame_id).DeleteNumCorHavePoint3D(t_p2d_id);
         }
     }
 
     inline vector2 GetNormalizedPoint(const int frame_id, const int p2d_id) {
         Eigen::Vector2d ptn;
-        const auto &frame = frames_.at(frame_id);
+        const auto &frame = this->frame(frame_id);
         ImageToNormalized(Camera(frame.camera_id), frame.points.at(p2d_id),
                           ptn);
         return ptn;

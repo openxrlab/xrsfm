@@ -4,8 +4,6 @@
 #include "base/map.h"
 #include "geometry/track_processor.h"
 #include "optimization/ba_solver.h"
-// #include "utility/view.h"
-// #include "utility/viewer.h"
 
 namespace xrsfm {
 inline double ToDeg(double theta) { return theta * 180 / M_PI; }
@@ -16,8 +14,6 @@ class ErrorDetector {
                               std::set<int> &bad_matched_frame_ids);
     bool IsGoodRelativePose(const Map &map, const FramePair &fp,
                             std::vector<char> &inlier_mask);
-
-    std::string image_dir_;
 };
 
 class ErrorCorrector {

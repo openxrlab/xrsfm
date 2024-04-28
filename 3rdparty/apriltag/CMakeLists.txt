@@ -133,7 +133,6 @@ if(BUILD_PYTHON_WRAPPER)
 endif(BUILD_PYTHON_WRAPPER)
 
 if (NOT Python3_NOT_FOUND AND NOT Numpy_NOT_FOUND AND PYTHONLIBS_FOUND AND BUILD_PYTHON_WRAPPER)
-    # TODO deal with both python2/3
     execute_process(COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/python_build_flags.py OUTPUT_VARIABLE PY_OUT)
     set(PY_VARS CFLAGS LDFLAGS LINKER EXT_SUFFIX)
     cmake_parse_arguments(PY "" "${PY_VARS}" "" ${PY_OUT})

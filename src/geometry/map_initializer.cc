@@ -4,16 +4,15 @@
 
 #include "geometry/map_initializer.h"
 
-#include "geometry/colmap/base/triangulation.h"
 #include "geometry/essential.h"
-#include "geometry/triangluate_svd.h"
+#include "geometry/triangulate_light.h"
 
 namespace xrsfm {
 
 bool CheckInitFramePair(const Map &map, FramePair &frame_pair,
                         double min_angle = 16.0) {
-    auto &frame1 = map.frames_[frame_pair.id1];
-    auto &frame2 = map.frames_[frame_pair.id2];
+    auto &frame1 = map.frame(frame_pair.id1);
+    auto &frame2 = map.frame(frame_pair.id2);
 
     int inlier_num;
     std::vector<char> inlier_mask;
@@ -44,7 +43,7 @@ bool CheckInitFramePair(const Map &map, FramePair &frame_pair,
     for (size_t i = 0; i < num_matches; ++i) {
         if (frame_pair.inlier_mask[i]) { // assert track valid
             if (inlier_mask[id_p3d]) {
-                double angle = colmap::CalculateTriangulationAngle(
+                double angle = CalculateTriangulationAngleLight(
                     pose1.center(), pose2.center(), point3ds[id_p3d]);
                 if (angle > DegToRad(min_angle)) {
                     num_p3d_valid++;
@@ -110,7 +109,6 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
         }
 
         for (const auto &init_id2 : init_id2_candidate) {
-            // std::cout<<init_id2<<"\n";
             FramePair frame_pair;
             if (init_id1 < init_id2)
                 FindPair(map.frame_pairs_, init_id1, init_id2, frame_pair);
@@ -123,7 +121,6 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
         }
 
         for (const auto &init_id2 : init_id2_candidate) {
-            // std::cout<<init_id2<<"\n";
             FramePair frame_pair;
             if (init_id1 < init_id2)
                 FindPair(map.frame_pairs_, init_id1, init_id2, frame_pair);
@@ -140,7 +137,7 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
 
 void InitializeMap(Map &map, FramePair &frame_pair) {
     const int id1 = frame_pair.id1, id2 = frame_pair.id2;
-    auto &frame1 = map.frames_[id1], &frame2 = map.frames_[id2];
+    auto &frame1 = map.frame(id1), &frame2 = map.frame(id2);
     printf("Initialize id1: %d %s id2: %d %s\n", id1, frame1.name.c_str(), id2,
            frame2.name.c_str());
 

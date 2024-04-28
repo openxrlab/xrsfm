@@ -4,20 +4,19 @@
 
 #include "track_processor.h"
 
-#include "base/camera.h"
-#include "geometry/colmap/estimators/triangulation.h"
-#include "geometry/triangluate_svd.h"
+#include "geometry/triangulate_light.h"
 
 namespace xrsfm {
-double ReprojectionError(const Pose &pose, const vector2 &point2d,
-                         const vector3 &point3d) {
-    vector3 p_c = pose.q * point3d + pose.t;
-    vector2 residual = p_c.hnormalized() - point2d;
-    return residual.norm();
+
+size_t NChooseK(const size_t n, const size_t k) {
+    if (k == 0) {
+        return 1;
+    }
+    return (n * NChooseK(n - 1, k - 1)) / k;
 }
 
-double Reprojection_Error(const Pose &pose, const Camera &camera,
-                          const vector2 &point2d, const vector3 &point3d) {
+double ReprojectionError(const Pose &pose, const Camera &camera,
+                         const vector2 &point2d, const vector3 &point3d) {
     vector3 p_c = pose.q * point3d + pose.t;
     vector2 estimate;
     NormalizedToImage(camera, p_c.hnormalized(), estimate);
@@ -35,9 +34,9 @@ void AddTrack(const std::vector<std::pair<int, int>> &observations,
     int min_level1 = -1, min_level2 = -1;
     for (const auto &[frame_id, p2d_id] : observations) {
         track.observations_[frame_id] = p2d_id;
-        map.frames_[frame_id].track_ids_[p2d_id] = track_id;
+        map.frame(frame_id).track_ids_[p2d_id] = track_id;
 
-        int level = map.frames_[frame_id].hierarchical_level;
+        int level = map.frame(frame_id).hierarchical_level;
         if (level == -1)
             continue;
 
@@ -64,10 +63,10 @@ void AddTrack(const std::vector<std::pair<int, int>> &observations,
 
 void ContinueTrackUpdate(const int track_id, const int frame_id,
                          const int p2d_id, Map &map) {
-    auto &track = map.tracks_[track_id];
+    auto &track = map.track(track_id);
     track.observations_[frame_id] = p2d_id;
 
-    auto &frame = map.frames_[frame_id];
+    auto &frame = map.frame(frame_id);
     frame.track_ids_[p2d_id] = track_id;
 
     map.AddNumCorHavePoint3D(frame_id, p2d_id);
@@ -76,78 +75,46 @@ void ContinueTrackUpdate(const int track_id, const int frame_id,
 void SetTrackOutlier(Map &map, Track &track) {
     track.outlier = true;
     for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
-        map.frames_[t_frame_id].track_ids_[t_p2d_id] = -1;
+        map.frame(t_frame_id).track_ids_[t_p2d_id] = -1;
         map.DeleteNumCorHavePoint3D(t_frame_id, t_p2d_id);
     }
 }
 
 bool CreatePoint3d(const std::vector<std::pair<int, int>> observations,
                    Map &map) {
-    std::vector<matrix<3, 4>> Ps;
-    std::vector<vector<2>> ps;
     // Prepare the data
-    for (auto &[t_frame_id, t_p2d_id] : observations) {
-        Frame &t_frame = map.frames_[t_frame_id];
-        matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
-        vector<3> T = t_frame.Tcw.t;
-        matrix<3, 4> P;
-        P << R, T;
-        Ps.push_back(P);
-        vector<2> p2d_n = GetPointNormalized(map.Camera(t_frame.camera_id),
-                                             t_frame.points[t_p2d_id]);
-        ps.push_back(p2d_n);
-    }
-    //  make new track;
-    vector<3> p;
-    if (triangulate_point_checked(Ps, ps, p)) {
-        AddTrack(observations, p, map);
-        return true;
-    }
-    return false;
-}
-
-bool CreatePoint3d1(const std::vector<std::pair<int, int>> observations,
-                    Map &map) {
     size_t data_size = observations.size();
-    std::vector<colmap::TriangulationEstimator::PointData> point_data(
-        data_size);
-    std::vector<colmap::TriangulationEstimator::PoseData> pose_data(data_size);
-    // Prepare the data
+    std::vector<Eigen::Vector3d> point_data(data_size);
+    std::vector<Eigen::Vector3d> pose_data(data_size);
     for (size_t i = 0; i < data_size; ++i) {
         const auto &[t_frame_id, t_p2d_id] = observations[i];
-        Frame &t_frame = map.frames_[t_frame_id];
+        Frame &t_frame = map.frame(t_frame_id);
         assert(t_frame.registered);
-        matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
-        vector<3> T = t_frame.Tcw.t;
-        matrix<3, 4> P;
-        P << R, T;
 
-        point_data[i].point_normalized = GetPointNormalized(
-            map.Camera(t_frame.camera_id), t_frame.points[t_p2d_id]);
-        pose_data[i].proj_matrix = P;
-        pose_data[i].proj_center = t_frame.center();
+        matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
+        vector<2> p2d_n = GetPointNormalized(map.Camera(t_frame.camera_id),
+                                             t_frame.points[t_p2d_id]);
+
+        point_data.at(i) = R.transpose() * (p2d_n.homogeneous()).normalized();
+        pose_data.at(i) = t_frame.center();
     }
 
-    colmap::EstimateTriangulationOptions tri_options;
-    tri_options.min_tri_angle = DegToRad(1.5);
-    tri_options.residual_type =
-        colmap::TriangulationEstimator::ResidualType::ANGULAR_ERROR;
-    tri_options.ransac_options.max_error = DegToRad(2);
-    tri_options.ransac_options.confidence = 0.9999;
-    tri_options.ransac_options.min_inlier_ratio = 0.02;
-    tri_options.ransac_options.max_num_trials = 10000;
-    // Enforce exhaustive sampling for small track lengths.
-    const size_t kExhaustiveSamplingThreshold = 15;
+    const double min_tri_angle = DegToRad(1.5);
+    colmap::RANSACOptions ransac_options;
+    ransac_options.max_error = DegToRad(2);
+    ransac_options.confidence = 0.9999;
+    ransac_options.min_inlier_ratio = 0.02;
+    ransac_options.max_num_trials = 10000;
+    constexpr size_t kExhaustiveSamplingThreshold = 15;
     if (point_data.size() <= kExhaustiveSamplingThreshold) {
-        tri_options.ransac_options.min_num_trials =
-            NChooseK(point_data.size(), 2);
+        ransac_options.min_num_trials = NChooseK(point_data.size(), 2);
     }
 
     //  make new track;
     vector<3> p;
     std::vector<char> inlier_mask;
-    if (EstimateTriangulation(tri_options, point_data, pose_data, &inlier_mask,
-                              &p)) {
+    if (EstimatePointLight(ransac_options, min_tri_angle, point_data, pose_data,
+                           inlier_mask, p)) {
         std::vector<std::pair<int, int>> inlier_observations;
         for (int k = 0; k < observations.size(); ++k) {
             if (inlier_mask[k]) {
@@ -165,9 +132,9 @@ GetMaxAngle(const Map &map, const std::set<int> &observed_track_ids,
             const int frame_id, const int p2d_id) {
     int best_track_id = -1;
     double best_angle_error = 100;
-    const auto &frame = map.frames_.at(frame_id);
+    const auto &frame = map.frame(frame_id);
     for (const auto &track_id : observed_track_ids) {
-        const auto &track = map.tracks_[track_id];
+        const auto &track = map.track(track_id);
         if (track.observations_.count(frame_id) != 0)
             continue;
         vector3 p3d = track.point3d_;
@@ -191,7 +158,7 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id,
     int num_create = 0, num_extend = 0;
     int num_zero_track = 0, num_one_track = 0, num_multi_track = 0;
 
-    Frame &frame = map.frames_[frame_id];
+    Frame &frame = map.frame(frame_id);
     const auto &corrs_vector =
         map.corr_graph_.frame_node_vec_[frame_id].corrs_vector;
     assert(frame.track_ids_.size() == corrs_vector.size());
@@ -204,7 +171,7 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id,
         std::set<int> observed_track_ids;
         std::vector<std::pair<int, int>> observations;
         for (const auto &[t_frame_id, t_p2d_id] : corrs_vector.at(p2d_id)) {
-            const auto &cor_frame = map.frames_.at(t_frame_id);
+            const auto &cor_frame = map.frame(t_frame_id);
             if (!cor_frame.registered)
                 continue;
             if (cor_frame.track_ids_.size() <= t_p2d_id) {
@@ -224,11 +191,9 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id,
 
         const int num_track = observed_track_ids.size();
 
-        // std::cout<<frame.id<<" 2 "<<p2d_id<<" "<<num_track<<std::endl;
-
         if (num_track == 0) {
             num_zero_track++;
-            if (CreatePoint3d1(observations, map))
+            if (CreatePoint3d(observations, map))
                 num_create++;
         } else if (num_track >= 1) {
             auto [best_track_id, best_angle_error] =
@@ -262,7 +227,7 @@ inline void UpdateTrackAngle(const std::vector<Frame> &frames, Track &track,
     double max_tri_angle = 0;
     for (int i = 0; i < centers.size(); ++i) {
         for (int j = i + 1; j < centers.size(); ++j) {
-            const double tri_angle = CalculateTriangulationAngle(
+            const double tri_angle = CalculateTriangulationAngleLight(
                 centers[i], centers[j], track.point3d_);
             if (tri_angle > max_tri_angle) {
                 max_tri_angle = tri_angle;
@@ -284,10 +249,10 @@ inline void FilterPoint3d(const double max_re, const double min_tri_angle_rad,
     std::vector<std::pair<int, int>> obs_to_delete;
     obs_to_delete.reserve(8);
     for (auto &[frame_id, p2d_id] : track.observations_) {
-        const auto &frame = map.frames_[frame_id];
+        const auto &frame = map.frame(frame_id);
         const auto &camera = map.Camera(frame.camera_id);
         // CHECK(frame.registered);
-        const double re = Reprojection_Error(
+        const double re = ReprojectionError(
             frame.Tcw, camera, frame.points[p2d_id], track.point3d_);
         const vector3 p3d = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
         if (re > max_re || p3d.z() < 1e-3 || p3d.z() > 1e3) {
@@ -305,7 +270,7 @@ inline void FilterPoint3d(const double max_re, const double min_tri_angle_rad,
         num_filtered1 += obs_to_delete.size();
         for (const auto &[o_frame_id, o_p2d_id] : obs_to_delete) {
             track.observations_.erase(o_frame_id);
-            map.frames_[o_frame_id].track_ids_[o_p2d_id] = -1;
+            map.frame(o_frame_id).track_ids_[o_p2d_id] = -1;
             map.DeleteNumCorHavePoint3D(o_frame_id, o_p2d_id);
         }
         track.error = (reproj_error_sum / track.observations_.size());
@@ -334,13 +299,13 @@ int Point3dProcessor::FilterPoints3d(Map &map, const double max_re,
 int Point3dProcessor::FilterPointsFrame(Map &map, const int frame_id,
                                         const double max_re, const double deg) {
     const double min_tri_angle_rad = DegToRad(deg);
-    const auto &frame = map.frames_[frame_id];
+    const auto &frame = map.frame(frame_id);
 
     int num_filtered1 = 0, num_filtered2 = 0;
     for (const auto &track_id : frame.track_ids_) {
         if (track_id == -1)
             continue;
-        auto &track = map.tracks_[track_id];
+        auto &track = map.track(track_id);
         FilterPoint3d(max_re, min_tri_angle_rad, map, track, num_filtered1,
                       num_filtered2);
     }
@@ -350,81 +315,26 @@ int Point3dProcessor::FilterPointsFrame(Map &map, const int frame_id,
 
 void Point3dProcessor::CheckTrackDepth(const Map &map) {
     for (size_t i = 0; i < map.tracks_.size(); ++i) {
-        auto &track = map.tracks_[i];
+        auto &track = map.track(i);
         if (track.outlier)
             continue;
         int count = 0;
-        for (auto &obs_info : track.observations_) {
-            const auto &frame = map.frames_[obs_info.first];
+        for (auto &[frame_id, p2d_id] : track.observations_) {
+            const auto &frame = map.frame(frame_id);
             vector3 p_c = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
 
             auto &camera = map.Camera(frame.camera_id);
-            double re = Reprojection_Error(frame.Tcw, camera,
-                                           frame.points[obs_info.second],
-                                           track.point3d_);
+            double re = ReprojectionError(frame.Tcw, camera,
+                                          frame.points[p2d_id], track.point3d_);
             if (p_c.z() < 0 || p_c.z() > 100) {
-                printf("Error:%zu %d %lf %lf\n", i, obs_info.first, p_c.z(),
-                       re);
+                printf("Error:%zu %d %lf %lf\n", i, frame_id, p_c.z(), re);
             }
         }
     }
-}
-
-void Point3dProcessor::ReTriangulate(Map &map) {
-    int count0 = 0, count1 = 0, count2 = 0;
-    for (size_t i = 0; i < map.tracks_.size(); ++i) {
-        auto &track = map.tracks_[i];
-        if (track.outlier)
-            continue;
-        count2++;
-
-        bool has_negative_depth = false;
-        std::vector<std::pair<int, int>> observations(0);
-        for (auto &[t_frame_id, t_p2d_id] : track.observations_) {
-            Frame &t_frame = map.frames_[t_frame_id];
-            if (!t_frame.registered)
-                continue;
-            observations.emplace_back(t_frame_id, t_p2d_id);
-            vector3 p_c = t_frame.Tcw.q * track.point3d_ + t_frame.Tcw.t;
-            if (p_c.z() < 0) {
-                has_negative_depth = true;
-                //                printf("%zu %d %lf\n",i,t_frame_id,p_c.z());
-            }
-        }
-        // if (!has_negative_depth) continue;
-
-        std::vector<matrix<3, 4>> Ps;
-        std::vector<vector<2>> ps;
-        // Prepare the data
-        for (auto &[frame_id, p2d_id] : observations) {
-            Frame &t_frame = map.frames_[frame_id];
-            matrix<3, 3> R = t_frame.Tcw.q.toRotationMatrix();
-            vector<3> T = t_frame.Tcw.t;
-            matrix<3, 4> P;
-            P << R, T;
-
-            vector<2> p2d_n = GetPointNormalized(map.Camera(t_frame.camera_id),
-                                                 t_frame.points[p2d_id]);
-
-            Ps.push_back(P);
-            ps.push_back(p2d_n);
-        }
-
-        //  make new track;
-        vector<3> p;
-        std::vector<char> inlier_mask;
-        if (triangulate_point_checked(Ps, ps, p)) {
-            track.point3d_ = p;
-            count0++;
-        }
-        count1++;
-    }
-
-    printf("ReTriangulate %d/%d/%d\n", count0, count1, count2);
 }
 
 void Point3dProcessor::ContinueTrack(Map &map, int track_id, double max_re) {
-    auto &track = map.tracks_[track_id];
+    auto &track = map.track(track_id);
     const auto init_obs = track.observations_;
 
     std::set<std::pair<int, int>> visted_pair;
@@ -434,7 +344,7 @@ void Point3dProcessor::ContinueTrack(Map &map, int track_id, double max_re) {
             // search connect obs{frame,p2d}
             if (track.observations_.count(c_frame_id) != 0)
                 continue;
-            auto &c_frame = map.frames_[c_frame_id];
+            auto &c_frame = map.frame(c_frame_id);
             if (!c_frame.registered)
                 continue;
             const int track_id2 = c_frame.track_ids_[c_p2d_id];
@@ -446,8 +356,8 @@ void Point3dProcessor::ContinueTrack(Map &map, int track_id, double max_re) {
             // check rpe
             const auto &c_camera = map.Camera(c_frame.camera_id);
             double re =
-                Reprojection_Error(c_frame.Tcw, c_camera,
-                                   c_frame.points[c_p2d_id], track.point3d_);
+                ReprojectionError(c_frame.Tcw, c_camera,
+                                  c_frame.points[c_p2d_id], track.point3d_);
             if (re > max_re)
                 continue;
             ContinueTrackUpdate(track_id, c_frame_id, c_p2d_id, map);
@@ -456,7 +366,7 @@ void Point3dProcessor::ContinueTrack(Map &map, int track_id, double max_re) {
 }
 
 void Point3dProcessor::MergeTrack(Map &map, int track_id, double max_re) {
-    auto &track = map.tracks_[track_id];
+    auto &track = map.track(track_id);
     const auto init_obs = track.observations_;
     // merge track
     std::set<int> visted_id;
@@ -466,14 +376,14 @@ void Point3dProcessor::MergeTrack(Map &map, int track_id, double max_re) {
             // search connected track
             if (track.observations_.count(c_frame_id) != 0)
                 continue;
-            auto &frame = map.frames_[c_frame_id];
+            auto &frame = map.frame(c_frame_id);
             if (!frame.registered)
                 continue;
             const int track_id2 = frame.track_ids_[c_p2d_id];
             if (track_id2 == -1 || visted_id.count(track_id2) > 0)
                 continue;
             visted_id.insert(track_id2);
-            auto &track2 = map.tracks_[track_id2];
+            auto &track2 = map.track(track_id2);
 
             // judge whether to merge
             bool merge_success = true;
@@ -484,11 +394,11 @@ void Point3dProcessor::MergeTrack(Map &map, int track_id, double max_re) {
             for (const Track *track_ptr : {&track, &track2}) {
                 for (const auto &[t_frame_id, t_p2d_id] :
                      track_ptr->observations_) {
-                    const auto &t_frame = map.frames_[t_frame_id];
+                    const auto &t_frame = map.frame(t_frame_id);
                     const auto &t_camera = map.Camera(t_frame.camera_id);
-                    double re = Reprojection_Error(t_frame.Tcw, t_camera,
-                                                   t_frame.points[t_p2d_id],
-                                                   merged_p3d);
+                    double re =
+                        ReprojectionError(t_frame.Tcw, t_camera,
+                                          t_frame.points[t_p2d_id], merged_p3d);
                     if (re > max_re) {
                         merge_success = false;
                         break;
@@ -505,9 +415,9 @@ void Point3dProcessor::MergeTrack(Map &map, int track_id, double max_re) {
                      track2.observations_) {
                     if (track.observations_.count(t_frame_id) == 0) {
                         track.observations_[t_frame_id] = t_p2d_id;
-                        map.frames_[t_frame_id].track_ids_[t_p2d_id] = track_id;
+                        map.frame(t_frame_id).track_ids_[t_p2d_id] = track_id;
                     } else {
-                        map.frames_[t_frame_id].track_ids_[t_p2d_id] = -1;
+                        map.frame(t_frame_id).track_ids_[t_p2d_id] = -1;
                         map.DeleteNumCorHavePoint3D(t_frame_id, t_p2d_id);
                     }
                 }
@@ -521,10 +431,10 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                                    double max_re) {
     int num_merged_track = 0, num_connected_track = 0;
     int num_continue_track = 0, num_connected_meas = 0;
-    for (const auto &track_id : map.frames_[frame_id].track_ids_) {
+    for (const auto &track_id : map.frame(frame_id).track_ids_) {
         if (track_id == -1)
             continue;
-        auto &track = map.tracks_[track_id];
+        auto &track = map.track(track_id);
         // merge track
         std::set<int> visted_id;
         for (const auto &[_frame_id, p2d_id] : track.observations_) {
@@ -534,7 +444,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                 // search connected track
                 if (track.observations_.count(c_frame_id) != 0)
                     continue;
-                auto &frame = map.frames_[c_frame_id];
+                auto &frame = map.frame(c_frame_id);
                 if (!frame.registered)
                     continue;
                 const int track_id2 = frame.track_ids_[c_p2d_id];
@@ -542,7 +452,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                     continue;
                 num_connected_track++;
                 visted_id.insert(track_id2);
-                auto &track2 = map.tracks_[track_id2];
+                auto &track2 = map.track(track_id2);
 
                 // judge whether to merge
                 const double w1 = track.observations_.size(),
@@ -553,11 +463,11 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                 for (const Track *track_ptr : {&track, &track2}) {
                     for (const auto &[t_frame_id, t_p2d_id] :
                          track_ptr->observations_) {
-                        const auto &t_frame = map.frames_[t_frame_id];
+                        const auto &t_frame = map.frame(t_frame_id);
                         const auto &t_camera = map.Camera(t_frame.camera_id);
-                        double re = Reprojection_Error(t_frame.Tcw, t_camera,
-                                                       t_frame.points[t_p2d_id],
-                                                       merged_p3d);
+                        double re = ReprojectionError(t_frame.Tcw, t_camera,
+                                                      t_frame.points[t_p2d_id],
+                                                      merged_p3d);
                         if (re > max_re) {
                             merge_success = false;
                             break;
@@ -572,10 +482,10 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                          track2.observations_) {
                         if (track.observations_.count(t_frame_id) == 0) {
                             track.observations_[t_frame_id] = t_p2d_id;
-                            map.frames_[t_frame_id].track_ids_[t_p2d_id] =
+                            map.frame(t_frame_id).track_ids_[t_p2d_id] =
                                 track_id;
                         } else {
-                            map.frames_[t_frame_id].track_ids_[t_p2d_id] = -1;
+                            map.frame(t_frame_id).track_ids_[t_p2d_id] = -1;
                             map.DeleteNumCorHavePoint3D(t_frame_id, t_p2d_id);
                         }
                     }
@@ -591,7 +501,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                      .corrs_vector[p2d_id]) {
                 if (track.observations_.count(c_frame_id) != 0)
                     continue;
-                auto &frame = map.frames_[c_frame_id];
+                auto &frame = map.frame(c_frame_id);
                 if (!frame.registered)
                     continue;
                 const int track_id2 = frame.track_ids_[c_p2d_id];
@@ -601,11 +511,11 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                 num_connected_meas++;
                 visted_pair.insert(pair);
 
-                const auto &t_frame = map.frames_[c_frame_id];
+                const auto &t_frame = map.frame(c_frame_id);
                 const auto &t_camera = map.Camera(t_frame.camera_id);
-                double re = Reprojection_Error(t_frame.Tcw, t_camera,
-                                               t_frame.points[c_p2d_id],
-                                               track.point3d_);
+                double re =
+                    ReprojectionError(t_frame.Tcw, t_camera,
+                                      t_frame.points[c_p2d_id], track.point3d_);
                 if (re < max_re) {
                     num_continue_track++;
                     ContinueTrackUpdate(track_id, c_frame_id, c_p2d_id, map);
@@ -619,7 +529,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
 
 bool Point3dProcessor::CheckFrameMeasurement(Map &map, int frame_id) {
     bool no_mea = true;
-    auto &frame = map.frames_[frame_id];
+    auto &frame = map.frame(frame_id);
     for (int i = 0; i < frame.track_ids_.size(); ++i) {
         if (frame.track_ids_[i] == -1)
             continue;
@@ -643,38 +553,7 @@ void Point3dProcessor::CheckFramesMeasurement(Map &map, double th_rpe_lba,
             FilterPointsFrame(map, frame.id, th_rpe_lba, th_angle_lba);
         }
         if (CheckFrameMeasurement(map, frame.id)) {
-            map.frames_[frame.id].registered = false;
-        }
-    }
-}
-
-void Point3dProcessor::ContinueFrameTracks(
-    const int frame_id, const std::vector<std::pair<int, int>> &cor_2d_3d_ids,
-    Map &map) {
-    auto &frame = map.frames_[frame_id];
-    const auto &camera = map.Camera(frame.camera_id);
-    for (const auto &[p2d_id, track_id] : cor_2d_3d_ids) {
-        bool skip = false;
-        auto &track = map.tracks_[track_id];
-        if (track.observations_.count(frame_id) != 0) {
-            // two 2D points in an image are associated with the same 3D point
-            const int p2d_id1 = track.observations_[frame_id];
-            const double re0 = Reprojection_Error(
-                frame.Tcw, camera, frame.points[p2d_id], track.point3d_);
-            const double re1 = Reprojection_Error(
-                frame.Tcw, camera, frame.points[p2d_id1], track.point3d_);
-            if (re0 < re1) {
-                frame.track_ids_[p2d_id1] = -1;
-                map.DeleteNumCorHavePoint3D(frame_id, p2d_id1);
-            } else {
-                skip = true;
-            }
-        }
-
-        if (!skip) {
-            frame.track_ids_[p2d_id] = track_id;
-            track.observations_[frame_id] = p2d_id;
-            map.AddNumCorHavePoint3D(frame_id, p2d_id);
+            map.frame(frame.id).registered = false;
         }
     }
 }
@@ -682,41 +561,35 @@ void Point3dProcessor::ContinueFrameTracks(
 bool CreatePoint3dRAW(const std::vector<std::pair<Pose, vector2>> &observations,
                       vector3 &p) {
     size_t data_size = observations.size();
-    std::vector<colmap::TriangulationEstimator::PointData> point_data(
-        data_size);
-    std::vector<colmap::TriangulationEstimator::PoseData> pose_data(data_size);
+
+    std::vector<Eigen::Vector3d> point_data;
+    std::vector<Eigen::Vector3d> pose_data;
+
     // Prepare the data
     for (size_t i = 0; i < data_size; ++i) {
         const auto &[Tcw, p2d] = observations[i];
         matrix<3, 3> R = Tcw.q.toRotationMatrix();
-        vector<3> T = Tcw.t;
-        matrix<3, 4> P;
-        P << R, T;
-
-        point_data[i].point_normalized = p2d;
-        pose_data[i].proj_matrix = P;
-        pose_data[i].proj_center = Tcw.center();
+        Eigen::Vector3d ray = R.transpose() * (p2d.homogeneous()).normalized();
+        point_data.push_back(ray);
+        pose_data.push_back(Tcw.center());
     }
 
-    colmap::EstimateTriangulationOptions tri_options;
-    tri_options.min_tri_angle = DegToRad(1.5);
-    tri_options.residual_type =
-        colmap::TriangulationEstimator::ResidualType::ANGULAR_ERROR;
-    tri_options.ransac_options.max_error = DegToRad(2);
-    tri_options.ransac_options.confidence = 0.9999;
-    tri_options.ransac_options.min_inlier_ratio = 0.02;
-    tri_options.ransac_options.max_num_trials = 10000;
+    const double min_tri_angle = DegToRad(1.5);
+    colmap::RANSACOptions ransac_options;
+    ransac_options.max_error = DegToRad(2);
+    ransac_options.confidence = 0.9999;
+    ransac_options.min_inlier_ratio = 0.02;
+    ransac_options.max_num_trials = 10000;
     // Enforce exhaustive sampling for small track lengths.
-    const size_t kExhaustiveSamplingThreshold = 15;
+    constexpr size_t kExhaustiveSamplingThreshold = 15;
     if (point_data.size() <= kExhaustiveSamplingThreshold) {
-        tri_options.ransac_options.min_num_trials =
-            NChooseK(point_data.size(), 2);
+        ransac_options.min_num_trials = NChooseK(point_data.size(), 2);
     }
 
     //  make new track;
     std::vector<char> inlier_mask;
-    if (EstimateTriangulation(tri_options, point_data, pose_data, &inlier_mask,
-                              &p)) {
+    if (EstimatePointLight(ransac_options, min_tri_angle, point_data, pose_data,
+                           inlier_mask, p)) {
         int count = 0;
         for (int k = 0; k < observations.size(); ++k) {
             if (inlier_mask[k]) {
@@ -728,4 +601,5 @@ bool CreatePoint3dRAW(const std::vector<std::pair<Pose, vector2>> &observations,
     }
     return false;
 }
+
 } // namespace xrsfm

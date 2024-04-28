@@ -516,14 +516,6 @@ matd_t *matd_inverse(const matd_t *x) {
     return NULL; // unreachable
 }
 
-// TODO Optimization: Some operations we could perform in-place,
-// saving some memory allocation work. E.g., ADD, SUBTRACT. Just need
-// to make sure that we don't do an in-place modification on a matrix
-// that was an input argument!
-
-// handle right-associative operators, greedily consuming them. These
-// include transpose and inverse. This is called by the main recursion
-// method.
 static inline matd_t *matd_op_gobble_right(const char *expr, int *pos,
                                            matd_t *acc, matd_t **garb,
                                            int *garbpos) {
@@ -1091,7 +1083,6 @@ static matd_svd_t matd_svd_tall(matd_t *A, int flags) {
             for (int i = 0; i < vlen; i++)
                 v[i] /= mag;
 
-            // TODO: optimize these multiplications
             // matd_t *Q = matd_identity(A->ncols);
             //  for (int i = 0; i < vlen; i++)
             //    for (int j = 0; j < vlen; j++)

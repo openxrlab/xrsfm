@@ -35,8 +35,6 @@
 #include <Eigen/Core>
 #include <vector>
 
-//#include "estimators/homography_matrix.h"
-//#include "util/alignment.h"
 #include "optim/ransac.h"
 #include "util/types.h"
 

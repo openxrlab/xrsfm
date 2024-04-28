@@ -8,6 +8,7 @@
 #include "base/map.h"
 
 namespace xrsfm {
+
 bool CreatePoint3dRAW(
     const std::vector<std::pair<Pose, Eigen::Vector2d>> &observations,
     Eigen::Vector3d &p);
@@ -23,9 +24,6 @@ class Point3dProcessor {
     double th_rpe_lba_ = 8, th_angle_lba_ = 2.0;
     double th_rpe_gba_ = 8, th_angle_gba_ = 2.0;
 
-    void ReTriangulate(Map &map);
-    void UpdateTrackInfo(Map &map);
-
     void CheckTrackDepth(const Map &map);
     bool CheckFrameMeasurement(Map &map, int frame_id);
     void CheckFramesMeasurement(Map &map, double th_rpe_lba,
@@ -34,10 +32,6 @@ class Point3dProcessor {
     void MergeTrack(Map &map, int track_id, double max_re);
     void MergeTracks(Map &map, const int frame_id, double max_re);
     void ContinueTrack(Map &map, int track_id, double max_re);
-    void
-    ContinueFrameTracks(const int frame_id,
-                        const std::vector<std::pair<int, int>> &cor_2d_3d_ids,
-                        Map &map);
 
     int TriangulateFramePoint(Map &map, const int frame_id,
                               const double deg_th);
@@ -46,6 +40,7 @@ class Point3dProcessor {
     int FilterPointsFrame(Map &map, const int frame_id, const double max_re,
                           const double deg);
 };
+
 } // namespace xrsfm
 
 #endif // XRSFM_SRC_GEOMETRY_TRACK_PROCESSOR_H

@@ -15,7 +15,7 @@ bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp,
     if ((std::abs(fp.id1 - fp.id2) != 1) && fp.matches.size() < num_min_matches)
         return true;
 
-    const auto &frame1 = map.frames_[fp.id1], &frame2 = map.frames_[fp.id2];
+    const auto &frame1 = map.frame(fp.id1), &frame2 = map.frame(fp.id2);
     const vector3 relative_motion = frame2.center() - frame1.center();
     const double distance = relative_motion.norm();
     const bool is_pure_rotation = distance < pure_rotation_th;
@@ -103,51 +103,48 @@ bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp,
 bool ErrorDetector::CheckAllRelativePose(Map &map, int frame_id,
                                          std::set<int> &bad_matched_frame_ids) {
     bad_matched_frame_ids.clear();
-    const auto &frame = map.frames_[frame_id];
+    const auto &frame = map.frame(frame_id);
     std::map<int, int> id2num_covisible_obs;
     for (const auto &track_id : frame.track_ids_) {
         if (track_id == -1)
             continue;
-        const auto &track = map.tracks_[track_id];
+        const auto &track = map.track(track_id);
         for (const auto &[t_frame_id, t_p2d_id] : track.observations_) {
             if (id2num_covisible_obs.count(t_frame_id) == 0) {
                 id2num_covisible_obs[t_frame_id] = 1;
             } else {
-                id2num_covisible_obs[t_frame_id]++;
+                id2num_covisible_obs.at(t_frame_id)++;
             }
         }
     }
 
     int num_good = 0, num_all = 0;
     for (const auto id : map.frameid2framepairids_[frame_id]) {
-        auto &fp = map.frame_pairs_[id];
+        const auto &fp = map.frame_pairs_[id];
+        const auto &frame1 = map.frame(fp.id1);
+        const auto &frame2 = map.frame(fp.id2);
+        if (!(frame1.registered && frame2.registered))
+            continue;
+
         int num_covise = -1;
         if (fp.id1 == frame_id) {
-            num_covise = id2num_covisible_obs[fp.id2];
+            if (id2num_covisible_obs.count(fp.id2) != 0)
+                num_covise = id2num_covisible_obs.at(fp.id2);
         } else {
-            num_covise = id2num_covisible_obs[fp.id1];
+            if (id2num_covisible_obs.count(fp.id1) != 0)
+                num_covise = id2num_covisible_obs.at(fp.id1);
         }
         if (num_covise >= 10)
             continue;
+        // matched but not covisible
 
-        const auto &frame1 = map.frames_[fp.id1];
-        const auto &frame2 = map.frames_[fp.id2];
-        // std::cout<<fp.id1<< " "<<fp.id2<<" "<<num_covise<<"
-        // "<<fp.matches.size()<<std::endl;
-        if (frame1.registered &&
-            frame2.registered) { // && frame1.is_keyframe && frame2.is_keyframe)
-                                 // { std::cout<<fp.id1<< " 1 "<<fp.id2<<"
-                                 // "<<num_covise<<"
-                                 // "<<fp.matches.size()<<std::endl; bad key
-                                 // frame selection
-            ++num_all;
-            std::vector<char> inlier_mask;
-            if (IsGoodRelativePose(map, fp, inlier_mask)) {
-                ++num_good;
-            } else {
-                int bad_neighbor_id = fp.id1 == frame_id ? fp.id2 : fp.id1;
-                bad_matched_frame_ids.insert(bad_neighbor_id);
-            }
+        ++num_all;
+        std::vector<char> inlier_mask;
+        if (IsGoodRelativePose(map, fp, inlier_mask)) { // TODO use tri angle
+            ++num_good;
+        } else {
+            int bad_neighbor_id = fp.id1 == frame_id ? fp.id2 : fp.id1;
+            bad_matched_frame_ids.insert(bad_neighbor_id);
         }
     }
 

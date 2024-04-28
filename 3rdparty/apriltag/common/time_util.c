@@ -67,8 +67,6 @@ int32_t timeutil_usleep(int64_t useconds) {
     Sleep(useconds / 1000);
     return 0;
 #else
-    // unistd.h function, but usleep is obsoleted in POSIX.1-2008.
-    // TODO: Eventually, rewrite this to use nanosleep
     return usleep(useconds);
 #endif
 }

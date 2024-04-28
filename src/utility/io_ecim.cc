@@ -12,17 +12,12 @@ void ReadCamerasBinary(const std::string &path,
     CHECK(file.is_open()) << path;
 
     const uint64_t num_camera = read_data2<uint64_t>(file);
-
     for (int i = 0; i < num_camera; ++i) {
-        uint32_t camera_id = -1, camera_model = -1;
-        read_data(file, camera_id);
-        read_data(file, camera_model);
+        const uint32_t camera_id = read_data<uint32_t>(file);
+        const uint32_t camera_model = read_data<uint32_t>(file);
         Camera camera(camera_id, camera_model);
-
-        uint64_t w = 0, h = 0; // TODO set w,h in camera
-        read_data(file, w);
-        read_data(file, h);
-
+        camera.width_ = read_data<uint64_t>(file);
+        camera.height_ = read_data<uint64_t>(file);
         read_data_vec(file, camera.params_.data(), camera.params_.size());
         cameras[camera_id] = camera;
     }
@@ -111,13 +106,10 @@ void ReadImagesBinaryForTriangulation(const std::string &path,
             pt.y = read_data2<double>(file);
         }
         for (size_t i = 0; i < num_p2d; ++i) {
-            // Eigen::Vector<float, 256> desc;
             std::vector<float> desc(feature_dim);
             read_data_vec(file, desc.data(), feature_dim);
         }
         frames[frame.id] = frame;
-        // std::cout<<frame.id<<" "<<frame.name<<"
-        // "<<frame.points.size()<<std::endl;
     }
 }
 

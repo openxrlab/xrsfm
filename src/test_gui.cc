@@ -15,9 +15,9 @@ class MainWindow : public QMainWindow {
         model_viewer_widget_ = new ModelViewerWidget(this);
         setCentralWidget(model_viewer_widget_);
         model_viewer_widget_->map = new Map();
-        ReadColMapDataBinary(
-            "/home/SENSETIME/yezhichao2/Data/KITTI/00/results/",
-            *model_viewer_widget_->map);
+        // ReadColMapDataBinary(
+        //     "/path/to/KITTI/00/results/",
+        //     *model_viewer_widget_->map);
 
         std::setlocale(LC_NUMERIC, "C");
         resize(1024, 600);
@@ -46,9 +46,21 @@ class MainWindow : public QMainWindow {
     }
 
     void mapping() {
-        FeatureProcessor feature_processor(project_widget_->GetImagePath(),
-                                           project_widget_->GetWorkspacePath());
+        const std::string image_path = project_widget_->GetImagePath();
+        const std::string work_path = project_widget_->GetWorkspacePath();
+
+        FeatureProcessor feature_processor(image_path, work_path);
         feature_processor.Run();
+
+        // Map map;
+        // PreProcess(work_path, camera_path, map);
+
+        // IncrementalMapper imapper;
+        // imapper.options.init_id1 = -1;
+        // imapper.options.init_id2 = -1;
+        // imapper.options.correct_pose = false;
+        // imapper.options.stop_when_register_fail = true;
+        // imapper.Reconstruct(map);
     }
 
     QToolBar *file_toolbar_;

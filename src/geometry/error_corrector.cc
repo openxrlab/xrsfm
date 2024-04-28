@@ -7,7 +7,7 @@ namespace xrsfm {
 inline std::vector<int> GetMatchedFrameIds(Map &map, int frame_id) {
     std::vector<int> matched_frame_ids;
     for (const int &id : map.frameid2matched_frameids_[frame_id]) {
-        if (!map.frames_[id].registered)
+        if (!map.frame(id).registered)
             continue;
         matched_frame_ids.emplace_back(id);
     }
@@ -27,8 +27,7 @@ std::vector<std::set<int>> DivideMatchedFrames(Map &map, Frame &frame,
     for (auto &track_id : frame.track_ids_) {
         if (track_id == -1)
             continue;
-        for (auto &[t_frame_id, t_p2d_id] :
-             map.tracks_[track_id].observations_) {
+        for (auto &[t_frame_id, t_p2d_id] : map.track(track_id).observations_) {
             if (id2num_covisible1.count(t_frame_id) != 0) {
                 id2num_covisible1[t_frame_id]++;
             }
@@ -37,8 +36,7 @@ std::vector<std::set<int>> DivideMatchedFrames(Map &map, Frame &frame,
     for (auto &track_id : frame2.track_ids_) {
         if (track_id == -1)
             continue;
-        for (auto &[t_frame_id, t_p2d_id] :
-             map.tracks_[track_id].observations_) {
+        for (auto &[t_frame_id, t_p2d_id] : map.track(track_id).observations_) {
             if (id2num_covisible2.count(t_frame_id) != 0) {
                 id2num_covisible2[t_frame_id]++;
             }
@@ -77,8 +75,8 @@ LoopInfo GetLoopInfo(Map &map, Frame &frame1, Frame &frame2) {
                   track_id2 = frame2.track_ids_[i];
         if (track_id1 == -1 || track_id2 == -1)
             continue;
-        const auto &track1 = map.tracks_[track_id1],
-                   &track2 = map.tracks_[track_id2];
+        const auto &track1 = map.track(track_id1),
+                   &track2 = map.track(track_id2);
 
         vector3 p3d1 = frame1.Tcw.q * track1.point3d_ + frame1.Tcw.t;
         vector3 p3d2 = frame2.Tcw.q * track2.point3d_ + frame2.Tcw.t;
@@ -99,7 +97,7 @@ bool CheckNegtiveDepth(const Map &map, const Frame &frame1,
     for (auto &track_id : frame1.track_ids_) {
         if (track_id == -1)
             continue;
-        auto &track = map.tracks_[track_id];
+        auto &track = map.track(track_id);
         const vector3 p3d = frame2.Tcw.q * track.point3d_ + frame2.Tcw.t;
         if (p3d.z() < 0) {
             return true;
@@ -108,7 +106,7 @@ bool CheckNegtiveDepth(const Map &map, const Frame &frame1,
     for (auto &track_id : frame2.track_ids_) {
         if (track_id == -1)
             continue;
-        auto &track = map.tracks_[track_id];
+        auto &track = map.track(track_id);
         const vector3 p3d = frame1.Tcw.q * track.point3d_ + frame1.Tcw.t;
         if (p3d.z() < 0) {
             return true;
@@ -120,23 +118,22 @@ bool CheckNegtiveDepth(const Map &map, const Frame &frame1,
 inline bool TryLocate(Map &map, const int frame_id,
                       const std::set<int> &local_frame_ids,
                       Point3dProcessor *p3d_processor_) {
-    bool reg_success = RegisterNextImageLocal(frame_id, local_frame_ids, map);
+    bool reg_success = RegisterImageLocal(frame_id, local_frame_ids, map);
 
     if (!reg_success) {
         bool have_neighbor = false;
         std::vector<int> adjacent_frame_ids = {frame_id - 1, frame_id + 1};
         for (auto &id : adjacent_frame_ids) {
             if (local_frame_ids.count(id) != 0) {
-                map.frames_[frame_id].registered = false;
+                map.frame(frame_id).registered = false;
                 p3d_processor_->TriangulateFramePoint(
                     map, id, p3d_processor_->th_rpe_lba_);
-                map.frames_[frame_id].registered = true;
+                map.frame(frame_id).registered = true;
                 have_neighbor = true;
             }
         }
         if (have_neighbor)
-            reg_success =
-                RegisterNextImageLocal(frame_id, local_frame_ids, map);
+            reg_success = RegisterImageLocal(frame_id, local_frame_ids, map);
     }
     return reg_success;
 }
@@ -147,19 +144,19 @@ inline void MergeTrackLoop(Map &map, Frame &frame1, Frame &frame2) {
         const int track_id = frame2.track_ids_[i];
         if (track_id == -1)
             continue;
-        auto &track = map.tracks_[track_id];
+        auto &track = map.track(track_id);
         if (track.observations_.count(frame1.id) != 0)
             continue;
 
         const int track_id1 = frame1.track_ids_[i];
         if (track_id1 != -1) { //  try merge track1 into track
-            auto &track1 = map.tracks_[track_id1];
+            auto &track1 = map.track(track_id1);
             for (const auto &[t_frame_id, t_p2d_id] : track1.observations_) {
                 if (track.observations_.count(t_frame_id) == 0) {
                     track.observations_[t_frame_id] = t_p2d_id;
-                    map.frames_[t_frame_id].track_ids_[t_p2d_id] = track_id;
+                    map.frame(t_frame_id).track_ids_[t_p2d_id] = track_id;
                 } else {
-                    map.frames_[t_frame_id].track_ids_[t_p2d_id] = -1;
+                    map.frame(t_frame_id).track_ids_[t_p2d_id] = -1;
                     map.DeleteNumCorHavePoint3D(t_frame_id, t_p2d_id);
                 }
             }
@@ -181,17 +178,12 @@ bool ErrorCorrector::CheckAndCorrectPose(Map &map, int frame_id, int iter) {
     if (!TryLocate(map, frame_id, bad_matched_frame_ids, p3d_processor_))
         return false;
 
-    auto &frame = map.frames_[frame_id];
+    auto &frame = map.frame(frame_id);
     const std::vector<int> matched_frame_ids =
         GetMatchedFrameIds(map, frame_id);
     for (auto &id : matched_frame_ids) {
         std::cout << "|" << id << std::endl;
     }
-
-    // error_detector.viewerTh_->update_map(map);
-    // cv::Mat img(10,10,CV_8U);
-    // cv::imshow("",img);
-    // cv::waitKey();
 
     // PoseGraph
     const double dist = (frame.Tcw.center() - map.tmp_frame.center()).norm();
@@ -209,10 +201,6 @@ bool ErrorCorrector::CheckAndCorrectPose(Map &map, int frame_id, int iter) {
         ba_solver_->ScalePoseGraphUnorder(loop_info, map, true);
     }
 
-    // error_detector.viewerTh_->update_map(map);
-    // cv::imshow("",img);
-    // cv::waitKey();
-
     MergeTrackLoop(map, frame, map.tmp_frame);
 
     // BA
@@ -225,7 +213,6 @@ bool ErrorCorrector::CheckAndCorrectPose(Map &map, int frame_id, int iter) {
         ba_solver_->KGBA(map, matched_frame_ids, true);
         p3d_processor_->FilterPoints3d(map, p3d_processor_->th_rpe_gba_,
                                        p3d_processor_->th_angle_gba_);
-        // TODO num_image_reg_pre = num_image_reg;
     }
 
     error_detector.CheckAllRelativePose(map, frame_id, bad_matched_frame_ids);

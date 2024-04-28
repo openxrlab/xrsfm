@@ -136,15 +136,6 @@ void tag_refine(std::string image_dir, std::string map_dir,
     Map map;
     ReadColMapDataBinary(map_dir, map);
     const Camera &cam_seq = map.Camera(0);
-    for (auto &[id, frame] : map.frame_map_) {
-        if (!frame.registered)
-            continue;
-        frame.points_normalized.resize(frame.points.size());
-        for (size_t j = 0; j < frame.points.size(); j++) {
-            ImageToNormalized(cam_seq, frame.points[j],
-                              frame.points_normalized[j]);
-        }
-    }
     std::map<std::string, int> name2id;
     for (auto &[id, frame] : map.frame_map_) {
         name2id[frame.name] = id;
@@ -243,8 +234,11 @@ void tag_refine(std::string image_dir, std::string map_dir,
             Track &track = map.track_map_[frame.track_ids_[i]];
             if (track.outlier)
                 continue;
+
+            Eigen::Vector2d points_normalized;
+            ImageToNormalized(cam_seq, frame.points[i], points_normalized);
             ceres::CostFunction *cost_function =
-                new ProjectionCost(frame.points_normalized[i]);
+                new ProjectionCost(points_normalized);
             problem.AddResidualBlock(cost_function, nullptr,
                                      frame.Tcw.q.coeffs().data(),
                                      frame.Tcw.t.data(), track.point3d_.data());

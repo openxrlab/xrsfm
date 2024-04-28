@@ -36,7 +36,6 @@
 #include <array>
 #include <vector>
 
-//#include "util/alignment.h"
 #include "geometry/colmap/util/types.h"
 
 namespace colmap {

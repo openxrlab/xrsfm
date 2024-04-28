@@ -54,10 +54,8 @@ inline void ReadFeatures(const std::string &file_name,
     CHECK_EQ(num_frames, frames.size());
     for (auto &frame : frames) {
         read_name(file, frame.name);
-        // std::cout<<frame.name<<std::endl;
         int num_points = -1;
         read_data(file, num_points);
-        // std::cout<<num_points<<std::endl;
         CHECK(num_points <= 1e6);
         frame.keypoints_.resize(num_points);
         frame.uint_descs_.resize(num_points, 128);
@@ -108,7 +106,6 @@ inline void ReadFramePairs(const std::string &file_name,
     for (auto &frame_pair : frame_pairs) {
         read_data(file, frame_pair.id1);
         read_data(file, frame_pair.id2);
-        // std::cout<<frame_pair.id1<<" "<<frame_pair.id2<<std::endl;
         size_t num_matches = read_data2<size_t>(file);
         frame_pair.matches.resize(num_matches);
         read_data_vec(file, &(frame_pair.matches[0]), num_matches);
