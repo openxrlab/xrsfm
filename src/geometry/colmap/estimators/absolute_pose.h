@@ -36,7 +36,11 @@
 #include <array>
 #include <vector>
 
-#include "geometry/colmap/util/types.h"
+// #include "geometry/colmap/util/types.h"
+
+namespace Eigen {
+typedef Eigen::Matrix<double, 3, 4> Matrix3x4d;
+}
 
 namespace colmap {
 

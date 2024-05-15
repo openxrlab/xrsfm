@@ -133,6 +133,7 @@ add_library(xrsfm
         src/ui/resources.qrc
         )
 
+qt5_add_resources(RESOURCES src/ui/resources.qrc)
 
 target_include_directories(xrsfm
         PUBLIC
@@ -163,7 +164,7 @@ else ()
         sift_gpu
         ${Qt5Core_LIBRARIES}
         ${Qt5OpenGL_LIBRARIES}
-        ${Qt5Widgets_LIBRARIES}
+        ${Qt5Widgets_LIBRARIES} 
         )
 endif()
 
@@ -190,3 +191,4 @@ target_link_libraries(rec_kitti xrsfm)
 
 add_executable(test_gui src/test_gui.cc)
 target_link_libraries(test_gui xrsfm)
+target_sources(test_gui PRIVATE ${RESOURCES})

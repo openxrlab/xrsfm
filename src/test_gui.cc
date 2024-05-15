@@ -1,7 +1,6 @@
 #include <iostream>
 #include <QApplication>
 #include <QMainWindow>
-#include <QtCore>
 #include <QtGui>
 #include <QtWidgets>
 #include "src/ui/project_widget.h"
@@ -15,9 +14,6 @@ class MainWindow : public QMainWindow {
         model_viewer_widget_ = new ModelViewerWidget(this);
         setCentralWidget(model_viewer_widget_);
         model_viewer_widget_->map = new Map();
-        // ReadColMapDataBinary(
-        //     "/path/to/KITTI/00/results/",
-        //     *model_viewer_widget_->map);
 
         std::setlocale(LC_NUMERIC, "C");
         resize(1024, 600);
@@ -25,6 +21,9 @@ class MainWindow : public QMainWindow {
 
         project_widget_ = new ProjectWidget(this);
 
+        action_view_model_ = new QAction("Open Sparse Model", this);
+        connect(action_view_model_, &QAction::triggered, this,
+                &MainWindow::selectModelPath);
         action_set_project_ = new QAction("Set Project", this);
         connect(action_set_project_, &QAction::triggered, this,
                 &MainWindow::showMenu);
@@ -34,9 +33,25 @@ class MainWindow : public QMainWindow {
                 &MainWindow::mapping);
 
         file_toolbar_ = addToolBar(tr("File"));
-        file_toolbar_->addAction(action_set_project_);
-        file_toolbar_->addAction(action_start_reconstruction_);
+        file_toolbar_->addAction(action_view_model_);
+        // TODO the reconstruction part
+        // file_toolbar_->addAction(action_set_project_);
+        // file_toolbar_->addAction(action_start_reconstruction_);
         file_toolbar_->setIconSize(QSize(16, 16));
+    }
+
+    void selectModelPath() {
+        const auto model_path = QFileDialog::getExistingDirectory(
+            this, tr("Select model path..."), "", QFileDialog::ShowDirsOnly);
+        std::string model_path_str = model_path.toUtf8().constData();
+        model_path_str += "/";
+        if (ReadColMapDataBinary(model_path_str, *model_viewer_widget_->map)) {
+            // model_viewer_widget_->Upload();
+            model_viewer_widget_->Upload();
+            std::cout << model_path_str << " load success\n";
+        } else {
+            std::cout << model_path_str << " load fail\n";
+        }
     }
 
     void showMenu() {
@@ -64,6 +79,7 @@ class MainWindow : public QMainWindow {
     }
 
     QToolBar *file_toolbar_;
+    QAction *action_view_model_;
     QAction *action_set_project_;
     QAction *action_start_reconstruction_;
     ProjectWidget *project_widget_;
@@ -72,15 +88,15 @@ class MainWindow : public QMainWindow {
 } // namespace xrsfm
 
 int main(int argc, char **argv) {
-    using namespace xrsfm;
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
+    Q_INIT_RESOURCE(resources);
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 
     QApplication app(argc, argv);
     QMainWindow window;
-    MainWindow main_window;
+    xrsfm::MainWindow main_window;
     main_window.show();
 
     return app.exec();

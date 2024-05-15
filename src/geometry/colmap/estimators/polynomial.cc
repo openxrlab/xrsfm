@@ -32,8 +32,7 @@
 #include "polynomial.h"
 
 #include <Eigen/Eigenvalues>
-
-#include "geometry/colmap/util/logging.h"
+#include <glog/logging.h>
 
 namespace colmap {
 namespace {

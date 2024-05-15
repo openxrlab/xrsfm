@@ -30,7 +30,7 @@
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
 #include <Eigen/Eigen>
-#include "ui/model_viewer_widget.h"
+#include "model_viewer_widget.h"
 #include "src/geometry/colmap/util/math.h"
 
 #define SELECTION_BUFFER_IMAGE_IDX 0
@@ -622,20 +622,20 @@ void ModelViewerWidget::SetupView() {
     projection_matrix_.setToIdentity();
 }
 
-// void ModelViewerWidget::Upload() {
-//     point_colormap_->Prepare(cameras, images, points3D, reg_image_ids);
-//     image_colormap_->Prepare(cameras, images, points3D, reg_image_ids);
+void ModelViewerWidget::Upload() {
+    //     point_colormap_->Prepare(cameras, images, points3D, reg_image_ids);
+    //     image_colormap_->Prepare(cameras, images, points3D, reg_image_ids);
 
-//     ComposeProjectionMatrix();
+    //     ComposeProjectionMatrix();
 
-//     UploadPointData();
-//     UploadImageData();
-//     UploadMovieGrabberData();
-//     UploadPointConnectionData();
-//     UploadImageConnectionData();
+    UploadPointData();
+    //     UploadImageData();
+    //     UploadMovieGrabberData();
+    //     UploadPointConnectionData();
+    //     UploadImageConnectionData();
 
-//     update();
-// }
+    update();
+}
 
 // void ModelViewerWidget::UploadCoordinateGridData() {
 //     makeCurrent();

@@ -29,7 +29,7 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "ui/point_painter.h"
+#include "point_painter.h"
 
 namespace xrsfm {
 
@@ -50,9 +50,9 @@ void PointPainter::Setup() {
 
     // TODO
     shader_program_.addShaderFromSourceFile(QOpenGLShader::Vertex,
-                                            "/shaders/points.v.glsl");
+                                            ":/shaders/points.v.glsl");
     shader_program_.addShaderFromSourceFile(QOpenGLShader::Fragment,
-                                            "/shaders/points.f.glsl");
+                                            ":/shaders/points.f.glsl");
 
     shader_program_.link();
     shader_program_.bind();

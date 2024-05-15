@@ -36,9 +36,6 @@
 #include <random>
 #include <thread>
 
-#include "logging.h"
-//#include "util/threading.h"
-
 namespace colmap {
 
 extern thread_local std::mt19937 *PRNG;

@@ -36,10 +36,10 @@
 #include <random>
 #include <stdexcept>
 #include <vector>
+#include <glog/logging.h>
 
 #include "random_sampler.h"
 #include "support_measurement.h"
-#include "../util/logging.h"
 
 namespace colmap {
 

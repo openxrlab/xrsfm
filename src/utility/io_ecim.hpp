@@ -121,7 +121,7 @@ inline void WriteTrajectory(const Map &map,
     trajectory_file.close();
 }
 
-void ReadColMapDataBinary(const std::string &output_path, Map &map);
+bool ReadColMapDataBinary(const std::string &output_path, Map &map);
 
 void WriteColMapDataBinary(const std::string &output_path, const Map &map);
 

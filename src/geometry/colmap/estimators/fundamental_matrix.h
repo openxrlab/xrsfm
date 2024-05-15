@@ -36,7 +36,7 @@
 #include <vector>
 
 #include "optim/ransac.h"
-#include "util/types.h"
+// #include "util/types.h"
 
 namespace colmap {
 

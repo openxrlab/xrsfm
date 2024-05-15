@@ -95,6 +95,8 @@ class ModelViewerWidget : public QOpenGLWidget,
     void resizeGL(int width, int height) override;
     void paintGL() override;
 
+    void Upload();
+
   private:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
@@ -104,7 +106,6 @@ class ModelViewerWidget : public QOpenGLWidget,
     void SetupPainters();
     void SetupView();
 
-    //   void Upload();
     void UploadCoordinateGridData();
     void UploadPointData(const bool selection_mode = false);
     //   void UploadPointConnectionData();

@@ -3,6 +3,7 @@
 //
 
 #include "io_ecim.hpp"
+#include <filesystem>
 
 namespace xrsfm {
 
@@ -13,11 +14,11 @@ void ReadCamerasBinary(const std::string &path,
 
     const uint64_t num_camera = read_data2<uint64_t>(file);
     for (int i = 0; i < num_camera; ++i) {
-        const uint32_t camera_id = read_data<uint32_t>(file);
-        const uint32_t camera_model = read_data<uint32_t>(file);
+        const uint32_t camera_id = read_data2<uint32_t>(file);
+        const uint32_t camera_model = read_data2<uint32_t>(file);
         Camera camera(camera_id, camera_model);
-        camera.width_ = read_data<uint64_t>(file);
-        camera.height_ = read_data<uint64_t>(file);
+        camera.width_ = read_data2<uint64_t>(file);
+        camera.height_ = read_data2<uint64_t>(file);
         read_data_vec(file, camera.params_.data(), camera.params_.size());
         cameras[camera_id] = camera;
     }
@@ -79,10 +80,17 @@ void ReadPoints3DBinary(const std::string &path, std::map<int, Track> &tracks) {
     }
 }
 
-void ReadColMapDataBinary(const std::string &output_path, Map &map) {
+bool ReadColMapDataBinary(const std::string &output_path, Map &map) {
+    namespace fs = std::filesystem;
+    if (!(fs::exists(fs::path(output_path + "cameras.bin")) &&
+          fs::exists(fs::path(output_path + "images.bin")) &&
+          fs::exists(fs::path(output_path + "points3D.bin")))) {
+        return false;
+    }
     ReadCamerasBinary(output_path + "cameras.bin", map.camera_map_);
     ReadImagesBinary(output_path + "images.bin", map.frame_map_);
     ReadPoints3DBinary(output_path + "points3D.bin", map.track_map_);
+    return true;
 }
 
 void ReadImagesBinaryForTriangulation(const std::string &path,

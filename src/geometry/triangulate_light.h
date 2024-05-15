@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "geometry/colmap/optim/ransac.h"
-#include "util/types.h"
+// #include "util/types.h"
 
 namespace xrsfm {
 

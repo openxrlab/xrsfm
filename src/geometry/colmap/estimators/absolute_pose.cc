@@ -32,8 +32,8 @@
 #include "absolute_pose.h"
 
 #include <Eigen/Eigen>
+#include <glog/logging.h>
 
-#include "geometry/colmap/util/logging.h"
 #include "polynomial.h"
 
 namespace colmap {
