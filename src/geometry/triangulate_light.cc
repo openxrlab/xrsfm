@@ -6,8 +6,8 @@
 #include <Eigen/Geometry>
 #include <unordered_set>
 
-#include "geometry/colmap/optim/combination_sampler.h"
-#include "geometry/colmap/optim/loransac.h"
+#include "ransac/combination_sampler.h"
+#include "ransac/loransac.h"
 
 namespace xrsfm {
 

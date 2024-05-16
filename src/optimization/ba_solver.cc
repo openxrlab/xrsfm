@@ -5,7 +5,7 @@
 #include "ba_solver.h"
 
 #include "cost_factor_ceres.h"
-#include "geometry/colmap/util/math.h"
+#include "util/math.h"
 #include "utility/timer.h"
 #include "geometry/triangulate_light.h"
 

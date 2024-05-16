@@ -1,6 +1,0 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>shaders/points.v.glsl</file>
-    <file>shaders/points.f.glsl</file>
-</qresource>
-</RCC>

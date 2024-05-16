@@ -11,7 +11,7 @@
 #include <random>
 #include <type_traits>
 
-#include "global.h"
+#include "utility/global.h"
 
 namespace xrsfm {
 

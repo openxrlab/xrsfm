@@ -115,31 +115,31 @@ add_library(xrsfm
         src/geometry/triangulate_light.cc
         src/geometry/track_processor.cc
 
-        src/geometry/colmap/estimators/absolute_pose.cc
-        src/geometry/colmap/estimators/polynomial.cc
-        src/geometry/colmap/estimators/fundamental_matrix.cc
-        src/geometry/colmap/util/random.cc
-        src/geometry/colmap/optim/random_sampler.cc
-        src/geometry/colmap/optim/combination_sampler.cc
-        src/geometry/colmap/optim/support_measurement.cc
-
         src/optimization/ba_solver.cc
         src/mapper/incremental_mapper.cc
         src/utility/io_ecim.cc
 
-        src/ui/point_painter.cc
-        src/ui/project_widget.cc
-        src/ui/model_viewer_widget.cc
-        src/ui/resources.qrc
+        src/colmap/estimators/absolute_pose.cc
+        src/colmap/estimators/polynomial.cc
+        src/colmap/estimators/fundamental_matrix.cc
+        src/colmap/ransac/random_sampler.cc
+        src/colmap/ransac/combination_sampler.cc
+        src/colmap/ransac/support_measurement.cc
+        src/colmap/ransac/random.cc
+        src/colmap/ui/point_painter.cc
+        src/colmap/ui/project_widget.cc
+        src/colmap/ui/model_viewer_widget.cc
+        src/colmap/ui/resources.qrc
         )
 
-qt5_add_resources(RESOURCES src/ui/resources.qrc)
+
+qt5_add_resources(RESOURCES src/colmap/ui/resources.qrc)
 
 target_include_directories(xrsfm
         PUBLIC
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/src
-        ${CMAKE_SOURCE_DIR}/src/geometry/colmap
+        ${CMAKE_SOURCE_DIR}/src/colmap
         ${CMAKE_SOURCE_DIR}/3rdparty/SiftGPU
         ${CMAKE_SOURCE_DIR}/3rdparty/apriltag
         ${EIGEN3_INCLUDE_DIRS}
@@ -159,12 +159,12 @@ if(XRPRIMER_ENABLED)
 else ()
     target_link_libraries(xrsfm
         stdc++fs
+        sift_gpu
         ${OpenCV_LIBS}
         ${CERES_LIBRARIES}
-        sift_gpu
         ${Qt5Core_LIBRARIES}
         ${Qt5OpenGL_LIBRARIES}
-        ${Qt5Widgets_LIBRARIES} 
+        ${Qt5Widgets_LIBRARIES}
         )
 endif()
 

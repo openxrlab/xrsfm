@@ -7,8 +7,7 @@
 #include <Eigen/Core>
 #include <vector>
 
-#include "geometry/colmap/optim/ransac.h"
-// #include "util/types.h"
+#include "ransac/ransac.h"
 
 namespace xrsfm {
 

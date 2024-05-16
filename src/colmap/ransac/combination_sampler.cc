@@ -29,33 +29,49 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-#include "random_sampler.h"
+#include "combination_sampler.h"
 
 #include <numeric>
 
-#include "../util/random.h"
+#include "random.h"
+#include "util/math.h"
 
 namespace colmap {
 
-RandomSampler::RandomSampler(const size_t num_samples)
+CombinationSampler::CombinationSampler(const size_t num_samples)
     : num_samples_(num_samples) {}
 
-void RandomSampler::Initialize(const size_t total_num_samples) {
+void CombinationSampler::Initialize(const size_t total_num_samples) {
     CHECK_LE(num_samples_, total_num_samples);
-    sample_idxs_.resize(total_num_samples);
-    std::iota(sample_idxs_.begin(), sample_idxs_.end(), 0);
+    total_sample_idxs_.resize(total_num_samples);
+    // Note that the samples must be in increasing order for `NextCombination`.
+    std::iota(total_sample_idxs_.begin(), total_sample_idxs_.end(), 0);
 }
 
-size_t RandomSampler::MaxNumSamples() {
-    return std::numeric_limits<size_t>::max();
+size_t NChooseK(const size_t n, const size_t k) {
+    if (k == 0) {
+        return 1;
+    }
+    return (n * NChooseK(n - 1, k - 1)) / k;
 }
 
-std::vector<size_t> RandomSampler::Sample() {
-    Shuffle(static_cast<uint32_t>(num_samples_), &sample_idxs_);
+size_t CombinationSampler::MaxNumSamples() {
+    return NChooseK(total_sample_idxs_.size(), num_samples_);
+}
 
+std::vector<size_t> CombinationSampler::Sample() {
     std::vector<size_t> sampled_idxs(num_samples_);
     for (size_t i = 0; i < num_samples_; ++i) {
-        sampled_idxs[i] = sample_idxs_[i];
+        sampled_idxs[i] = total_sample_idxs_[i];
+    }
+
+    if (!NextCombination(total_sample_idxs_.begin(),
+                         total_sample_idxs_.begin() + num_samples_,
+                         total_sample_idxs_.end())) {
+        // Reached all possible combinations, so reset to original state.
+        // Note that the samples must be in increasing order for
+        // `NextCombination`.
+        std::iota(total_sample_idxs_.begin(), total_sample_idxs_.end(), 0);
     }
 
     return sampled_idxs;

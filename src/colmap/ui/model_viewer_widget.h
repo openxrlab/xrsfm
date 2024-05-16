@@ -109,7 +109,7 @@ class ModelViewerWidget : public QOpenGLWidget,
     void UploadCoordinateGridData();
     void UploadPointData(const bool selection_mode = false);
     //   void UploadPointConnectionData();
-    //   void UploadImageData(const bool selection_mode = false);
+    void UploadImageData(const bool selection_mode = false);
     //   void UploadImageConnectionData();
     //   void UploadMovieGrabberData();
 
@@ -125,9 +125,8 @@ class ModelViewerWidget : public QOpenGLWidget,
     QMatrix4x4 projection_matrix_;
 
     PointPainter point_painter_;
-
-    //   PointViewerWidget *point_viewer_widget_;
-    //   DatabaseImageViewerWidget *image_viewer_widget_;
+    LinePainter image_line_painter_;
+    TrianglePainter image_triangle_painter_;
 
     bool mouse_is_pressed_;
     QTimer mouse_press_timer_;

@@ -3,9 +3,9 @@
 #include <QMainWindow>
 #include <QtGui>
 #include <QtWidgets>
-#include "src/ui/project_widget.h"
-#include "src/feature/feature_processor.h"
-#include "src/ui/model_viewer_widget.h"
+#include "feature/feature_processor.h"
+#include "ui/model_viewer_widget.h"
+#include "ui/project_widget.h"
 
 namespace xrsfm {
 class MainWindow : public QMainWindow {
@@ -46,7 +46,6 @@ class MainWindow : public QMainWindow {
         std::string model_path_str = model_path.toUtf8().constData();
         model_path_str += "/";
         if (ReadColMapDataBinary(model_path_str, *model_viewer_widget_->map)) {
-            // model_viewer_widget_->Upload();
             model_viewer_widget_->Upload();
             std::cout << model_path_str << " load success\n";
         } else {

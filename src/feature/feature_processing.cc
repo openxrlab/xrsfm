@@ -9,12 +9,12 @@
 #include <algorithm>
 #include <numeric>
 
-#include "geometry/colmap/estimators/fundamental_matrix.h"
+#include "estimators/fundamental_matrix.h"
 #include "geometry/epipolar_geometry.hpp"
 #include "geometry/essential.h"
 #include "base/map.h"
-#include "optim/loransac.h"
-#include "optim/ransac.h"
+#include "ransac/loransac.h"
+#include "ransac/ransac.h"
 #include "sift_extractor.h"
 #include "utility/timer.h"
 #include "match_expansion.h"

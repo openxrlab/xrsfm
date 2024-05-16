@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include "utility/random.h"
+#include "random.h"
 
 namespace xrsfm {
 namespace {

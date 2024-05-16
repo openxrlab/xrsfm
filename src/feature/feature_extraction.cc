@@ -9,10 +9,10 @@
 
 #include "base/map.h"
 #include "feature_processing.h"
-#include "geometry/colmap/estimators/fundamental_matrix.h"
+#include "estimators/fundamental_matrix.h"
 #include "geometry/essential.h"
-#include "optim/loransac.h"
-#include "optim/ransac.h"
+#include "ransac/loransac.h"
+#include "ransac/ransac.h"
 #include "sift_extractor.h"
 #include "utility/timer.h"
 

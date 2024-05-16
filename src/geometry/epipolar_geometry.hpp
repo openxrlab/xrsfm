@@ -4,7 +4,7 @@
 
 #include "base/map.h"
 #include "estimators/fundamental_matrix.h"
-#include "optim/loransac.h"
+#include "ransac/loransac.h"
 
 namespace xrsfm {
 inline void SolveFundamnetalCOLMAP(const std::vector<Eigen::Vector2d> &points1,

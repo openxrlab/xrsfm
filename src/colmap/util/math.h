@@ -108,9 +108,6 @@ template <typename T> T Sigmoid(const T x, const T alpha = 1);
 // @return         The scaled value in the range [0, 1].
 template <typename T> T ScaleSigmoid(T x, const T alpha = 1, const T x0 = 10);
 
-// Binomial coefficient or all combinations, defined as n! / ((n - k)! k!).
-size_t NChooseK(const size_t n, const size_t k);
-
 // Cast value from one type to another and truncate instead of overflow, if the
 // input value is out of range of the output data type.
 template <typename T1, typename T2> T2 TruncateCast(const T1 value);

@@ -1,0 +1,11 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>shaders/points.v.glsl</file>
+    <file>shaders/points.f.glsl</file>
+    <file>shaders/lines.v.glsl</file>
+    <file>shaders/lines.g.glsl</file>
+    <file>shaders/lines.f.glsl</file>
+    <file>shaders/triangles.v.glsl</file>
+    <file>shaders/triangles.f.glsl</file>
+</qresource>
+</RCC>
