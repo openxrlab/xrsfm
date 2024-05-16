@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#include "base/camera.h"
+#include "base/camera.hpp"
 #include "base/map.h"
 #include "geometry/track_processor.h"
 #include "optimization/ba_solver.h"

@@ -40,17 +40,15 @@ void FeatureExtract(const std::string &image_dir_path,
         const cv::Mat image = cv::imread(image_dir_path + frame.name,
                                          cv::IMREAD_IGNORE_ORIENTATION);
         if (image.rows == 0) {
-            std::cout << "Can't read " << image_dir_path + frame.name
-                      << std::endl;
+            std::cout << "ERROR: fail to read image: "
+                      << image_dir_path + frame.name << std::endl;
             exit(0);
         }
 
         image_size.push_back(ImageSize(image.cols, image.rows));
 
 #ifndef USE_ORB
-        // std::cout << image_dir_path + frame.name << std::endl;
         sift.ExtractUINT8(image, frame.keypoints_, frame.uint_descs_);
-        // std::cout << i << " " << frame.uint_descs_.rows() << std::endl;
 #else
         orb(image, cv::Mat(), frame.keypoints_, frame.orb_descs_);
 #endif

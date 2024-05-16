@@ -36,11 +36,8 @@ class Camera {
     }
     Camera(int _id, double fxy, double cx, double cy) {
         id_ = _id;
-        // model_id_ = 0;
-        // params_ = {fxy, cx, cy};
         model_id_ = 2;
         params_ = {fxy, cx, cy, 0};
-        std::cout << params_.size() << std::endl;
         is_valid = true;
     }
 
@@ -88,8 +85,8 @@ inline void ImageToNormalized(const Camera &c, const Eigen::Vector2d &p2d,
     CAMERA_MODEL_CASES
 #undef CAMERA_MODEL_CASE
 
-    std::cout << "ERROR: (ImageToNormalized) unsupported model type: "
-              << c.model_id_ << "\n";
+    printf("ERROR: (ImageToNormalized) unsupported model type: %d\n",
+           c.model_id_);
     exit(-1);
 }
 
@@ -104,8 +101,8 @@ inline void NormalizedToImage(const Camera &c, const Eigen::Vector2d &p2d_n,
     CAMERA_MODEL_CASES
 #undef CAMERA_MODEL_CASE
 
-    std::cout << "ERROR: (NormalizedToImage) unsupported model type: "
-              << c.model_id_ << "\n";
+    printf("ERROR: (NormalizedToImage) unsupported model type: %d",
+           int(c.model_id_));
     exit(-1);
 }
 

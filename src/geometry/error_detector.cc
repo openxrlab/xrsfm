@@ -92,9 +92,6 @@ bool ErrorDetector::IsGoodRelativePose(const Map &map, const FramePair &fp,
            num_matches);
 
     if (ratio < ratio_th) {
-        // std::cout << frame1.tcw.q.coeffs().transpose() << " " <<
-        // frame1.tcw.t.transpose() << std::endl;nn
-
         return false;
     }
     return true;

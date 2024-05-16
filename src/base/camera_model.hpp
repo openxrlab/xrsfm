@@ -26,7 +26,6 @@ inline void IterativeUndistortion(const double *params, double *xy) {
     Eigen::Vector2d xy_plus;
 
     for (size_t i = 0; i < kNumIterations; ++i) {
-        // std::cout << i << " " << kNumIterations << std::endl;
         const double step0 = std::max(std::numeric_limits<double>::epsilon(),
                                       std::abs(kRelStepSize * x(0)));
         const double step1 = std::max(std::numeric_limits<double>::epsilon(),

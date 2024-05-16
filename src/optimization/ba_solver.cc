@@ -5,11 +5,28 @@
 #include "ba_solver.h"
 
 #include "cost_factor_ceres.h"
-#include "util/math.h"
 #include "utility/timer.h"
 #include "geometry/triangulate_light.h"
 
 namespace xrsfm {
+
+template <typename T>
+T Percentile(const std::vector<T> &elems, const double p) {
+    CHECK(!elems.empty());
+    CHECK_GE(p, 0);
+    CHECK_LE(p, 100);
+
+    const int idx = static_cast<int>(std::round(p / 100 * (elems.size() - 1)));
+    const size_t percentile_idx =
+        std::max(0, std::min(static_cast<int>(elems.size() - 1), idx));
+
+    std::vector<T> ordered_elems = elems;
+    std::nth_element(ordered_elems.begin(),
+                     ordered_elems.begin() + percentile_idx,
+                     ordered_elems.end());
+
+    return ordered_elems.at(percentile_idx);
+}
 
 void PrintSolverSummary(const ceres::Solver::Summary &summary) {
     std::cout << std::right << std::setw(16) << "Residuals : ";
@@ -466,7 +483,7 @@ std::vector<int> FindLocalBundle(const int frame_id, Map &map,
 
                 // Calculate the triangulation angle at a certain percentile.
                 const double kTriangulationAnglePercentile = 75;
-                tri_angle = colmap::Percentile(
+                tri_angle = Percentile(
                     CalculateTriangulationAnglesLight(
                         proj_center, proj_center_overlap, shared_points3D),
                     kTriangulationAnglePercentile);

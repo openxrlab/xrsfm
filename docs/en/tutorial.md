@@ -51,7 +51,7 @@ Run reconsturction stage with the following command line
 "init_id1" and "init_id2" indicates two frames for the initialization of SfM.
 In general, these two frames can be set to 0 and 5.
 
-The format of output binary files is is consistent with COLMAP, you can use colmap gui to view the reconstruction result.
+You can view the reconstruction results using ```./bin/xrsfm_gui```. The file format is the same as the well-known open-source project COLMAP. You can also use COLMAP's graphical user interface to view the reconstruction results of this project.
 
 ### 3. Estimate scale with apriltag (Optional)
 Input: images, reconstruction results

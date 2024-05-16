@@ -31,7 +31,6 @@
 
 #include <Eigen/Eigen>
 #include "model_viewer_widget.h"
-#include "util/math.h"
 
 #define SELECTION_BUFFER_IMAGE_IDX 0
 #define SELECTION_BUFFER_POINT_IDX 1
@@ -51,6 +50,10 @@ const Eigen::Vector4f kZAxisColor(0.0f, 0.0f, 0.9f, 0.5f);
 
 namespace xrsfm {
 namespace {
+
+double RadToDeg(const double rad) {
+    return rad * 57.29577951308232286464772187173366546630859375;
+}
 
 // Generate unique index from RGB color in the range [0, 256^3].
 inline size_t RGBToIndex(const uint8_t r, const uint8_t g, const uint8_t b) {
@@ -369,8 +372,7 @@ void ModelViewerWidget::RotateView(const float x, const float y,
         // First shift to rotation center, then rotate and shift back.
         model_view_matrix_.translate(rot_center(0), rot_center(1),
                                      rot_center(2));
-        model_view_matrix_.rotate(colmap::RadToDeg(angle), axis(0), axis(1),
-                                  axis(2));
+        model_view_matrix_.rotate(RadToDeg(angle), axis(0), axis(1), axis(2));
         model_view_matrix_.translate(-rot_center(0), -rot_center(1),
                                      -rot_center(2));
         update();

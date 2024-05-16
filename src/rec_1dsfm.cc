@@ -41,7 +41,6 @@ void PreProcess(const std::string bin_path, Map &map) {
     }
 
     for (int i = 0; i < cameras.size(); ++i) {
-        std::cout << i << " " << cameras.size() << std::endl;
         auto &camera = cameras[i];
         // camera.log();
         // if distortion parameters of the camera are not estimated, the camera

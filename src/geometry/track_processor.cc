@@ -175,8 +175,8 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id,
             if (!cor_frame.registered)
                 continue;
             if (cor_frame.track_ids_.size() <= t_p2d_id) {
-                std::cout << "bad" << t_frame_id << " " << t_p2d_id
-                          << std::endl;
+                printf("Error: frame %d index out of bounds %d %d\n",
+                       t_frame_id, t_p2d_id, int(cor_frame.track_ids_.size()));
                 exit(0);
             }
             observations.emplace_back(t_frame_id, t_p2d_id);

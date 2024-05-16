@@ -20,7 +20,7 @@ extern "C" {
 }
 
 #include "base/map.h"
-#include "base/camera.h"
+#include "base/camera.hpp"
 #include "geometry/track_processor.h"
 #include "optimization/ba_solver.h"
 #include "optimization/cost_factor_ceres.h"
@@ -257,7 +257,7 @@ void tag_refine(std::string image_dir, std::string map_dir,
 
     ceres::Solve(solver_options, &problem, &summary);
     std::cout << summary.BriefReport() << "\n";
-    std::cout << scale << std::endl;
+    std::cout << "scale :" << scale << std::endl;
 
     // resize map
     for (auto &[id, frame] : map.frame_map_) {

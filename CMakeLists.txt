@@ -171,20 +171,20 @@ endif()
 add_executable(run_matching src/run_matching.cc)
 target_link_libraries(run_matching xrsfm)
 
-# add_executable(run_reconstruction src/run_reconstruction.cc)
-# target_link_libraries(run_reconstruction xrsfm)
+add_executable(run_reconstruction src/run_reconstruction.cc)
+target_link_libraries(run_reconstruction xrsfm)
 
-# add_executable(run_triangulation src/run_triangulation.cc)
-# target_link_libraries(run_triangulation xrsfm)
+add_executable(run_triangulation src/run_triangulation.cc)
+target_link_libraries(run_triangulation xrsfm)
 
-# add_executable(unpack_collect_data src/unpack_collect_data.cc)
-# target_link_libraries(unpack_collect_data xrsfm)
+add_executable(unpack_collect_data src/unpack_collect_data.cc)
+target_link_libraries(unpack_collect_data xrsfm)
 
-# add_executable(estimate_scale src/estimate_scale.cc)
-# target_link_libraries(estimate_scale xrsfm apriltag)
+add_executable(estimate_scale src/estimate_scale.cc)
+target_link_libraries(estimate_scale xrsfm apriltag)
 
-# add_executable(rec_1dsfm src/rec_1dsfm.cc)
-# target_link_libraries(rec_1dsfm xrsfm)
+add_executable(rec_1dsfm src/rec_1dsfm.cc)
+target_link_libraries(rec_1dsfm xrsfm)
 
 add_executable(rec_kitti src/rec_kitti.cc)
 target_link_libraries(rec_kitti xrsfm)
