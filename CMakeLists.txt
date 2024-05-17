@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(xrsfm)
 
-option(XRPRIMER_ENABLED "Buinding based on XRPRIMER, if available" OFF)
+option(XRPRIMER_ENABLED "Buinding based on XRPRIMER, if available" ON)
 option(CUDA_ENABLED "Whether to enable CUDA, if available" ON)
 set(CUDA_ARCHS "Auto" CACHE STRING "List of CUDA architectures for which to \
 generate code, e.g., Auto, All, Maxwell, Pascal, ...")
