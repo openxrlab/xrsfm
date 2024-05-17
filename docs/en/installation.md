@@ -58,9 +58,9 @@ Run it with
 ```shell
 docker run --name xrsfm-container --gpus all --network=host -it xrsfm
 ```
-```
 
 Compile xrsfm
+
 ```shell
 git clone https://github.com/openxrlab/xrsfm.git
 cd xrsfm && cmake -B build && cmake --build build -j4

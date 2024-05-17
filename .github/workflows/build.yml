@@ -29,7 +29,7 @@ jobs:
       run:
         shell: bash -l {0}
     container:
-      image: openxrlab/xrsfm_runtime:ubuntu1804_x64_cu116
+      image: openxrlab/xrsfm_runtime:ubuntu20.04_cu12.1.0
       credentials:
         username: ${{secrets.DOCKERHUB_USERNAME}}
         password: ${{secrets.DOCKERHUB_PWD}}
