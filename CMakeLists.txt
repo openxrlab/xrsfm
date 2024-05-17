@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(xrsfm)
 
-option(XRPRIMER_ENABLED "Buinding based on XRPRIMER, if available" ON)
+option(XRPRIMER_ENABLED "Buinding based on XRPRIMER, if available" OFF)
 option(CUDA_ENABLED "Whether to enable CUDA, if available" ON)
 set(CUDA_ARCHS "Auto" CACHE STRING "List of CUDA architectures for which to \
 generate code, e.g., Auto, All, Maxwell, Pascal, ...")
@@ -151,10 +151,13 @@ target_include_directories(xrsfm
 if(XRPRIMER_ENABLED)
     target_link_libraries(xrsfm
         stdc++fs
+        sift_gpu
         XRPrimer::xrprimer
         ${OpenCV_LIBS}
         ${GTEST_LIBRARIES}
-        sift_gpu
+        ${Qt5Core_LIBRARIES}
+        ${Qt5OpenGL_LIBRARIES}
+        ${Qt5Widgets_LIBRARIES}
         )
 else ()
     target_link_libraries(xrsfm

@@ -127,7 +127,8 @@ class PoseGraphCost : public ceres::SizedCostFunction<8, 4, 3, 4, 3, 1, 1> {
         vector3 p2(parameters[3]);
         double s1 = parameters[4][0];
         double s2 = parameters[5][0];
-        map<Eigen::Vector<double, 8>> residual(residuals);
+        map<vector<3>> res_q(residuals);
+        map<vector<3>> res_p(residuals + 5);
 
         quaternion q1_inverse = q1.inverse();
         quaternion q12_estimated = q1_inverse * q2;
@@ -135,24 +136,23 @@ class PoseGraphCost : public ceres::SizedCostFunction<8, 4, 3, 4, 3, 1, 1> {
 
         double weight_q = 1.0;
         double weight_p = 1.0;
-        residual.head<3>() = weight_q * logmap(q_mea * q12_estimated.inverse());
-        residual.tail<3>() = weight_p * (p12_estimated - s1 * p_mea);
+        res_q = weight_q * logmap(q_mea * q12_estimated.inverse());
+        res_p = weight_p * (p12_estimated - s1 * p_mea);
 
         // 1.0 00 seq be better
         // 0.5 02 seq be better
         double weight_s = 1.0;
-        residual(3) = weight_s * (s1 / s2 - 1);
+        residuals[3] = weight_s * (s1 / s2 - 1);
 
-        // double weight_o = 0.1;  // 0.1 bad in seq_4761_478
         if (s1 < 1) {
-            residual(4) = weight_o * (s1 - 1);
+            residuals[4] = weight_o * (s1 - 1);
         } else {
-            residual(4) = weight_o * (1.0 / s1 - 1);
+            residuals[4] = weight_o * (1.0 / s1 - 1);
         }
 
         if (jacobians) {
             matrix3 R1 = q1.toRotationMatrix();
-            matrix3 JRI = jri(residual.head<3>());
+            matrix3 JRI = jri(res_q);
             if (jacobians[0]) {
                 map<matrix<8, 4, true>> j_q1(jacobians[0]);
                 j_q1.setZero();

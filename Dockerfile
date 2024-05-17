@@ -14,6 +14,11 @@ RUN apt-get install -y \
     python3-pip \
     libglew-dev \
     libatlas-base-dev \
-    libgtest-dev
+    libgtest-dev \
+    qtbase5-dev \
+    libqt5opengl5-dev \
+    libeigen3-dev \
+    libceres-dev \
+    libopencv-dev
 
 Run pip3 install numpy
