@@ -79,12 +79,13 @@ bool RegisterImage(const int frame_id, Map &map) {
         num_inlier++;
         const auto &[p2d_id, track_id] = id_pair_vec[id];
         auto &track = map.track(track_id);
-        // TODO do something if this track has been observed by this frame
         if (track.observations_.count(frame_id) == 0) {
             frame.track_ids_[p2d_id] = track_id;
             track.observations_[frame_id] = p2d_id;
             map.AddNumCorHavePoint3D(frame_id, p2d_id);
             level_vec.emplace_back(track.hierarchical_level);
+        } else { // if this track has been observed
+            // TODO compare the reprojection error
         }
     }
     std::sort(level_vec.begin(), level_vec.end());
