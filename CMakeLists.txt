@@ -30,9 +30,12 @@ find_package(GLEW REQUIRED)
 
 find_package(Qt5 5.4 COMPONENTS Core OpenGL Widgets)
 
+set(CUDA_MIN_VERSION "7.0")
 if (CUDA_ENABLED)
-    find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
-    message(STATUS "found")
+    find_package(CUDA QUIET)
+    message(STATUS "Found CUDA ")
+    message(STATUS "  Includes : ${CUDA_INCLUDE_DIRS}")
+    message(STATUS "  Libraries : ${CUDA_LIBRARIES}")
 endif ()
 
 
@@ -56,10 +59,9 @@ endif ()
 if (CUDA_FOUND)
     if (CUDA_ENABLED)
         add_definitions("-DCUDA_ENABLED")
-
-        include(${CMAKE_CURRENT_SOURCE_DIR}/SelectCudaComputeArch.cmake)
-
-        CUDA_SELECT_NVCC_ARCH_FLAGS(CUDA_ARCH_FLAGS ${CUDA_ARCHS})
+        if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+            set(CMAKE_CUDA_ARCHITECTURES "native")
+        endif()
 
         set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${CUDA_ARCH_FLAGS}")
         set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -D_FORCE_INLINES")
@@ -70,7 +72,8 @@ if (CUDA_FOUND)
         add_definitions("-D_MWAITXINTRIN_H_INCLUDED")
 
         message(STATUS "Enabling CUDA support (version: ${CUDA_VERSION_STRING},"
-                " archs: ${CUDA_ARCH_FLAGS_readable})")
+                " archs: ${CMAKE_CUDA_ARCHITECTURES})")
+
     else ()
         set(CUDA_FOUND OFF)
         message(STATUS "Disabling CUDA support")
