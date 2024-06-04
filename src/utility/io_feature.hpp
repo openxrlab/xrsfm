@@ -41,7 +41,7 @@ inline void ReadFeatures(const std::string &file_name,
         std::cerr << "Error: can not open " << file_name << "\n";
         return;
     }
-    // points track_ids_ keypoints_ uint_descs_
+
     int num_frames = -1;
     read_data(file, num_frames);
     if (init_frames) {
@@ -79,7 +79,7 @@ inline void SaveFeatures(const std::string &file_name,
         std::cerr << "Error: can not open " << file_name << "\n";
         return;
     }
-    // points track_ids_ keypoints_ uint_descs_
+
     int num_frames = frames.size();
     write_data(file, num_frames);
     for (const auto &frame : frames) {

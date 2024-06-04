@@ -96,10 +96,8 @@ Polynomial operator*(const double &scale, const Polynomial &poly) {
     return Polynomial(scale * poly.coefficients());
 }
 
-inline matrix3 to_matrix(const vector<9> &vec) {
-    return (matrix3() << vec.segment<3>(0), vec.segment<3>(3),
-            vec.segment<3>(6))
-        .finished();
+inline map<matrix3> to_matrix(const vector<9> &vec) {
+    return map<matrix3>(vec.data());
 }
 
 inline matrix<9, 4>
@@ -307,28 +305,6 @@ matrix3 find_essential_matrix(const std::vector<vector2> &points1,
                               const std::vector<vector2> &points2,
                               double threshold, double confidence,
                               size_t max_iteration, int seed) {
-    // Diagnosis::TimingItem timing =
-    // Diagnosis::time(DI_F_ESSENTIAL_RANSAC_TIME);
-#if 0
-        ITSLAM_UNUSED_EXPR(max_iteration);
-    std::vector<cv::Point2f> cvPoints1, cvPoints2;
-    for (size_t i = 0; i < points1.size(); ++i) {
-        cvPoints1.emplace_back(float(points1[i].x()), float(points1[i].y()));
-        cvPoints2.emplace_back(float(points2[i].x()), float(points2[i].y()));
-    }
-    cv::Mat cvE = cv::findEssentialMat(cvPoints1, cvPoints2, cv::Mat::eye(3, 3, CV_32FC1), cv::RANSAC, confidence, threshold, cv::noArray());
-    // workaround: fuck opencv
-    if (cvE.rows != 3 || cvE.cols != 3) {
-        return matrix3::Identity() * std::numeric_limits<double>::quiet_NaN();
-    }
-    matrix3 E;
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            E(i, j) = cvE.at<double>(i, j);
-        }
-    }
-    return E;
-#else
     LotBox lotbox(points1.size());
     lotbox.seed(seed);
     double K = log(1 - confidence);
@@ -341,9 +317,9 @@ matrix3 find_essential_matrix(const std::vector<vector2> &points1,
 
     size_t iter_max = max_iteration;
     for (size_t iter = 0; iter < iter_max; ++iter) {
+        std::array<vector2, 5> pts1, pts2;
         // generate hypothesis
         lotbox.refill_all();
-        std::array<vector2, 5> pts1, pts2;
         for (size_t i = 0; i < 5; ++i) {
             size_t sample_id = lotbox.draw_without_replacement();
             pts1[i] = points1[sample_id];
@@ -383,7 +359,6 @@ matrix3 find_essential_matrix(const std::vector<vector2> &points1,
     }
     // printf("iter_num: %d inlier_num: %d\n", iter_max, best_inlier);
     return best_E;
-#endif
 }
 
 void solve_essential(const std::vector<vector2> &points1,

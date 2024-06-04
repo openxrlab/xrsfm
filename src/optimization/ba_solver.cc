@@ -605,18 +605,44 @@ void BASolver::LBA(int frame_id, Map &map) {
     ceres::Solve(solver_options, &problem, &summary);
 }
 
+inline void SetSubsetManifold(int size, const std::vector<int> &constant_params,
+                              ceres::Problem *problem, double *params) {
+#if CERES_VERSION_MAJOR >= 3 ||                                                \
+    (CERES_VERSION_MAJOR == 2 && CERES_VERSION_MINOR >= 1)
+    problem->SetManifold(params,
+                         new ceres::SubsetManifold(size, constant_params));
+#else
+    problem->SetParameterization(
+        params, new ceres::SubsetParameterization(size, constant_params));
+#endif
+}
+
 void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
     // set up problem
     ceres::Problem problem;
+    std::set<int> problem_camera_ids;
     std::set<int> fixed_camera_ids;
     for (auto &frame : map.frames_) {
         if (!frame.registered)
             continue;
         SetUp(problem, map, frame);
-        if (fixed_camera_ids.count(frame.camera_id) == 0) {
-            fixed_camera_ids.insert(frame.camera_id);
-            problem.SetParameterBlockConstant(
-                map.Camera(frame.camera_id).params_.data());
+        problem_camera_ids.insert(frame.camera_id);
+    }
+    // ParameterizeCameras
+    bool fix_camera = false;
+    for (const int camera_id : problem_camera_ids) {
+        auto &camera = map.Camera(camera_id);
+        if (fix_camera) {
+            problem.SetParameterBlockConstant(camera.params_.data());
+        } else {
+            std::vector<int> const_param_ids;
+            const_param_ids.push_back(index_cx(camera.model_id_));
+            const_param_ids.push_back(index_cy(camera.model_id_));
+            if (const_param_ids.size() > 0) {
+                SetSubsetManifold(static_cast<int>(camera.params_.size()),
+                                  const_param_ids, &problem,
+                                  camera.params_.data());
+            }
         }
     }
 

@@ -7,7 +7,7 @@
 #include "ransac/loransac.h"
 
 namespace xrsfm {
-inline void SolveFundamnetalCOLMAP(const std::vector<Eigen::Vector2d> &points1,
+inline void SolveFundamentalCOLMAP(const std::vector<Eigen::Vector2d> &points1,
                                    const std::vector<Eigen::Vector2d> &points2,
                                    FramePair &frame_pair) {
     colmap::Options option;

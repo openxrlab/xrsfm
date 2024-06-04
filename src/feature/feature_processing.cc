@@ -266,7 +266,7 @@ void FeatureMatching(const std::vector<Frame> &frames,
                 points1.push_back(frame1.points[match.id1]);
                 points2.push_back(frame2.points[match.id2]);
             }
-            SolveFundamnetalCOLMAP(points1, points2, frame_pair);
+            SolveFundamentalCOLMAP(points1, points2, frame_pair);
         } else {
             CHECK(false); // TODO it only work with known camera parameters
         }

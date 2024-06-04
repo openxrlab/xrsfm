@@ -85,7 +85,7 @@ void PreProcess(const std::string bin_path, const std::string feature_path,
             points1.push_back(frame1.points[match.id1]);
             points2.push_back(frame2.points[match.id2]);
         }
-        SolveFundamnetalCOLMAP(points1, points2, frame_pair);
+        SolveFundamentalCOLMAP(points1, points2, frame_pair);
         if (frame_pair.inlier_num < 30)
             continue;
         std::vector<Match> new_matches;

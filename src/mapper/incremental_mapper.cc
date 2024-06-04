@@ -77,8 +77,9 @@ void IncrementalMapper::Reconstruct(Map &map) {
             TIMING(timer.che, p3d_processor.CheckTrackDepth(map));
             p3d_processor.CheckFramesMeasurement(map, options.th_rpe_lba,
                                                  options.th_angle_lba);
-            TIMING(timer.gba, ba_solver.KGBA(map, std::vector<int>(0), true));
-            // TIMING(timer.gba, ba_solver.GBA(map));
+            // TIMING(timer.gba, ba_solver.KGBA(map, std::vector<int>(0),
+            // true));
+            TIMING(timer.gba, ba_solver.GBA(map));
             TIMING(timer.fil,
                    p3d_processor.FilterPoints3d(map, options.th_rpe_gba,
                                                 options.th_angle_gba));
