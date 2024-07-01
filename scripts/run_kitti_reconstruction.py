@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 seq_name_list = [
     '00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10'
 ]
+# 07
 
 
 def get_opts():
@@ -29,11 +30,13 @@ if __name__ == '__main__':
         bin_dir_path = bin_dir_path+'/'
 
     for seq_name in seq_name_list:
+        if (seq_name != '06'):
+            continue
         init_id1 = 0
         if seq_name == '01':
             init_id1 = 500
-        if seq_name == '06':
-            init_id1 = 200
+        # if seq_name == '06':
+        #     init_id1 = 200
         init_id2 = init_id1+10
 
         print('Begin '+seq_name)
@@ -41,3 +44,4 @@ if __name__ == '__main__':
         os.system(
             f'{exe} {bin_path} {data_path} {seq_name} {bin_path} \
             {init_id1} {init_id2} > {bin_path}log_map.txt')
+        # break

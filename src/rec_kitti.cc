@@ -14,9 +14,15 @@ void PreProcess(const std::string dir_path, const int camera_param_id,
                 Map &map) {
     std::vector<Frame> frames;
     std::map<int, Camera> cameras;
-    std::vector<FramePair> frame_pairs;
+    std::vector<FramePair> frame_pairs, frame_pairs1;
     ReadFeatures(dir_path + "ftr.bin", frames, true);
     ReadFramePairs(dir_path + "fp.bin", frame_pairs);
+    for (const auto &fp : frame_pairs) {
+        if (fp.matches.size() < 100)
+            continue;
+        frame_pairs1.push_back(fp);
+    }
+    frame_pairs = frame_pairs1;
 
     // set cameras
     Camera seq;
@@ -78,6 +84,7 @@ int main(int argc, char *argv[]) {
     } else {
         exit(-1);
     }
+
     const std::string seq_path = data_path + seq_name + "/";
     std::map<std::string, int> name2camera_id = {
         {"00", 0}, {"01", 0}, {"02", 0}, {"03", 1}, {"04", 2}, {"05", 2},
@@ -96,14 +103,10 @@ int main(int argc, char *argv[]) {
     imapper.options.init_id2 = init_id2;
     imapper.options.correct_pose = true;
     imapper.options.stop_when_register_fail = true;
-    imapper.Reconstruct(map);
+    imapper.ReconstructKeyFrames(map);
     std::cout << "Reconstruction Done!" << std::endl;
 
     // 4. Output Trajectory
-    std::vector<double> timestamp_vec;
-    LoadTimeStamp(seq_path + "times.txt", timestamp_vec);
-    UpdateFrameTimeStamp(map.frames_, timestamp_vec);
-    WriteTrajectory(map, output_path + seq_name + "_test.tum");
     WriteColMapDataBinary(output_path, map);
 
     return 0;

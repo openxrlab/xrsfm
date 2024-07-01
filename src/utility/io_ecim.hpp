@@ -76,51 +76,6 @@ inline void ReadCameraInfo(const std::string &file_name,
     }
 }
 
-inline void LoadTimeStamp(const std::string timestamp_path,
-                          std::vector<double> &timestamp_vec) {
-    std::ifstream file;
-    file.open(timestamp_path);
-    CHECK(file.is_open()) << timestamp_path;
-    while (!file.eof()) {
-        std::string s;
-        std::getline(file, s);
-        if (!s.empty()) {
-            std::stringstream ss;
-            ss << s;
-            double t;
-            ss >> t;
-            timestamp_vec.push_back(t);
-        }
-    }
-    return;
-}
-
-inline void UpdateFrameTimeStamp(std::vector<Frame> &frames,
-                                 std::vector<double> &timestamp_Vec) {
-    int step = int(1.0 * timestamp_Vec.size() / frames.size() + 0.1);
-    printf("%d %zu %zu\n", step, timestamp_Vec.size(), frames.size());
-    for (auto &f : frames) {
-        f.timestamp = timestamp_Vec[step * f.id];
-    }
-    return;
-}
-
-inline void WriteTrajectory(const Map &map,
-                            const std::string &trajectory_path) {
-    std::ofstream trajectory_file(trajectory_path);
-    for (auto &frame : map.frames_) {
-        if (!frame.registered)
-            continue;
-        Eigen::Vector3d twc = frame.twc();
-        Eigen::Quaterniond qwc = frame.qwc();
-        trajectory_file << std::to_string(frame.timestamp) << " " << twc[0]
-                        << " " << twc[1] << " " << twc[2] << " " << qwc.x()
-                        << " " << qwc.y() << " " << qwc.z() << " " << qwc.w()
-                        << "\n";
-    }
-    trajectory_file.close();
-}
-
 bool ReadColMapDataBinary(const std::string &output_path, Map &map);
 
 void WriteColMapDataBinary(const std::string &output_path, const Map &map);

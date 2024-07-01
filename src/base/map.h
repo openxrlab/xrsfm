@@ -28,11 +28,11 @@ class Track {
 
 class Frame {
   public:
-    double timestamp = 0;
     std::string name;
     uint32_t id = -1;
     uint32_t camera_id = 0;
 
+    bool has_pose = false;
     bool registered = false;
     bool registered_fail = false;
     bool is_keyframe = false;
@@ -129,7 +129,6 @@ class Map {
     Frame tmp_frame;
     int init_id1 = -1;
     int init_id2 = -1;
-    int current_frame_id_ = -1;
     double sre_key_ = 0;
     double avg_track_length_ = 0;
 
@@ -145,12 +144,11 @@ class Map {
                                std::vector<std::pair<int, int>> &cor_2d_3d_ids,
                                const bool use_p2d_normalized);
 
-    void SearchCorrespondences1(const Frame &frame,
-                                const std::set<int> cor_frame_id,
-                                std::vector<vector2> &points2d,
-                                std::vector<vector3> &points3d,
-                                std::vector<std::pair<int, int>> &cor_2d_3d_ids,
-                                const bool use_p2d_normalized);
+    void SearchCorrespondencesLocal(
+        const Frame &frame, const std::set<int> cor_frame_id,
+        std::vector<vector2> &points2d, std::vector<vector3> &points3d,
+        std::vector<std::pair<int, int>> &cor_2d_3d_ids,
+        const bool use_p2d_normalized);
 
     inline const class Camera &Camera(int camera_id) const {
         return camera_map_.at(camera_id);
@@ -166,6 +164,7 @@ class Map {
         return tracks_.at(track_id);
     };
     inline class Track &track(int track_id) { return tracks_.at(track_id); };
+
     inline int NumFrames() { return frames_.size(); };
 
     int MaxPoint3dFrameId();

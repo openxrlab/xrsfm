@@ -173,7 +173,9 @@ int main(int argc, const char *argv[]) {
     }
 
     // GBA
-    ba_solver.GBA(map, true, true);
+    BaOptions ba_options;
+    ba_options.fix_frame_poses = true;
+    ba_solver.GBA(map, ba_options);
 
     WriteColMapDataBinary(output_path, map);
     return 0;

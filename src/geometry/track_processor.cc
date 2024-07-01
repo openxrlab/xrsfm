@@ -5,6 +5,7 @@
 #include "track_processor.h"
 
 #include "geometry/triangulate_light.h"
+#include "geometry/projection.hpp"
 
 namespace xrsfm {
 
@@ -13,15 +14,6 @@ size_t NChooseK(const size_t n, const size_t k) {
         return 1;
     }
     return (n * NChooseK(n - 1, k - 1)) / k;
-}
-
-double ReprojectionError(const Pose &pose, const Camera &camera,
-                         const vector2 &point2d, const vector3 &point3d) {
-    vector3 p_c = pose.q * point3d + pose.t;
-    vector2 estimate;
-    NormalizedToImage(camera, p_c.hnormalized(), estimate);
-    vector2 residual = estimate - point2d;
-    return residual.norm();
 }
 
 void AddTrack(const std::vector<std::pair<int, int>> &observations,
@@ -163,8 +155,7 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id,
         map.corr_graph_.frame_node_vec_[frame_id].corrs_vector;
     assert(frame.track_ids_.size() == corrs_vector.size());
 
-    for (int p2d_id = 0, num_p2d = frame.track_ids_.size(); p2d_id < num_p2d;
-         ++p2d_id) {
+    for (int p2d_id = 0; p2d_id < frame.track_ids_.size(); ++p2d_id) {
         if (frame.track_ids_.at(p2d_id) != -1)
             continue; // only triangulate un-trigulated points
 
@@ -185,7 +176,7 @@ int Point3dProcessor::TriangulateFramePoint(Map &map, const int frame_id,
                 observed_track_ids.insert(trakc_id);
             }
         }
-        observations.emplace_back(std::pair<int, int>(frame_id, p2d_id));
+        observations.emplace_back(frame_id, p2d_id);
         if (observations.size() < 2)
             continue;
 
@@ -255,7 +246,7 @@ inline void FilterPoint3d(const double max_re, const double min_tri_angle_rad,
         const double re = ReprojectionError(
             frame.Tcw, camera, frame.points[p2d_id], track.point3d_);
         const vector3 p3d = frame.Tcw.q * track.point3d_ + frame.Tcw.t;
-        if (re > max_re || p3d.z() < 1e-3 || p3d.z() > 1e3) {
+        if (re > max_re && p3d.z() < 1e-3) {
             obs_to_delete.emplace_back(frame_id, p2d_id);
         } else {
             reproj_error_sum += re;
@@ -288,9 +279,10 @@ int Point3dProcessor::FilterPoints3d(Map &map, const double max_re,
     const double min_tri_angle_rad = DegToRad(deg);
     int num_filtered1 = 0, num_filtered2 = 0;
     for (auto &track : map.tracks_) {
-        if (!track.outlier)
-            FilterPoint3d(max_re, min_tri_angle_rad, map, track, num_filtered1,
-                          num_filtered2);
+        if (track.outlier)
+            continue;
+        FilterPoint3d(max_re, min_tri_angle_rad, map, track, num_filtered1,
+                      num_filtered2);
     }
     printf("Outlier num1: %d Outlier num2: %d\n", num_filtered1, num_filtered2);
     return num_filtered1 + num_filtered2;
@@ -431,6 +423,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                                    double max_re) {
     int num_merged_track = 0, num_connected_track = 0;
     int num_continue_track = 0, num_connected_meas = 0;
+
     for (const auto &track_id : map.frame(frame_id).track_ids_) {
         if (track_id == -1)
             continue;
@@ -493,7 +486,13 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
                 }
             }
         }
-        // continue track
+    }
+
+    // continue track
+    for (const auto &track_id : map.frame(frame_id).track_ids_) {
+        if (track_id == -1)
+            continue;
+        auto &track = map.track(track_id);
         std::set<std::pair<int, int>> visted_pair;
         for (const auto &[_frame_id, p2d_id] : track.observations_) {
             for (const auto &[c_frame_id, c_p2d_id] :
@@ -523,6 +522,7 @@ void Point3dProcessor::MergeTracks(Map &map, const int frame_id,
             }
         }
     }
+
     printf("Merge: %d/%d %d/%d \n", num_merged_track, num_connected_track,
            num_continue_track, num_connected_meas);
 }

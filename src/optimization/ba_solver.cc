@@ -161,6 +161,60 @@ void AddLoopEdge(ceres::Problem &problem, Map &map, const LoopInfo &loop_info,
     }
 }
 
+void AddCovisibilityEdge1(ceres::Problem &problem, Map &map,
+                          std::vector<double> &s_vec,
+                          std::vector<Pose> &twc_vec) {
+    for (auto &frame : map.frames_) {
+        if (!frame.registered)
+            continue;
+
+        auto &s1 = s_vec[frame.id];
+        auto &pose1 = twc_vec[frame.id];
+
+        int count = 0;
+        for (const auto &cor_id : map.frameid2covisible_frameids_[frame.id]) {
+            if (frame.id <= cor_id)
+                continue;
+
+            auto &s2 = s_vec[cor_id];
+            auto &pose2 = twc_vec[cor_id];
+            Eigen::Quaterniond q_mea = pose1.q.inverse() * pose2.q;
+            vector3 p_mea = pose1.q.inverse() * (pose2.t - pose1.t);
+            ceres::CostFunction *cost_function =
+                new PoseGraphCost(q_mea, p_mea, 0.0);
+            problem.AddResidualBlock(
+                cost_function, nullptr, pose1.q.coeffs().data(), pose1.t.data(),
+                pose2.q.coeffs().data(), pose2.t.data(), &s1, &s2);
+            count++;
+        }
+    }
+}
+
+void AddLoopEdge1(ceres::Problem &problem, Map &map, const LoopInfo &loop_info,
+                  std::vector<double> &s_vec, std::vector<double> &s_vec_loop,
+                  std::vector<Pose> &twc_vec) {
+    auto &pose1 = twc_vec[loop_info.frame_id];
+    for (size_t i = 0; i < loop_info.cor_frame_ids_vec.size(); ++i) {
+        auto &s1 = s_vec_loop[i];
+        auto &pose1_mea = loop_info.twc_vec[i];
+        int count = 0;
+        for (const auto &cor_id : loop_info.cor_frame_ids_vec[i]) {
+            auto &s2 = s_vec[cor_id];
+            auto &pose2 = twc_vec[cor_id];
+            Eigen::Quaterniond q_mea = pose1_mea.q.inverse() * pose2.q;
+            vector3 p_mea = pose1_mea.q.inverse() * (pose2.t - pose1_mea.t);
+
+            ceres::CostFunction *cost_function =
+                new PoseGraphCost(q_mea, p_mea, 0.0);
+            problem.AddResidualBlock(
+                cost_function, nullptr, pose1.q.coeffs().data(), pose1.t.data(),
+                pose2.q.coeffs().data(), pose2.t.data(), &s1, &s2);
+            count++;
+        }
+        printf("loop_cor: %d num_edge: %d\n", i, count);
+    }
+}
+
 void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
                                      bool use_key) {
     // assign the best frame for each map points
@@ -337,6 +391,134 @@ void BASolver::ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
         int p2d_id = track.observations_[frame_id];
         Pose tcw = map.frame(frame_id).Tcw;
 
+        vector2 p2d = map.GetNormalizedPoint(frame_id, p2d_id);
+        track.point3d_ =
+            tcw.q.inverse() *
+            (s_vec[frame_id] * track.depth * p2d.homogeneous() - tcw.t);
+    }
+}
+
+void BASolver::ScalePoseGraphUnorder1(const LoopInfo &loop_info, Map &map) {
+    // assign the best frame for each map points
+    for (auto &track : map.tracks_) {
+        if (track.outlier)
+            continue;
+        int best_frame_id = -1;
+        double best_depth = -1.0;
+        for (const auto &[frame_id, p2d_id] : track.observations_) {
+            if (frame_id == loop_info.frame_id)
+                continue;
+            const auto &frame = map.frame(frame_id);
+            const double depth =
+                (frame.Tcw.q * track.point3d_ + frame.Tcw.t).z();
+            if (best_frame_id == -1) {
+                best_frame_id = frame_id;
+                best_depth = depth;
+            } else {
+                if (depth < 0)
+                    continue;
+                if ((best_depth < 0) || (depth < best_depth)) {
+                    best_frame_id = frame_id;
+                    best_depth = depth;
+                }
+            }
+        }
+        track.ref_id = best_frame_id;
+        track.depth = best_depth;
+        // output debug info
+        if (track.depth < 0) {
+            std::cout << "!!! negative depth\n";
+            const auto &it = track.observations_.begin();
+            const int track_id = map.frame(it->first).track_ids_[it->second];
+            printf("-%d %d %lf\n", track_id, track.ref_id, track.depth);
+            for (const auto &[frame_id, p2d_id] : track.observations_) {
+                const auto &frame = map.frame(frame_id);
+                const double depth =
+                    (frame.Tcw.q * track.point3d_ + frame.Tcw.t).z();
+                printf("%d %d %lf\n", track_id, frame_id, depth);
+            }
+        }
+        if (track.ref_id == -1)
+            std::cout << "!!! no frame_id\n";
+    }
+
+    // prepare data
+    size_t num_frames = map.NumFrames();
+    std::vector<Pose> twc_vec(num_frames);
+    std::vector<double> s_vec(twc_vec.size(), 1);
+    std::vector<double> s_vec_loop(loop_info.cor_frame_ids_vec.size(), 1);
+    for (auto &frame : map.frames_) {
+        if (frame.registered) {
+            twc_vec[frame.id] = frame.Tcw.inverse();
+        }
+    }
+
+    ceres::Problem problem;
+    // covisibility edge
+    AddCovisibilityEdge1(problem, map, s_vec, twc_vec);
+    // loop edge
+    AddLoopEdge1(problem, map, loop_info, s_vec, s_vec_loop, twc_vec);
+
+    if (loop_info.scale_obs != -1) {
+        printf("s12:%lf %zu %zu\n", loop_info.scale_obs,
+               loop_info.cor_frame_ids_vec[0].size(),
+               loop_info.cor_frame_ids_vec[1].size());
+        ceres::CostFunction *cost_function = new ScaleCost(loop_info.scale_obs);
+        problem.AddResidualBlock(cost_function, nullptr, &s_vec_loop[0],
+                                 &s_vec_loop[1]);
+    }
+
+    for (auto &frame : map.frames_) {
+        if (!frame.registered)
+            continue;
+        problem.SetParameterization(twc_vec[frame.id].q.coeffs().data(),
+                                    new QuatParam);
+        if (frame.id != loop_info.frame_id) {
+            problem.SetParameterLowerBound(&s_vec[frame.id], 0, 0.2);
+        }
+        problem.SetParameterBlockConstant(
+            twc_vec[frame.id].q.coeffs().data()); // may bug
+    }
+    problem.SetParameterLowerBound(&s_vec_loop[0], 0, 0.2);
+    problem.SetParameterLowerBound(&s_vec_loop[1], 0, 0.2);
+
+    problem.SetParameterBlockConstant(&s_vec[map.init_id1]);
+    problem.SetParameterBlockConstant(&s_vec[map.init_id2]);
+    problem.SetParameterBlockConstant(twc_vec[map.init_id1].t.data());
+    problem.SetParameterBlockConstant(twc_vec[map.init_id2].t.data());
+
+    ceres::Solver::Options solver_options = InitSolverOptions();
+    solver_options.minimizer_progress_to_stdout = true;
+    solver_options.initial_trust_region_radius = 1e16;
+    solver_options.trust_region_strategy_type = ceres::DOGLEG;
+    ceres::Solver::Summary summary;
+
+    ceres::Solve(solver_options, &problem, &summary);
+    std::cout << summary.BriefReport() << "\n";
+
+    std::cout << s_vec_loop[0] << std::endl;
+    std::cout << s_vec_loop[1] << std::endl;
+
+    // set camera pose
+    int index = 0;
+    for (auto &frame : map.frames_) {
+        if (!frame.registered)
+            continue;
+        map.frame(frame.id).Tcw = twc_vec.at(frame.id).inverse();
+        index++;
+        if (index % 10 == 0) {
+            std::cout << "scale :" << index << " " << s_vec.at(index)
+                      << std::endl;
+        }
+    }
+
+    // set map point
+    for (auto &track : map.tracks_) {
+        if (track.outlier)
+            continue;
+        int frame_id = track.ref_id;
+        int p2d_id = track.observations_[frame_id];
+        Pose tcw = map.frame(frame_id).Tcw;
         vector2 p2d = map.GetNormalizedPoint(frame_id, p2d_id);
         track.point3d_ =
             tcw.q.inverse() *
@@ -617,7 +799,7 @@ inline void SetSubsetManifold(int size, const std::vector<int> &constant_params,
 #endif
 }
 
-void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
+void BASolver::GBA(Map &map, BaOptions ba_options) {
     // set up problem
     ceres::Problem problem;
     std::set<int> problem_camera_ids;
@@ -629,10 +811,9 @@ void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
         problem_camera_ids.insert(frame.camera_id);
     }
     // ParameterizeCameras
-    bool fix_camera = false;
     for (const int camera_id : problem_camera_ids) {
         auto &camera = map.Camera(camera_id);
-        if (fix_camera) {
+        if (ba_options.fix_camera_parameter) {
             problem.SetParameterBlockConstant(camera.params_.data());
         } else {
             std::vector<int> const_param_ids;
@@ -643,25 +824,26 @@ void BASolver::GBA(Map &map, bool accurate, bool fix_all_frames) {
                                   const_param_ids, &problem,
                                   camera.params_.data());
             }
+            problem.SetParameterUpperBound(camera.params_.data(), 3, 0.4);
         }
     }
 
     // fix poses
-    if (!fix_all_frames) {
-        problem.SetParameterBlockConstant(map.frame(map.init_id1).Tcw.t.data());
-        problem.SetParameterBlockConstant(map.frame(map.init_id2).Tcw.t.data());
-    } else {
+    if (ba_options.fix_frame_poses) {
         for (auto &frame : map.frames_) {
             if (!frame.registered)
                 continue;
             problem.SetParameterBlockConstant(frame.Tcw.q.coeffs().data());
             problem.SetParameterBlockConstant(frame.Tcw.t.data());
         }
+    } else {
+        problem.SetParameterBlockConstant(map.frame(map.init_id1).Tcw.t.data());
+        // problem.SetParameterBlockConstant(map.frame(map.init_id2).Tcw.t.data());
     }
 
     ceres::Solver::Options solver_options = InitSolverOptions();
     solver_options.minimizer_progress_to_stdout = true;
-    if (accurate) {
+    if (ba_options.is_accurate_mode) {
         solver_options.max_num_iterations = 50;
         solver_options.function_tolerance = 1e-5;
         solver_options.parameter_tolerance = 1e-6;

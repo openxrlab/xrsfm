@@ -11,7 +11,9 @@
 #include "utility/timer.h"
 
 namespace xrsfm {
+
 struct IncrementalMapperOptions {
+    bool fix_camera_parameter = true;
     bool correct_pose = false;
     bool only_with_sim3 = false;
     bool stop_when_register_fail = false;
@@ -27,12 +29,14 @@ class IncrementalMapper {
   public:
     IncrementalMapper();
     void Reconstruct(Map &map);
+    void ReconstructKeyFrames(Map &map);
     TimerArray timer;
     BASolver ba_solver;
     Point3dProcessor p3d_processor;
     ErrorCorrector error_corrector;
     IncrementalMapperOptions options;
 };
+
 } // namespace xrsfm
 
 #endif // XRSFM_SRC_MAPPER_INCREMENTAL_MAPPER_H

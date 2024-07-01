@@ -165,7 +165,7 @@ void Map::SearchCorrespondences(const Frame &frame,
     }
 }
 
-void Map::SearchCorrespondences1(
+void Map::SearchCorrespondencesLocal(
     const Frame &frame, const std::set<int> cor_frame_id,
     std::vector<vector2> &points2d, std::vector<vector3> &points3d,
     std::vector<std::pair<int, int>> &cor_2d_3d_ids,

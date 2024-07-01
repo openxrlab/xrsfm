@@ -11,15 +11,23 @@
 #include "utility/timer.h"
 
 namespace xrsfm {
+
+struct BaOptions {
+    bool fix_camera_parameter = true;
+    bool fix_frame_poses = false;
+    bool is_accurate_mode = true;
+};
+
 class BASolver {
   public:
     BASolver() {}
 
     void ScalePoseGraphUnorder(const LoopInfo &loop_info, Map &map,
                                bool use_key = false);
+    void ScalePoseGraphUnorder1(const LoopInfo &loop_info, Map &map);
     void KGBA(Map &map, const std::vector<int> fix_key_frame_ids,
               const bool is_sequential_data);
-    void GBA(Map &map, bool accurate = true, bool fix_all_frames = false);
+    void GBA(Map &map, BaOptions ba_options = BaOptions());
     void LBA(int frame_id, Map &map);
 
   private:

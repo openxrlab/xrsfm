@@ -68,15 +68,14 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
     if (init_frame_pair.id1 == -1) {
         std::vector<std::pair<int, int>> frame_info_vec;
         for (const auto &frame : map.frames_) {
-            if (map.Camera(frame.camera_id).valid())
-                frame_info_vec.emplace_back(
-                    frame.id, map.frameid2matched_frameids_[frame.id].size());
+            if (!map.Camera(frame.camera_id).valid())
+                continue;
+            frame_info_vec.emplace_back(
+                frame.id, map.frameid2matched_frameids_[frame.id].size());
         }
         std::sort(
             frame_info_vec.begin(), frame_info_vec.end(),
-            [](const std::pair<int, int> &a, const std::pair<int, int> &b) {
-                return a.second > b.second;
-            });
+            [](const auto &a, const auto &b) { return a.second > b.second; });
         for (const auto &[frame_id, num_matched_frame] : frame_info_vec) {
             init_id1_candidate.emplace_back(frame_id);
         }
@@ -84,9 +83,10 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
         init_id1_candidate.push_back(init_frame_pair.id1);
     }
 
-    std::cout << init_id1_candidate.size() << std::endl;
+    std::cout << "candidate number of init id1:" << init_id1_candidate.size()
+              << std::endl;
 
-    for (const auto &init_id1 : init_id1_candidate) {
+    for (const auto &init_id1 : init_id1_candidate) { // TODO skip visited pair
         std::vector<int> init_id2_candidate;
         {
             std::unordered_map<int, int> num_correspondences;
@@ -98,11 +98,10 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
             }
             std::vector<std::pair<int, int>> frame_info_vec(
                 num_correspondences.begin(), num_correspondences.end());
-            std::sort(
-                frame_info_vec.begin(), frame_info_vec.end(),
-                [](const std::pair<int, int> &a, const std::pair<int, int> &b) {
-                    return a.second > b.second;
-                });
+            std::sort(frame_info_vec.begin(), frame_info_vec.end(),
+                      [](const auto &a, const auto &b) {
+                          return a.second > b.second;
+                      });
             for (const auto &[frame_id, num_matched_frame] : frame_info_vec) {
                 init_id2_candidate.emplace_back(frame_id);
             }
@@ -126,12 +125,13 @@ bool FindInitFramePair(const Map &map, FramePair &init_frame_pair) {
                 FindPair(map.frame_pairs_, init_id1, init_id2, frame_pair);
             else
                 FindPair(map.frame_pairs_, init_id2, init_id1, frame_pair);
-            if (CheckInitFramePair(map, frame_pair, 8.0)) {
+            if (CheckInitFramePair(map, frame_pair, 4.0)) {
                 init_frame_pair = frame_pair;
                 return true;
             }
         }
     }
+
     return false;
 }
 
