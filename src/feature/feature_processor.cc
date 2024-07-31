@@ -206,6 +206,7 @@ void FeatureProcessor::Run() {
         map.frame_pairs_ = std::move(frame_pairs);
         ExpansionAndMatching(map, id2rank, num_iteration, image_size_vec,
                              init_id1, init_id2, use_fundamental, id_pairs);
+        frame_pairs = map.frame_pairs_;
     } else {
         std::vector<std::pair<int, int>> id_pairs;
         if (matching_type_ == "sequential") {
